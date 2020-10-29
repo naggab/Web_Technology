@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./ts-dist/",
+    "typeRoots": ["node_modules/@types", "./src/@types"],
+    "types": ["webpack-env"]
+  },
+  "exclude": ["node_modules"],
+  "include": ["src/**/*.ts", "tests/**/*.ts"]
+}

@@ -1,0 +1,6 @@
+.idea
+node_modules
+dist
+.yarn
+ts-dist
+README.md
