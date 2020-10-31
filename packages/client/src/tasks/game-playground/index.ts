@@ -3,7 +3,7 @@ import viewHtml from "./view.html";
 
 var map_01: string[] = [
   "WWWWWWWWWWWWW",
-  "WOOOOOOOOOOOW",
+  "WTOOOOOOTOOOW",
   "WWWOOOOOOOOWW",
   "WWWOOOOOOWWWW",
   "WWOOOTOOOWWWW",
@@ -36,12 +36,55 @@ enum ElementType {
   Task,
 }
 
-var gridSize: number = 30;
+var gridSize: number = 50;
 var player: Player;
 
 var baseLayer: Konva.Layer;
 var grid: GridObject[][];
 var velocity: 10;
+
+class Task {
+  taskName: string;
+  isCompleted: boolean;
+  x: number;
+  y: number;
+
+  constructor(taskName: string) {
+    this.taskName = taskName;
+    this.isCompleted = false;
+  }
+
+  setPosition(x: number, y: number) {
+    this.x = x;
+    this.y = y;
+  }
+}
+
+var map_tasks: Task[] = [
+  new Task("Task01"),
+  new Task("Task02"),
+  new Task("Task03"),
+  new Task("Task04"),
+  new Task("Task05"),
+  new Task("Task06"),
+];
+
+var activeTasks: Task[] = new Array();
+
+function checkTaskCompletion(): boolean {
+  var done: boolean = true;
+  activeTasks.forEach((task) => {
+    if (task.isCompleted == false) {
+      done = false;
+    }
+  });
+  if (done) {
+    alert("you won :)");
+    return false; 
+  } else {
+    return true;
+  }
+}
 
 class Player {
   layer: Konva.Layer;
@@ -51,14 +94,14 @@ class Player {
   model: Konva.Circle;
 
   constructor(x: number, y: number, layer: Konva.Layer, stage: Konva.Stage) {
-    this.x = x - 1;
-    this.y = y - 1;
+    this.x = x;
+    this.y = y;
     this.layer = layer;
     this.stage = stage;
 
     this.model = new Konva.Circle({
-      x: x * gridSize - gridSize / 2,
-      y: y * gridSize - gridSize / 2,
+      x: (x + 1) * gridSize - gridSize / 2,
+      y: (y + 1) * gridSize - gridSize / 2,
       radius: gridSize / 2,
       fill: "green",
       stroke: "black",
@@ -95,6 +138,9 @@ class Player {
       if (newPos.type == ElementType.Task) {
         newPos.shape.fill("red");
         baseLayer.batchDraw();
+        newPos.task.isCompleted = true;
+        console.log(newPos.task);
+        checkTaskCompletion();
       }
     }
   }
@@ -124,6 +170,9 @@ class Player {
       if (newPos.type == ElementType.Task) {
         newPos.shape.fill("red");
         baseLayer.batchDraw();
+        newPos.task.isCompleted = true;
+        console.log(newPos.task);
+        checkTaskCompletion();
       }
     }
   }
@@ -144,10 +193,12 @@ class Player {
 class GridObject {
   type: ElementType;
   shape: Konva.Shape;
+  task: Task;
 
-  constructor(type: ElementType, shape: Konva.Shape) {
+  constructor(type: ElementType, shape: Konva.Shape, task?: Task) {
     this.type = type;
     this.shape = shape;
+    if (task !== undefined) this.task = task;
   }
 }
 
@@ -190,7 +241,7 @@ export class GamePlayground extends HTMLElement {
 
     grid = new Array();
     var gridRow: GridObject[];
-    map_02.forEach((row) => {
+    map_01.forEach((row) => {
       gridRow = new Array();
       for (let i = 0; i < row.length; i++) {
         switch (row.charAt(i)) {
@@ -211,12 +262,21 @@ export class GamePlayground extends HTMLElement {
             );
             break;
           case "T":
+            var r = Math.floor(Math.random() * map_tasks.length);
+            var gridTask: Task = map_tasks[r];
+            map_tasks.splice(r, 1);
+
             gridRow.push(
               new GridObject(
                 ElementType.Task,
                 this.drawRect(baseLayer, stage, x + i * gridSize, y * gridSize, ElementType.Task),
+                gridTask,
               ),
             );
+
+            this.drawText(baseLayer, stage, x + i * gridSize, y * gridSize + gridSize / 2 - 10, gridTask.taskName);
+            gridTask.setPosition(x + i, y);
+            activeTasks.push(gridTask);
             break;
         }
       }
@@ -265,6 +325,19 @@ export class GamePlayground extends HTMLElement {
     layer.add(elem);
     stage.add(layer);
     return elem;
+  }
+
+  drawText(layer: Konva.Layer, stage: Konva.Stage, x: number, y: number, s: string) {
+    var elem: Konva.Text = new Konva.Text({
+      x: x,
+      y: y,
+      text: s,
+      fontSize: 15,
+      fontFamily: "Arial",
+    });
+
+    layer.add(elem);
+    stage.add(layer);
   }
 
   keyDown(e) {
