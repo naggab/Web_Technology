@@ -16,17 +16,32 @@ var map_01: string[] = [
   "WWWWWWWWWWWWW",
 ];
 
+var map_02: string[] = [
+  "WWWWWWWWWWWWWWWWWWWWWW",
+  "WTOOOOOOOOOOOOOOOOOOOW",
+  "WOWWWWWWWWOWWWWWWWWWTW",
+  "WOWWWOOOOOOWWWWWTWWWWW",
+  "WOOOOOOOOOOWWWWWOWWWWW",
+  "WOOOOOOOOOOOOOOOOOOOTW",
+  "WOOOOOOOOOOOOOOOOOOOOW",
+  "WOOOOOOOWWWOWOOOOOOOOW",
+  "WOOOOWWWWWWOWWWWWOWWWW",
+  "WOOTWWWWWWTOWWWWTOWWWW",
+  "WWWWWWWWWWWWWWWWWWWWWW",
+];
+
 enum ElementType {
   Wall,
   OpenSpace,
   Task,
 }
 
-var gridSize: number = 50;
+var gridSize: number = 30;
 var player: Player;
 
 var baseLayer: Konva.Layer;
 var grid: GridObject[][];
+var velocity: 10;
 
 class Player {
   layer: Konva.Layer;
@@ -59,6 +74,22 @@ class Player {
     if (newPos !== undefined) {
       if (newPos.type != ElementType.Wall) {
         this.model.y(this.model.y() - amount * gridSize);
+        /*var model: Konva.Circle = this.model;
+        var stop: number = model.y() - (amount * gridSize);
+        var anim = new Konva.Animation(function(frame) {
+          model.y(model.y() - (amount * gridSize * (frame.timeDiff / 1000) * 10));
+          if (amount > 0 && model.y() <= stop) {
+            anim.stop();
+            model.y(stop);
+          }
+          if (amount < 0 && model.y() >= stop) {
+            anim.stop();
+            model.y(stop);
+          }
+        }, this.layer);
+        
+        anim.start();
+        */
         this.y -= amount;
       }
       if (newPos.type == ElementType.Task) {
@@ -73,6 +104,21 @@ class Player {
     if (newPos !== undefined) {
       if (newPos.type != ElementType.Wall) {
         this.model.x(this.model.x() - amount * gridSize);
+        /*var model: Konva.Circle = this.model;
+        var stop: number = model.x() - (amount * gridSize);
+        var anim = new Konva.Animation(function(frame) {
+          model.x(model.x() - (amount * gridSize * (frame.timeDiff / 1000) * 10));
+          if (amount > 0 && model.x() <= stop) {
+            anim.stop();
+            model.x(stop);
+          }
+          if (amount < 0 && model.x() >= stop) {
+            anim.stop();
+            model.x(stop);
+          }
+        }, this.layer);
+        anim.start();
+        */
         this.x -= amount;
       }
       if (newPos.type == ElementType.Task) {
@@ -144,7 +190,7 @@ export class GamePlayground extends HTMLElement {
 
     grid = new Array();
     var gridRow: GridObject[];
-    map_01.forEach((row) => {
+    map_02.forEach((row) => {
       gridRow = new Array();
       for (let i = 0; i < row.length; i++) {
         switch (row.charAt(i)) {
