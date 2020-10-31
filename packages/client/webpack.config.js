@@ -16,6 +16,10 @@ module.exports = {
         secure: false,
         changeOrigin: true,
       },
+      "/ws": {
+        target: "ws://localhost:3000",
+        ws: true,
+      },
     },
   },
   entry: "./src/index.ts",

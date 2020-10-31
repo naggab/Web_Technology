@@ -1,0 +1,43 @@
+<style>
+    .root {
+        min-height: 600px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    .root div {
+        padding: 8px;
+    }
+    span {
+
+    }
+    #msg_list {
+        height: 200px;
+        width: 800px;
+        overflow: hidden;
+        overflow-y: scroll;
+    }
+</style>
+<div class="root">
+    <div>
+        <label for="player_name_input">
+            PlayerName
+        </label>
+        <input type="text" name="player_name" value="Player" id="player_name_input">
+    </div>
+
+    <div>
+        <button id="connect_button">Connect</button>
+    </div>
+    <div id="controls">
+        <label for="action_input">
+            Move
+        </label>
+        <input type="text" name="player_name" value="5,5" id="action_input">
+        <button id="action_send_button">Send</button>
+    </div>
+    <div id="msg_list">
+
+    </div>
+</div>

@@ -16,6 +16,6 @@
     "fix-codestyle": "prettier --write .",
     "start:client": "yarn --cwd packages/client run start",
     "start:server": "yarn --cwd packages/server run start",
-    "start": "concurrently --kill-others -n client,server \"yarn run start:client\" \"yarn run start:server\""
+    "start": "concurrently --success first -n server,client \"yarn run start:server\" \"yarn run start:client\""
   }
 }
