@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
+    "konva": "^7.1.4",
     "lodash": "^4.17.20"
   },
   "devDependencies": {
