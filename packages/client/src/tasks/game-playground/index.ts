@@ -10,6 +10,9 @@ var map_01: string[] = [
   "WOOOOOOOOOOOW",
   "WWOOWOOOOWOOW",
   "WWOWWWWWWWTWW",
+  "WOOWWWWWWWWWW",
+  "WOWWWOOWWWWWW",
+  "WOOOOOTWWWWWW",
   "WWWWWWWWWWWWW",
 ];
 
@@ -20,8 +23,87 @@ enum ElementType {
 }
 
 var gridSize: number = 50;
-var playerCircle: Konva.Circle;
-var playerLayer: Konva.Layer;
+var player: Player;
+
+var baseLayer: Konva.Layer;
+var grid: GridObject[][];
+
+class Player {
+  layer: Konva.Layer;
+  stage: Konva.Stage;
+  x: number;
+  y: number;
+  model: Konva.Circle;
+
+  constructor(x: number, y: number, layer: Konva.Layer, stage: Konva.Stage) {
+    this.x = x - 1;
+    this.y = y - 1;
+    this.layer = layer;
+    this.stage = stage;
+
+    this.model = new Konva.Circle({
+      x: x * gridSize - gridSize / 2,
+      y: y * gridSize - gridSize / 2,
+      radius: gridSize / 2,
+      fill: "green",
+      stroke: "black",
+      strokeWidth: 2,
+    });
+
+    this.layer.add(this.model);
+    this.stage.add(this.layer);
+  }
+
+  moveUp(amount: number) {
+    var newPos = grid[this.y - amount][this.x];
+    if (newPos !== undefined) {
+      if (newPos.type != ElementType.Wall) {
+        this.model.y(this.model.y() - amount * gridSize);
+        this.y -= amount;
+      }
+      if (newPos.type == ElementType.Task) {
+        newPos.shape.fill("red");
+        baseLayer.batchDraw();
+      }
+    }
+  }
+
+  moveLeft(amount: number) {
+    var newPos = grid[this.y][this.x - amount];
+    if (newPos !== undefined) {
+      if (newPos.type != ElementType.Wall) {
+        this.model.x(this.model.x() - amount * gridSize);
+        this.x -= amount;
+      }
+      if (newPos.type == ElementType.Task) {
+        newPos.shape.fill("red");
+        baseLayer.batchDraw();
+      }
+    }
+  }
+
+  moveRight(amount: number) {
+    this.moveLeft(-amount);
+  }
+
+  moveDown(amount: number) {
+    this.moveUp(-amount);
+  }
+
+  redraw() {
+    this.layer.batchDraw();
+  }
+}
+
+class GridObject {
+  type: ElementType;
+  shape: Konva.Shape;
+
+  constructor(type: ElementType, shape: Konva.Shape) {
+    this.type = type;
+    this.shape = shape;
+  }
+}
 
 export class GamePlayground extends HTMLElement {
   constructor() {
@@ -32,14 +114,14 @@ export class GamePlayground extends HTMLElement {
     console.log(GamePlayground.name, "connected to DOM");
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = viewHtml;
-    this.drawGrid();
+    this.setupGrid();
   }
 
   disconnectedCallback() {
     console.log(GamePlayground.name, "disconnected from DOM");
   }
 
-  drawGrid() {
+  setupGrid() {
     /* Initial setup (stage) */
     var width = window.innerWidth;
     var height = window.innerHeight;
@@ -51,7 +133,7 @@ export class GamePlayground extends HTMLElement {
       height: height,
     });
 
-    var layer = new Konva.Layer();
+    baseLayer = new Konva.Layer();
 
     /* Attach keybaord events */
     document.onkeydown = this.keyDown;
@@ -60,32 +142,51 @@ export class GamePlayground extends HTMLElement {
     var x: number = 0;
     var y: number = 0;
 
+    grid = new Array();
+    var gridRow: GridObject[];
     map_01.forEach((row) => {
-      console.log(row);
+      gridRow = new Array();
       for (let i = 0; i < row.length; i++) {
         switch (row.charAt(i)) {
           case "W":
-            this.drawRect(layer, stage, x + i * gridSize, y, ElementType.Wall);
+            gridRow.push(
+              new GridObject(
+                ElementType.Wall,
+                this.drawRect(baseLayer, stage, x + i * gridSize, y * gridSize, ElementType.Wall),
+              ),
+            );
             break;
           case "O":
-            this.drawRect(layer, stage, x + i * gridSize, y, ElementType.OpenSpace);
+            gridRow.push(
+              new GridObject(
+                ElementType.OpenSpace,
+                this.drawRect(baseLayer, stage, x + i * gridSize, y * gridSize, ElementType.OpenSpace),
+              ),
+            );
             break;
           case "T":
-            this.drawRect(layer, stage, x + i * gridSize, y, ElementType.Task);
+            gridRow.push(
+              new GridObject(
+                ElementType.Task,
+                this.drawRect(baseLayer, stage, x + i * gridSize, y * gridSize, ElementType.Task),
+              ),
+            );
             break;
         }
       }
-      y += gridSize;
+      grid.push(gridRow);
+      y += 1;
     });
 
-    /* Draw player */
-    playerLayer = new Konva.Layer();
-    this.drawPlayer(playerLayer, stage, 4 * gridSize, 5 * gridSize);
+    /* Create player */
+    var playerLayer = new Konva.Layer();
+    player = new Player(5, 5, playerLayer, stage);
   }
 
   drawRect(layer: Konva.Layer, stage: Konva.Stage, x: number, y: number, type: ElementType) {
+    var elem: Konva.Rect;
     if (type == ElementType.Wall) {
-      var wall = new Konva.Rect({
+      elem = new Konva.Rect({
         x: x,
         y: y,
         width: gridSize,
@@ -94,9 +195,8 @@ export class GamePlayground extends HTMLElement {
         stroke: "black",
         strokeWidth: 2,
       });
-      layer.add(wall);
     } else if (type == ElementType.OpenSpace) {
-      var openSpace = new Konva.Rect({
+      elem = new Konva.Rect({
         x: x,
         y: y,
         width: gridSize,
@@ -105,9 +205,8 @@ export class GamePlayground extends HTMLElement {
         stroke: "black",
         strokeWidth: 2,
       });
-      layer.add(openSpace);
     } else if (type == ElementType.Task) {
-      var task = new Konva.Rect({
+      elem = new Konva.Rect({
         x: x,
         y: y,
         width: gridSize,
@@ -116,34 +215,28 @@ export class GamePlayground extends HTMLElement {
         stroke: "black",
         strokeWidth: 2,
       });
-      layer.add(task);
     }
-
+    layer.add(elem);
     stage.add(layer);
-  }
-
-  drawPlayer(layer: Konva.Layer, stage: Konva.Stage, x: number, y: number) {
-    playerCircle = new Konva.Circle({
-      x: x - gridSize / 2,
-      y: y - gridSize / 2,
-      radius: gridSize / 2,
-      fill: "green",
-      stroke: "black",
-      strokeWidth: 2,
-    });
-
-    layer.add(playerCircle);
-    stage.add(layer);
+    return elem;
   }
 
   keyDown(e) {
     switch (e.keyCode) {
-      case 87: playerCircle.y(playerCircle.y() - gridSize); break; // W
-      case 65: playerCircle.x(playerCircle.x() - gridSize); break; // A
-      case 83: playerCircle.y(playerCircle.y() + gridSize); break; // S 
-      case 68: playerCircle.x(playerCircle.x() + gridSize); break; // D
+      case 87:
+        player.moveUp(1);
+        break; // W
+      case 65:
+        player.moveLeft(1);
+        break; // A
+      case 83:
+        player.moveDown(1);
+        break; // S
+      case 68:
+        player.moveRight(1);
+        break; // D
     }
-    playerLayer.batchDraw();
+    player.redraw();
   }
 }
 
