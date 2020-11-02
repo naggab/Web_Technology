@@ -8,6 +8,10 @@ type PlayerEntry = {
   color: string;
   ws: WebSocket;
   connectionOk: boolean;
+  position?: {
+    x: number;
+    y: number;
+  };
 };
 
 type PlayerDetails = Omit<PlayerEntry, "id" | "connectionOk">;
@@ -52,9 +56,11 @@ export class Broker {
    * after 5 seconds is considered offline and will be removed.
    */
   private scheduledCleanup() {
+    console.log("scheduledCleanup");
     this.cleanupTimer = null;
     this.games.forEach((game) => {
       game.players.forEach((player) => {
+        console.log("checking", player.id, player.connectionOk, player.ws.readyState);
         if (!player.connectionOk) {
           this.onPlayerDisconnected(game, player);
           return;
@@ -131,6 +137,19 @@ export class Broker {
    * currently only relays every message to other players in the same game
    */
   private static onMessageFromPlayer(game: GameEntry, sender: PlayerEntry, msg: WebSocket.Data) {
+    try {
+      const event = JSON.parse(msg.toString());
+      if (event["op"] === "PLAYER_MOVE") {
+        sender.position = {
+          x: event["payload"]["x"],
+          y: event["payload"]["y"],
+        };
+        console.log("detected player", sender.id, "moved to", sender.position, msg);
+      }
+    } catch (e) {
+      console.error("unable to parse message, only relaying it");
+    }
+
     console.log(`broker: replaying message from player ${sender.id}`);
     Broker.broadcastMsgForGame(game, sender, msg);
   }
@@ -203,10 +222,12 @@ export class Broker {
     const currentStateMsg = {
       op: "CURRENT_STATE",
       payload: {
+        yourPlayerId: player.id,
         players: otherPlayers.map((otherPlayer) => ({
           id: otherPlayer.id,
           name: otherPlayer.name,
           color: otherPlayer.color,
+          position: otherPlayer.position,
         })),
       },
     };

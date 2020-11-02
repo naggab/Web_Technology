@@ -122,7 +122,7 @@ function checkTaskCompletion(): boolean {
  * and not absolute coordinates, so we can use them to iterate through the
  * grid array when doing the movement.
  */
-class Player {
+export class Player {
   layer: Konva.Layer;
   stage: Konva.Stage;
   x: number;
@@ -274,11 +274,12 @@ export class GamePlayground extends HTMLElement {
     console.log(GamePlayground.name, "disconnected from DOM");
   }
 
-  addPlayer(x: number, y: number, col: string, cb: IPlayerMovedCB): void {
+  addPlayer(x: number, y: number, col: string, cb: IPlayerMovedCB): Player {
     var playerLayer = new Konva.Layer();
-    player = new Player(x, y, col, playerLayer, this.stage);
+    const newPlayer = new Player(x, y, col, playerLayer, this.stage);
 
-    player.attachCallback(cb);
+    newPlayer.attachCallback(cb);
+    return newPlayer;
   }
 
   /**
@@ -437,6 +438,10 @@ export class GamePlayground extends HTMLElement {
         break; // D
     }
     player.redraw();
+  }
+
+  getCurrentPlayer() {
+    return player;
   }
 }
 

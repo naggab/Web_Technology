@@ -53,10 +53,10 @@ export class WsTestTask extends HTMLElement {
     }
     const location = this.movementInput.value;
 
-    const event: GameEvent<GameEventOp.PLAYER_MOVE> = {
-      op: GameEventOp.PLAYER_MOVE,
+    const event: GameEvent<GameEventOp.DEMO> = {
+      op: GameEventOp.DEMO,
       payload: {
-        location,
+        msg: location,
       },
     };
 

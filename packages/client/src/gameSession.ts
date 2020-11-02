@@ -1,10 +1,16 @@
-type PlayerInfo = {
+export type PlayerInfo = {
   id: number;
   name: string;
   color: string;
+  position?: {
+    x: number;
+    y: number;
+  };
 };
 
 export enum GameEventOp {
+  DEMO = "DEMO",
+
   GAME_START = "GAME_START",
   GAME_END = "GAME_END",
   SERVER_SHUTDOWN = "SERVER_SHUTDOWN",
@@ -20,17 +26,19 @@ export enum GameEventOp {
 }
 
 type GameEventOpPayloadMap = {
+  [GameEventOp.DEMO]: { msg: string };
   [GameEventOp.GAME_START]: {};
   [GameEventOp.GAME_END]: {};
   [GameEventOp.SERVER_SHUTDOWN]: {};
   [GameEventOp.PLAYER_JOIN]: PlayerInfo;
   [GameEventOp.PLAYER_LEAVE]: PlayerInfo;
-  [GameEventOp.PLAYER_MOVE]: { location: string };
+  [GameEventOp.PLAYER_MOVE]: { playerId: number; x: number; y: number };
   [GameEventOp.PLAYER_TASK_START]: {};
   [GameEventOp.PLAYER_TASK_FINISH]: {};
   [GameEventOp.PLAYER_TASK_FAIL]: {};
   [GameEventOp.CURRENT_STATE]: {
     players: Array<PlayerInfo>;
+    yourPlayerId: number;
   };
 };
 
