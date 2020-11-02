@@ -1,6 +1,9 @@
 import Konva from "konva";
 import viewHtml from "./view.html";
 
+/**
+ * Maps are parsed rows -> columns.
+ */
 var map_01: string[] = [
   "WWWWWWWWWWWWW",
   "WTOOOOOOTOOOW",
@@ -9,10 +12,10 @@ var map_01: string[] = [
   "WWOOOTOOOWWWW",
   "WOOOOOOOOOOOW",
   "WWOOWOOOOWOOW",
-  "WWOWWWWWWWTWW",
-  "WOOWWWWWWWWWW",
-  "WOWWWOOWWWWWW",
-  "WOOOOOTWWWWWW",
+  "WWOWWWWWWWTOW",
+  "WOOWWWWWWWWOW",
+  "WOWWWOOWWWWOW",
+  "WOOOOOTOOOOOW",
   "WWWWWWWWWWWWW",
 ];
 
@@ -30,19 +33,27 @@ var map_02: string[] = [
   "WWWWWWWWWWWWWWWWWWWWWW",
 ];
 
+/**
+ * The element type of a specific field on the grid.
+ */
 enum ElementType {
-  Wall,
-  OpenSpace,
-  Task,
+  Wall, // W
+  OpenSpace, // O
+  Task, // T
 }
 
 var gridSize: number = 50;
 var player: Player;
 
+/**
+ * Define the base layer & its grid.
+ */
 var baseLayer: Konva.Layer;
 var grid: GridObject[][];
-var velocity: 10;
 
+/**
+ * Basic type for a task shown on screen.
+ */
 class Task {
   taskName: string;
   isCompleted: boolean;
@@ -60,6 +71,9 @@ class Task {
   }
 }
 
+/**
+ * Temporary map for "demo" tasks to showcase randomization.
+ */
 var map_tasks: Task[] = [
   new Task("Task01"),
   new Task("Task02"),
@@ -69,8 +83,15 @@ var map_tasks: Task[] = [
   new Task("Task06"),
 ];
 
+/**
+ * List of currently active tasks. These are all the tasks the player
+ * still needs to complete in order to win the game.
+ */
 var activeTasks: Task[] = new Array();
 
+/**
+ * Check for task completion (win state).
+ */
 function checkTaskCompletion(): boolean {
   var done: boolean = true;
   activeTasks.forEach((task) => {
@@ -80,12 +101,20 @@ function checkTaskCompletion(): boolean {
   });
   if (done) {
     alert("you won :)");
-    return false; 
+    return false;
   } else {
     return true;
   }
 }
 
+/**
+ * Defines the player and stores the associated layer we used to draw him.
+ * The player layer is different to the base layer for redrawing purposes.
+ *
+ * Important: The x and y coordinates store the player position on the grid,
+ * and not absolute coordinates, so we can use them to iterate through the
+ * grid array when doing the movement.
+ */
 class Player {
   layer: Konva.Layer;
   stage: Konva.Stage;
@@ -112,27 +141,18 @@ class Player {
     this.stage.add(this.layer);
   }
 
+  /**
+   * Movement functions with collision detection, the player element
+   * is only allowed to move if its not moving towards a wall.
+   * If we move onto a task field -> highlight and check completion.
+   *
+   * @param amount The amount of grid elements the player should move.
+   */
   moveUp(amount: number) {
     var newPos = grid[this.y - amount][this.x];
     if (newPos !== undefined) {
       if (newPos.type != ElementType.Wall) {
         this.model.y(this.model.y() - amount * gridSize);
-        /*var model: Konva.Circle = this.model;
-        var stop: number = model.y() - (amount * gridSize);
-        var anim = new Konva.Animation(function(frame) {
-          model.y(model.y() - (amount * gridSize * (frame.timeDiff / 1000) * 10));
-          if (amount > 0 && model.y() <= stop) {
-            anim.stop();
-            model.y(stop);
-          }
-          if (amount < 0 && model.y() >= stop) {
-            anim.stop();
-            model.y(stop);
-          }
-        }, this.layer);
-        
-        anim.start();
-        */
         this.y -= amount;
       }
       if (newPos.type == ElementType.Task) {
@@ -150,21 +170,6 @@ class Player {
     if (newPos !== undefined) {
       if (newPos.type != ElementType.Wall) {
         this.model.x(this.model.x() - amount * gridSize);
-        /*var model: Konva.Circle = this.model;
-        var stop: number = model.x() - (amount * gridSize);
-        var anim = new Konva.Animation(function(frame) {
-          model.x(model.x() - (amount * gridSize * (frame.timeDiff / 1000) * 10));
-          if (amount > 0 && model.x() <= stop) {
-            anim.stop();
-            model.x(stop);
-          }
-          if (amount < 0 && model.x() >= stop) {
-            anim.stop();
-            model.x(stop);
-          }
-        }, this.layer);
-        anim.start();
-        */
         this.x -= amount;
       }
       if (newPos.type == ElementType.Task) {
@@ -185,11 +190,19 @@ class Player {
     this.moveUp(-amount);
   }
 
+  /**
+   * Call this to update the player.
+   */
   redraw() {
     this.layer.batchDraw();
   }
 }
 
+/**
+ * Represents a singular grid field on the screen and stores everything we
+ * need to manipulate it later. By storing the shape we can update the color
+ * and apply transformations after the initial draw.
+ */
 class GridObject {
   type: ElementType;
   shape: Konva.Shape;
@@ -218,6 +231,11 @@ export class GamePlayground extends HTMLElement {
     console.log(GamePlayground.name, "disconnected from DOM");
   }
 
+  /**
+   * Initializes the grid by creating a new layer (baseLayer) and looping
+   * through the user defined map to draw and populate the grid structure.
+   * Finally, creates the player layer and the player element.
+   */
   setupGrid() {
     /* Initial setup (stage) */
     var width = window.innerWidth;
@@ -241,6 +259,10 @@ export class GamePlayground extends HTMLElement {
 
     grid = new Array();
     var gridRow: GridObject[];
+
+    /**
+     * Parse the map.
+     */
     map_01.forEach((row) => {
       gridRow = new Array();
       for (let i = 0; i < row.length; i++) {
@@ -289,44 +311,41 @@ export class GamePlayground extends HTMLElement {
     player = new Player(5, 5, playerLayer, stage);
   }
 
+  /**
+   * Draws a single rectangle on the stage. ElementType defines the type of
+   * rectangle this function draws.
+   *
+   * @param layer The layer to draw to.
+   * @param stage The stage to draw to.
+   * @param x Absolute x coordinate (top left of rectangle)
+   * @param y Absolute y coordinate (top right of rectangle)
+   * @param type ElementType of the field.
+   */
   drawRect(layer: Konva.Layer, stage: Konva.Stage, x: number, y: number, type: ElementType) {
     var elem: Konva.Rect;
-    if (type == ElementType.Wall) {
-      elem = new Konva.Rect({
-        x: x,
-        y: y,
-        width: gridSize,
-        height: gridSize,
-        fill: "gray",
-        stroke: "black",
-        strokeWidth: 2,
-      });
-    } else if (type == ElementType.OpenSpace) {
-      elem = new Konva.Rect({
-        x: x,
-        y: y,
-        width: gridSize,
-        height: gridSize,
-        fill: "white",
-        stroke: "black",
-        strokeWidth: 2,
-      });
+    elem = new Konva.Rect({
+      x: x,
+      y: y,
+      width: gridSize,
+      height: gridSize,
+      fill: "gray",
+      stroke: "black",
+      strokeWidth: 2,
+    });
+
+    if (type == ElementType.OpenSpace) {
+      elem.fill("white");
     } else if (type == ElementType.Task) {
-      elem = new Konva.Rect({
-        x: x,
-        y: y,
-        width: gridSize,
-        height: gridSize,
-        fill: "yellow",
-        stroke: "black",
-        strokeWidth: 2,
-      });
+      elem.fill("yellow");
     }
     layer.add(elem);
     stage.add(layer);
     return elem;
   }
 
+  /**
+   * Draws a single text element to the specified x,y coordinate.
+   */
   drawText(layer: Konva.Layer, stage: Konva.Stage, x: number, y: number, s: string) {
     var elem: Konva.Text = new Konva.Text({
       x: x,
@@ -340,6 +359,9 @@ export class GamePlayground extends HTMLElement {
     stage.add(layer);
   }
 
+  /**
+   * Hook for keyboard events.
+   */
   keyDown(e) {
     switch (e.keyCode) {
       case 87:
