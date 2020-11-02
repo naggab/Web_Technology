@@ -56,11 +56,9 @@ export class Broker {
    * after 5 seconds is considered offline and will be removed.
    */
   private scheduledCleanup() {
-    console.log("scheduledCleanup");
     this.cleanupTimer = null;
     this.games.forEach((game) => {
       game.players.forEach((player) => {
-        console.log("checking", player.id, player.connectionOk, player.ws.readyState);
         if (!player.connectionOk) {
           this.onPlayerDisconnected(game, player);
           return;
@@ -144,7 +142,6 @@ export class Broker {
           x: event["payload"]["x"],
           y: event["payload"]["y"],
         };
-        console.log("detected player", sender.id, "moved to", sender.position, msg);
       }
     } catch (e) {
       console.error("unable to parse message, only relaying it");
@@ -175,7 +172,7 @@ export class Broker {
       this.games.delete(game.id);
       return;
     }
-    console.log(`broker: game ${game.id}: player ${player.id} left, ${game.players.size} players remaining`);
+    console.log(`broker: game ${game.id}: player (id: ${player.id}) left, ${game.players.size} players remaining`);
     Broker.broadcastMsgForGame(game, null, msg);
   }
 

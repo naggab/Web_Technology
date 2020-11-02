@@ -47,7 +47,7 @@ export class POCTask extends HTMLElement {
   }
 
   addForeignPlayer(id: number, x: number = 5, y: number = 5, color: string = "#EFEFEF") {
-    const newPlayer = this.gamePlayground.addPlayer(5, 5, color, undefined);
+    const newPlayer = this.gamePlayground.addPlayer(x, y, color, undefined);
     this.otherPlayers.set(id, newPlayer);
   }
 
@@ -58,7 +58,10 @@ export class POCTask extends HTMLElement {
       return;
     }
     const player = this.otherPlayers.get(id);
+    const layer = player.layer;
     player.model.remove();
+    player.model.destroy();
+    layer.batchDraw();
     this.otherPlayers.delete(id);
   }
 
