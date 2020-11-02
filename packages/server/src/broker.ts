@@ -44,6 +44,13 @@ export class Broker {
     this.cleanupTimer = setTimeout(this.scheduledCleanup, CLEANUP_SCHEDULE);
   }
 
+  /**
+   * to make sure all WebSockets are cleaned up every players WebSocket is checked regularly.
+   * initially every players `connectionOk` value is set to false and we ping() every websocket.
+   * Every still working WebSocket will return a pong (see Broker.setupPlayerListeners()) and
+   * set `connectionOk` to true again. Every player which has a `connectionOk` of false
+   * after 5 seconds is considered offline and will be removed.
+   */
   private scheduledCleanup() {
     this.cleanupTimer = null;
     this.games.forEach((game) => {
@@ -59,7 +66,10 @@ export class Broker {
     this.cleanupTimer = setTimeout(this.scheduledCleanup, CLEANUP_SCHEDULE);
   }
 
-  getOrCreateGame(id: GameIdType): GameEntry {
+  /**
+   * simple helper to create a game if it does not exist or return the existing game based on the gameId
+   */
+  private getOrCreateGame(id: GameIdType): GameEntry {
     if (this.games.has(id)) {
       return this.games.get(id);
     }
@@ -82,6 +92,9 @@ export class Broker {
     return player;
   }
 
+  /**
+   * send a message to a single player
+   */
   private static sendMsgToPlayer(player: PlayerEntry, msg: WebSocket.Data | object) {
     if (typeof msg === "object") {
       player.ws.send(JSON.stringify(msg));
@@ -90,6 +103,9 @@ export class Broker {
     player.ws.send(msg);
   }
 
+  /**
+   * send a message to a every player in every game
+   */
   private broadcastAll(msg: WebSocket.Data | object) {
     this.games.forEach((game) => {
       game.players.forEach((player) => {
@@ -98,6 +114,9 @@ export class Broker {
     });
   }
 
+  /**
+   * send a message to a every player in a single game, excluding its sender
+   */
   private static broadcastMsgForGame(game: GameEntry, sender: PlayerEntry | null, msg: WebSocket.Data | object) {
     game.players.forEach((player) => {
       if (player === sender) {
@@ -107,10 +126,20 @@ export class Broker {
     });
   }
 
+  /**
+   * handle a message received from a player.
+   * currently only relays every message to other players in the same game
+   */
   private static onMessageFromPlayer(game: GameEntry, sender: PlayerEntry, msg: WebSocket.Data) {
     console.log(`broker: replaying message from player ${sender.id}`);
     Broker.broadcastMsgForGame(game, sender, msg);
   }
+
+  /**
+   * handle player disconnects
+   * sends a PLAYER_LEAVE to every other player in the same game.
+   * if number of players in one game == 0 -> game is deleted
+   */
   private onPlayerDisconnected(game: GameEntry, player: PlayerEntry) {
     const msg = {
       op: "PLAYER_LEAVE",
@@ -131,6 +160,9 @@ export class Broker {
     Broker.broadcastMsgForGame(game, null, msg);
   }
 
+  /**
+   * bind listeners to a players websocket after it has been established
+   */
   private setupPlayerListeners(game: GameEntry, player: PlayerEntry) {
     const { ws } = player;
     ws.on("pong", () => {
@@ -147,6 +179,11 @@ export class Broker {
     });
   }
 
+  /**
+   * handle player connecting to a game:
+   * sends a PLAYER_JOIN to every other player in the game and
+   * sends a CURRENT_STATE to the new player to get him uptodate.
+   */
   public onPlayerConnected(gameId: GameIdType, playerDetails: PlayerDetails) {
     console.log("broker: new player connected:", { name: playerDetails.name });
     const game = this.getOrCreateGame(gameId);
@@ -176,6 +213,9 @@ export class Broker {
     Broker.sendMsgToPlayer(player, currentStateMsg);
   }
 
+  /**
+   * cleanup all websockets, players and games
+   */
   public async terminate() {
     if (this.cleanupTimer) {
       clearTimeout(this.cleanupTimer);
