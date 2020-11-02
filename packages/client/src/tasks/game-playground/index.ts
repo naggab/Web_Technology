@@ -42,6 +42,13 @@ enum ElementType {
   Task, // T
 }
 
+/**
+ * Interface for "player moved" callback function.
+ */
+interface IPlayerMovedCB {
+  (x: number, y: number): void;
+}
+
 var gridSize: number = 50;
 var player: Player;
 
@@ -85,7 +92,7 @@ var map_tasks: Task[] = [
 
 /**
  * List of currently active tasks. These are all the tasks the player
- * still needs to complete in order to win the game.
+ * needs to complete in order to win the game.
  */
 var activeTasks: Task[] = new Array();
 
@@ -120,19 +127,22 @@ class Player {
   stage: Konva.Stage;
   x: number;
   y: number;
+  col: string;
   model: Konva.Circle;
+  public playerMovedCB: IPlayerMovedCB;
 
-  constructor(x: number, y: number, layer: Konva.Layer, stage: Konva.Stage) {
+  constructor(x: number, y: number, col: string, layer: Konva.Layer, stage: Konva.Stage) {
     this.x = x;
     this.y = y;
     this.layer = layer;
     this.stage = stage;
+    this.col = col;
 
     this.model = new Konva.Circle({
       x: (x + 1) * gridSize - gridSize / 2,
       y: (y + 1) * gridSize - gridSize / 2,
       radius: gridSize / 2,
-      fill: "green",
+      fill: col,
       stroke: "black",
       strokeWidth: 2,
     });
@@ -154,6 +164,10 @@ class Player {
       if (newPos.type != ElementType.Wall) {
         this.model.y(this.model.y() - amount * gridSize);
         this.y -= amount;
+
+        if (this.playerMovedCB !== undefined) {
+          this.playerMovedCB(this.x, this.y);
+        }
       }
       if (newPos.type == ElementType.Task) {
         newPos.shape.fill("red");
@@ -171,6 +185,10 @@ class Player {
       if (newPos.type != ElementType.Wall) {
         this.model.x(this.model.x() - amount * gridSize);
         this.x -= amount;
+
+        if (this.playerMovedCB !== undefined) {
+          this.playerMovedCB(this.x, this.y);
+        }
       }
       if (newPos.type == ElementType.Task) {
         newPos.shape.fill("red");
@@ -196,6 +214,14 @@ class Player {
   redraw() {
     this.layer.batchDraw();
   }
+
+  /**
+   * Attaches a callback function to this player object.
+   * Called whenever the player moves onto a valid field.
+   */
+  attachCallback(cb: IPlayerMovedCB) {
+    this.playerMovedCB = cb;
+  }
 }
 
 /**
@@ -216,6 +242,7 @@ class GridObject {
 }
 
 export class GamePlayground extends HTMLElement {
+  stage: Konva.Stage;
   constructor() {
     super();
   }
@@ -231,6 +258,13 @@ export class GamePlayground extends HTMLElement {
     console.log(GamePlayground.name, "disconnected from DOM");
   }
 
+  addPlayer(x: number, y: number, col: string, cb: IPlayerMovedCB): void {
+    var playerLayer = new Konva.Layer();
+    player = new Player(x, y, col, playerLayer, this.stage);
+
+    player.attachCallback(cb);
+  }
+
   /**
    * Initializes the grid by creating a new layer (baseLayer) and looping
    * through the user defined map to draw and populate the grid structure.
@@ -242,7 +276,7 @@ export class GamePlayground extends HTMLElement {
     var height = window.innerHeight;
     var containerDiv: HTMLDivElement = this.shadowRoot.getElementById("container") as HTMLDivElement;
 
-    var stage = new Konva.Stage({
+    this.stage = new Konva.Stage({
       container: containerDiv,
       width: width,
       height: height,
@@ -271,7 +305,7 @@ export class GamePlayground extends HTMLElement {
             gridRow.push(
               new GridObject(
                 ElementType.Wall,
-                this.drawRect(baseLayer, stage, x + i * gridSize, y * gridSize, ElementType.Wall),
+                this.drawRect(baseLayer, this.stage, x + i * gridSize, y * gridSize, ElementType.Wall),
               ),
             );
             break;
@@ -279,7 +313,7 @@ export class GamePlayground extends HTMLElement {
             gridRow.push(
               new GridObject(
                 ElementType.OpenSpace,
-                this.drawRect(baseLayer, stage, x + i * gridSize, y * gridSize, ElementType.OpenSpace),
+                this.drawRect(baseLayer, this.stage, x + i * gridSize, y * gridSize, ElementType.OpenSpace),
               ),
             );
             break;
@@ -291,12 +325,13 @@ export class GamePlayground extends HTMLElement {
             gridRow.push(
               new GridObject(
                 ElementType.Task,
-                this.drawRect(baseLayer, stage, x + i * gridSize, y * gridSize, ElementType.Task),
+                this.drawRect(baseLayer, this.stage, x + i * gridSize, y * gridSize, ElementType.Task),
                 gridTask,
               ),
             );
 
-            this.drawText(baseLayer, stage, x + i * gridSize, y * gridSize + gridSize / 2 - 10, gridTask.taskName);
+            // awful code, will fix later (TODO)
+            this.drawText(baseLayer, this.stage, x + i * gridSize, y * gridSize + gridSize / 2 - 10, gridTask.taskName);
             gridTask.setPosition(x + i, y);
             activeTasks.push(gridTask);
             break;
@@ -308,7 +343,12 @@ export class GamePlayground extends HTMLElement {
 
     /* Create player */
     var playerLayer = new Konva.Layer();
-    player = new Player(5, 5, playerLayer, stage);
+    player = new Player(5, 5, "orange", playerLayer, this.stage);
+
+    /* Attach demo callback */
+    player.attachCallback(function (x: number, y: number): void {
+      console.log("Player X: " + x + "; Y: " + y);
+    });
   }
 
   /**
