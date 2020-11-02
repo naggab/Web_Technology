@@ -222,6 +222,22 @@ class Player {
   attachCallback(cb: IPlayerMovedCB) {
     this.playerMovedCB = cb;
   }
+
+  /**
+   * Moves the player to the specified position and redraws.
+   *
+   * @param x X coordinate (grid coordinates)
+   * @param y Y coordinate (grid coordinates)
+   */
+  moveTo(x: number, y: number) {
+    this.x = x;
+    this.y = y;
+
+    this.model.x(x * gridSize + gridSize / 2);
+    this.model.y(y * gridSize + gridSize / 2);
+
+    this.redraw();
+  }
 }
 
 /**
@@ -349,6 +365,9 @@ export class GamePlayground extends HTMLElement {
     player.attachCallback(function (x: number, y: number): void {
       console.log("Player X: " + x + "; Y: " + y);
     });
+
+    /* Demo moveTo */
+    player.moveTo(5, 9);
   }
 
   /**
