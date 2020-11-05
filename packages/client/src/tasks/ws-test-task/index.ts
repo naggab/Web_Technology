@@ -1,7 +1,8 @@
 import viewHtml from "./view.html";
 import { GameEvent, GameEventOp, GameSession } from "../../gameSession";
+import { Task, TaskOpts } from "../../task";
 
-export class WsTestTask extends HTMLElement {
+export default class WsTestTask extends Task {
   nameInput: HTMLInputElement;
   connectButton: HTMLButtonElement;
   msgList: HTMLDivElement;
@@ -11,8 +12,8 @@ export class WsTestTask extends HTMLElement {
 
   session: GameSession | null = null;
 
-  constructor() {
-    super();
+  constructor(opts: TaskOpts) {
+    super(opts);
     this.onConnectClicked = this.onConnectClicked.bind(this);
     this.onGameEvent = this.onGameEvent.bind(this);
     this.onSendActionClicked = this.onSendActionClicked.bind(this);
@@ -68,7 +69,7 @@ export class WsTestTask extends HTMLElement {
     this.movementSendButton.onclick = this.onSendActionClicked;
   }
 
-  connectedCallback() {
+  onMounted() {
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = viewHtml;
     this.nameInput = this.shadowRoot.getElementById("player_name_input") as HTMLInputElement;
@@ -80,7 +81,7 @@ export class WsTestTask extends HTMLElement {
     this.setupListeners();
   }
 
-  disconnectedCallback() {}
+  onUnmounting() {}
 }
 
 customElements.define("ws-test-task", WsTestTask);

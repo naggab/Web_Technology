@@ -1,9 +1,12 @@
 import viewHtml from "./view.html";
+import { Task } from "../../Task";
 
-export class SampleTask extends HTMLElement {
+export default class SampleTask extends Task {
   loadButton: HTMLAnchorElement;
   serverResponseSpan: HTMLSpanElement;
-  async connectedCallback() {
+  counter: number = 0;
+
+  async onMounted() {
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = viewHtml;
     this.loadButton = this.shadowRoot.getElementById("load-button") as HTMLAnchorElement;
@@ -11,7 +14,13 @@ export class SampleTask extends HTMLElement {
     this.loadButton.onclick = this.loadFromServer.bind(this);
   }
 
+  onUnmounting(): void | Promise<void> {}
+
   async loadFromServer() {
+    this.counter++;
+    if (this.counter > 5) {
+      this.finish(true);
+    }
     this.loadButton.innerText = "loading ...";
     try {
       const response = await fetch("/api/test");

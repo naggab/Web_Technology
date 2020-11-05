@@ -1,5 +1,6 @@
 import Konva from "konva";
 import viewHtml from "./view.html";
+import { TaskOpts, Task as BaseTask } from "../../Task";
 
 /**
  * Maps are parsed rows -> columns.
@@ -257,20 +258,20 @@ class GridObject {
   }
 }
 
-export class GamePlayground extends HTMLElement {
+export default class GamePlayground extends BaseTask {
   stage: Konva.Stage;
-  constructor() {
-    super();
+  constructor(opts: TaskOpts) {
+    super(opts);
   }
 
-  connectedCallback() {
+  onMounted() {
     console.log(GamePlayground.name, "connected to DOM");
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = viewHtml;
     this.setupGrid();
   }
 
-  disconnectedCallback() {
+  onUnmounting() {
     console.log(GamePlayground.name, "disconnected from DOM");
   }
 

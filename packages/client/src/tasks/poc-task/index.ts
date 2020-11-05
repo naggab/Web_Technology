@@ -1,8 +1,9 @@
 import viewHtml from "./view.html";
-import { GamePlayground, Player } from "../game-playground";
-import { GameEvent, GameEventOp, GameSession, PlayerInfo } from "../../gameSession";
+import { default as GamePlayground, Player } from "../game-playground";
+import { GameEvent, GameEventOp, GameSession } from "../../gameSession";
+import { Task, TaskOpts } from "../../Task";
 
-export class POCTask extends HTMLElement {
+export default class POCTask extends Task {
   gamePlayground: GamePlayground;
   gameSession: GameSession;
 
@@ -10,10 +11,10 @@ export class POCTask extends HTMLElement {
 
   otherPlayers: Map<number, Player>;
 
-  constructor() {
-    super();
+  constructor(opts: TaskOpts) {
+    super(opts);
     this.otherPlayers = new Map();
-    this.gamePlayground = new GamePlayground();
+    this.gamePlayground = new GamePlayground({ finishCb: () => {} });
     this.gameSession = new GameSession("Player");
     this.onStateUpdateReceived = this.onStateUpdateReceived.bind(this);
     this.onPlayerMoveReceived = this.onPlayerMoveReceived.bind(this);
@@ -22,7 +23,7 @@ export class POCTask extends HTMLElement {
     this.onPlayerLeave = this.onPlayerLeave.bind(this);
   }
 
-  connectedCallback() {
+  onMounted() {
     console.log(POCTask.name, "connected to DOM");
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = viewHtml;
@@ -102,7 +103,7 @@ export class POCTask extends HTMLElement {
     });
   }
 
-  disconnectedCallback() {
+  onUnmounting() {
     console.log(POCTask.name, "disconnected from DOM");
     this.gameSession.disconnect();
   }

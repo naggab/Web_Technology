@@ -1,52 +1,4 @@
-/**
- * defines name and importPath of one Task
- */
-interface TaskModule {
-  name: string;
-  importPath: string;
-}
-
-const taskResolverContext = require.context("./tasks/", true, /\.\/[^\/]+\/index.ts$/);
-
-/**
- * Resolves all importable tasks by looking for folders inside ./tasks containing a index.ts file
- */
-function resolveTasks(): TaskModule[] {
-  const importPaths = taskResolverContext.keys();
-  return importPaths.map((importPath) => ({
-    importPath,
-    name: importPath.substring(2, importPath.length - "/index.ts".length),
-  }));
-}
-
-/**
- * looks for a task inside a Array<TaskModule> by name
- */
-function findTask(tasks: TaskModule[], name: string): TaskModule | null {
-  for (let task of tasks) {
-    if (task.name === name) {
-      return task;
-    }
-  }
-  return null;
-}
-
-/**
- * loads task by importPath and creates its custom Web Component
- */
-function createTaskInstance(module: TaskModule) {
-  taskResolverContext(module.importPath);
-  return document.createElement(module.name);
-}
-
-/**
- * unmounts any previous task before creating and mounting a new task
- */
-function mountTask(module: TaskModule) {
-  const instance = createTaskInstance(module);
-  taskWrapper.innerHTML = "";
-  taskWrapper.appendChild(instance);
-}
+import { TaskManger, TaskModule } from "./taskManager";
 
 const linkCollection = document.createElement("div");
 const taskWrapper = document.createElement("div");
@@ -72,7 +24,21 @@ function main() {
   document.body.appendChild(linkCollection);
   document.body.appendChild(taskWrapper);
 
-  const tasks = resolveTasks();
+  const tasks = TaskManger.getTasks();
+
+  /**
+   * unmounts any previous task before creating and mounting a new task
+   */
+  function mountTask(module: TaskModule) {
+    const instance = TaskManger.createTaskInstance(module, (duration, success) => {
+      if (success) {
+        alert(`task ${module.name} finished in ${duration}ms. Success: ${success}`);
+      }
+      taskWrapper.innerHTML = "";
+    });
+    taskWrapper.innerHTML = "";
+    taskWrapper.appendChild(instance);
+  }
 
   // create links in the 'LinkCollection' for every found task
   for (let task of tasks) {
@@ -88,7 +54,7 @@ function main() {
   // check if task is already selected by hash in url
   if (window.location.hash) {
     const taskName = window.location.hash.substring(1);
-    const task = findTask(tasks, taskName);
+    const task = TaskManger.findTask(taskName);
     if (task) {
       mountTask(task);
     }
