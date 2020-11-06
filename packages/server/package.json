@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
+    "@apirush/common": "^0.0.0",
     "@types/express-ws": "^3.0.0",
     "@types/ws": "^7.2.9",
     "express": "^4.17.1",

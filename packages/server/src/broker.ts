@@ -1,4 +1,5 @@
 import WebSocket from "ws";
+import { GameEvent, GameEventOp } from "@apirush/common";
 
 type PlayerIdType = number;
 
@@ -136,11 +137,12 @@ export class Broker {
    */
   private static onMessageFromPlayer(game: GameEntry, sender: PlayerEntry, msg: WebSocket.Data) {
     try {
-      const event = JSON.parse(msg.toString());
-      if (event["op"] === "PLAYER_MOVE") {
+      const event = JSON.parse(msg.toString()) as GameEvent;
+      if (event.op === GameEventOp.PLAYER_MOVE) {
+        const castedEvt = event as GameEvent<GameEventOp.PLAYER_MOVE>;
         sender.position = {
-          x: event["payload"]["x"],
-          y: event["payload"]["y"],
+          x: castedEvt.payload.x,
+          y: castedEvt.payload.y,
         };
       }
     } catch (e) {
@@ -157,8 +159,8 @@ export class Broker {
    * if number of players in one game == 0 -> game is deleted
    */
   private onPlayerDisconnected(game: GameEntry, player: PlayerEntry) {
-    const msg = {
-      op: "PLAYER_LEAVE",
+    const msg: GameEvent<GameEventOp.PLAYER_LEAVE> = {
+      op: GameEventOp.PLAYER_LEAVE,
       payload: {
         id: player.id,
         name: player.name,
@@ -207,8 +209,8 @@ export class Broker {
     const player = Broker.addPlayerToGame(game, playerDetails);
     this.setupPlayerListeners(game, player);
 
-    const joinMsg = {
-      op: "PLAYER_JOIN",
+    const joinMsg: GameEvent<GameEventOp.PLAYER_JOIN> = {
+      op: GameEventOp.PLAYER_JOIN,
       payload: {
         id: player.id,
         name: player.name,
@@ -216,8 +218,8 @@ export class Broker {
       },
     };
     Broker.broadcastMsgForGame(game, player, joinMsg);
-    const currentStateMsg = {
-      op: "CURRENT_STATE",
+    const currentStateMsg: GameEvent<GameEventOp.CURRENT_STATE> = {
+      op: GameEventOp.CURRENT_STATE,
       payload: {
         yourPlayerId: player.id,
         players: otherPlayers.map((otherPlayer) => ({
@@ -239,8 +241,8 @@ export class Broker {
       clearTimeout(this.cleanupTimer);
       this.cleanupTimer = null;
     }
-    const msg = {
-      op: "SERVER_SHUTDOWN",
+    const msg: GameEvent<GameEventOp.SERVER_SHUTDOWN> = {
+      op: GameEventOp.SERVER_SHUTDOWN,
       payload: {},
     };
     this.broadcastAll(msg);

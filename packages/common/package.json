@@ -1,0 +1,11 @@
+{
+  "name": "@apirush/common",
+  "version": "0.0.0",
+  "main": "src/index.ts",
+  "private": true,
+  "dependencies": {
+    "typescript": "^4.0.5"
+  },
+  "devDependencies": {},
+  "scripts": {}
+}

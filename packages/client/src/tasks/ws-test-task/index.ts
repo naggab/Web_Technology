@@ -1,6 +1,7 @@
 import viewHtml from "./view.html";
-import { GameEvent, GameEventOp, GameSession } from "../../gameSession";
+import { GameSession } from "../../gameSession";
 import { Task, TaskOpts } from "../../task";
+import { GameEvent, GameEventOp } from "@apirush/common";
 
 export default class WsTestTask extends Task {
   nameInput: HTMLInputElement;

@@ -1,7 +1,8 @@
 import viewHtml from "./view.html";
 import { default as GamePlayground, Player } from "../game-playground";
-import { GameEvent, GameEventOp, GameSession } from "../../gameSession";
-import { Task, TaskOpts } from "../../Task";
+import { GameSession } from "../../gameSession";
+import { Task, TaskOpts } from "../../task";
+import { GameEvent, GameEventOp } from "@apirush/common";
 
 export default class POCTask extends Task {
   gamePlayground: GamePlayground;

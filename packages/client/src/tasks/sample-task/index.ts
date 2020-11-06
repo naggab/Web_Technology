@@ -1,5 +1,5 @@
 import viewHtml from "./view.html";
-import { Task } from "../../Task";
+import { Task } from "../../task";
 
 export default class SampleTask extends Task {
   loadButton: HTMLAnchorElement;
