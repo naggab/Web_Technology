@@ -1,6 +1,7 @@
 import Konva from "konva";
 import viewHtml from "./view.html";
-import { TaskOpts, Task as BaseTask } from "../../task";
+import { TaskOpts, Task as BaseTask, Task } from "../../task";
+import { TaskModule } from "../../taskManager";
 
 /**
  * Maps are parsed rows -> columns.
@@ -50,6 +51,16 @@ interface IPlayerMovedCB {
   (x: number, y: number): void;
 }
 
+/**
+ * Interface for a task drawn on screen.
+ */
+interface IPlaygroundTask {
+  taskModule: TaskModule;
+  isCompleted?: boolean;
+  x?: number;
+  y?: number;
+}
+
 var gridSize: number = 50;
 var player: Player;
 
@@ -60,42 +71,10 @@ var baseLayer: Konva.Layer;
 var grid: GridObject[][];
 
 /**
- * Basic type for a task shown on screen.
- */
-class Task {
-  taskName: string;
-  isCompleted: boolean;
-  x: number;
-  y: number;
-
-  constructor(taskName: string) {
-    this.taskName = taskName;
-    this.isCompleted = false;
-  }
-
-  setPosition(x: number, y: number) {
-    this.x = x;
-    this.y = y;
-  }
-}
-
-/**
- * Temporary map for "demo" tasks to showcase randomization.
- */
-var map_tasks: Task[] = [
-  new Task("Task01"),
-  new Task("Task02"),
-  new Task("Task03"),
-  new Task("Task04"),
-  new Task("Task05"),
-  new Task("Task06"),
-];
-
-/**
  * List of currently active tasks. These are all the tasks the player
  * needs to complete in order to win the game.
  */
-var activeTasks: Task[] = new Array();
+var activeTasks: IPlaygroundTask[] = new Array();
 
 /**
  * Check for task completion (win state).
@@ -173,9 +152,11 @@ export class Player {
       if (newPos.type == ElementType.Task) {
         newPos.shape.fill("red");
         baseLayer.batchDraw();
-        newPos.task.isCompleted = true;
-        console.log(newPos.task);
-        checkTaskCompletion();
+        if (newPos.task !== undefined) {
+          newPos.task.isCompleted = true;
+          console.log(newPos.task);
+          checkTaskCompletion();
+        }
       }
     }
   }
@@ -194,9 +175,11 @@ export class Player {
       if (newPos.type == ElementType.Task) {
         newPos.shape.fill("red");
         baseLayer.batchDraw();
-        newPos.task.isCompleted = true;
-        console.log(newPos.task);
-        checkTaskCompletion();
+        if (newPos.task !== undefined) {
+          newPos.task.isCompleted = true;
+          console.log(newPos.task);
+          checkTaskCompletion();
+        }
       }
     }
   }
@@ -249,9 +232,9 @@ export class Player {
 class GridObject {
   type: ElementType;
   shape: Konva.Shape;
-  task: Task;
+  task: IPlaygroundTask;
 
-  constructor(type: ElementType, shape: Konva.Shape, task?: Task) {
+  constructor(type: ElementType, shape: Konva.Shape, task?: IPlaygroundTask) {
     this.type = type;
     this.shape = shape;
     if (task !== undefined) this.task = task;
@@ -336,22 +319,15 @@ export default class GamePlayground extends BaseTask {
             );
             break;
           case "T":
-            var r = Math.floor(Math.random() * map_tasks.length);
-            var gridTask: Task = map_tasks[r];
-            map_tasks.splice(r, 1);
-
             gridRow.push(
               new GridObject(
                 ElementType.Task,
                 this.drawRect(baseLayer, this.stage, x + i * gridSize, y * gridSize, ElementType.Task),
-                gridTask,
               ),
             );
 
             // awful code, will fix later (TODO)
-            this.drawText(baseLayer, this.stage, x + i * gridSize, y * gridSize + gridSize / 2 - 10, gridTask.taskName);
-            gridTask.setPosition(x + i, y);
-            activeTasks.push(gridTask);
+            this.drawText(baseLayer, this.stage, x + i * gridSize, y * gridSize + gridSize / 2 - 10, "TASK");
             break;
         }
       }
@@ -367,9 +343,6 @@ export default class GamePlayground extends BaseTask {
     player.attachCallback(function (x: number, y: number): void {
       console.log("Player X: " + x + "; Y: " + y);
     });
-
-    /* Demo moveTo */
-    player.moveTo(5, 9);
   }
 
   /**
@@ -418,6 +391,38 @@ export default class GamePlayground extends BaseTask {
 
     layer.add(elem);
     stage.add(layer);
+  }
+
+  /**
+   * Add a single task to the board and draw it.
+   * If the task contains coordinates (X,Y) it will be added to the specified field.
+   * If no coordinates are given we select a new random field.
+   * 
+   * Returns true if the task was added and false on error / no free space.
+   */
+  addTask(task: IPlaygroundTask): boolean {
+    var res: boolean = false;
+    if (task.x !== undefined && task.y !== undefined) {
+      var go: GridObject = grid[task.x][task.y];
+      if (go !== undefined) {
+        go.type = ElementType.Task;
+        go.shape.fill("yellow");
+        res = true;
+        activeTasks.push(task);
+        console.log(go);
+      }
+    } else {
+      grid.forEach((row) => {
+        row.forEach((column) => {
+          if (column.type === ElementType.Task && column.task == undefined) {
+            column.task = task;
+            activeTasks.push(task);
+            console.log(column);
+          }
+        });
+      });
+    }
+    return res;
   }
 
   /**
