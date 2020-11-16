@@ -2,6 +2,7 @@ import Konva from "konva";
 import viewHtml from "./view.html";
 import { TaskOpts, Task as BaseTask, Task } from "../../task";
 import { TaskModule } from "../../taskManager";
+import { HitContext } from "konva/types/Context";
 
 /**
  * Maps are parsed rows -> columns.
@@ -109,6 +110,8 @@ export class Player {
   y: number;
   col: string;
   model: Konva.Circle;
+  tooltip: Konva.Text;
+  tooltipShape: Konva.Rect;
   public playerMovedCB: IPlayerMovedCB;
 
   constructor(x: number, y: number, col: string, layer: Konva.Layer, stage: Konva.Stage) {
@@ -128,7 +131,59 @@ export class Player {
     });
 
     this.layer.add(this.model);
+
+    /* Add tooltip to the player object */
+    /* We do this first because we need the text size in order */
+    /* to figure out how large the background needs to be. */
+    this.tooltip = new Konva.Text({
+      x: x * gridSize,
+      y: y * gridSize,
+      text: x + "," + y,
+      fontFamily: 'Arial',
+      fontSize: 12,
+      padding: 5,
+      fill: 'white',
+      alpha: 0.75,
+      visible: true,
+    });
+    this.tooltip.x(this.tooltip.x() + (gridSize / 2) - this.tooltip.width() / 2);
+    this.tooltip.y(this.tooltip.y() + (gridSize / 2) - this.tooltip.height() / 2);
+
+    /* Add a shape to draw the tooltip on */
+    this.tooltipShape = new Konva.Rect({
+      x: this.tooltip.x(),
+      y: this.tooltip.y(),
+      width: this.tooltip.width(),
+      height: this.tooltip.height() - 2,
+      fill: 'black',
+      cornerRadius: 5,
+      opacity: 0.6,
+    });
+
+    this.layer.add(this.tooltipShape);
+    this.layer.add(this.tooltip);
     this.stage.add(this.layer);
+  }
+
+  /** 
+   * Redraw the tooltip with new movement information.
+   * Automatically centers the text inside the background object
+   */
+  refreshTooltip(text?: string) {
+    if (text !== undefined) {
+      this.tooltip.text(text);
+    } else {
+      this.tooltip.text(this.x + "," + this.y);
+    }
+    this.tooltip.x(this.x * gridSize + (gridSize / 2) - this.tooltip.width() / 2);
+    this.tooltip.y(this.y * gridSize + (gridSize / 2) - this.tooltip.height() / 2);
+
+    this.tooltipShape.x(this.tooltip.x());
+    this.tooltipShape.y(this.tooltip.y());
+    this.tooltipShape.width(this.tooltip.width());
+    this.tooltipShape.height(this.tooltip.height() - 2);
+
+    this.redraw();
   }
 
   /**
@@ -144,6 +199,7 @@ export class Player {
       if (newPos.type != ElementType.Wall) {
         this.model.y(this.model.y() - amount * gridSize);
         this.y -= amount;
+        this.refreshTooltip();
 
         if (this.playerMovedCB !== undefined) {
           this.playerMovedCB(this.x, this.y);
@@ -167,6 +223,7 @@ export class Player {
       if (newPos.type != ElementType.Wall) {
         this.model.x(this.model.x() - amount * gridSize);
         this.x -= amount;
+        this.refreshTooltip();
 
         if (this.playerMovedCB !== undefined) {
           this.playerMovedCB(this.x, this.y);
@@ -335,9 +392,10 @@ export default class GamePlayground extends BaseTask {
       y += 1;
     });
 
-    /* Create player */
+    /* Create demo player */
     var playerLayer = new Konva.Layer();
     player = new Player(5, 5, "orange", playerLayer, this.stage);
+    player.refreshTooltip("PLAYER 1");
 
     /* Attach demo callback */
     player.attachCallback(function (x: number, y: number): void {
