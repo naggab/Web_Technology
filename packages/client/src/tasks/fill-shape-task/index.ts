@@ -17,7 +17,28 @@ export default class FillShapeTask extends Task {
     ctx.beginPath();
     ctx.arc(200, 200, 80, 0, 2 * Math.PI);
     ctx.stroke();
+
+    var clientX = 0.0;
+     var clientY = 0.0;
+     // Record the mouse position when it moves.
+     this.canvasElement.addEventListener('mousemove', function(e) {
+      clientX = e.clientX;
+      clientY = e.clientY;
+      console.log(clientX,clientY);
+      
+    });
+  
+  //Get Mouse Position
+  function getMousePos(canvas, evt) {
+      var rect = canvas.getBoundingClientRect();
+      return {
+          x: evt.clientX - rect.left,
+          y: evt.clientY - rect.top
+      };
   }
+  }
+ 
+  
 
   onUnmounting(): void | Promise<void> {}
 
@@ -39,3 +60,11 @@ export default class FillShapeTask extends Task {
 }
 
 customElements.define("fill-shape-task", FillShapeTask);
+
+function getMousePos(canvas, evt) {
+  var rect = canvas.getBoundingClientRect();
+  return {
+    x: evt.clientX - rect.left,
+    y: evt.clientY - rect.top
+  };
+}
