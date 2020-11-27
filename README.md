@@ -29,6 +29,10 @@ To start both server and client just execute `yarn run start` in the root folder
 recompile the client and refresh the browser. Changes to the server-code will restart the server but not refresh the client.
 After starting the client can be accessed via `http://localhost:9000`. The server binds to `http://localhost:3000`.
 
+##### How to run `tests`
+
+Testcases (specified in packages/client/tests) can be run by executing `yarn run test` inside the packages/client directory.
+
 ##### Code Styling
 
 This repo is equipped with a configured [`prettier`](https://prettier.io/) configuration. In the root folder just run 
