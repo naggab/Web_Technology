@@ -19,14 +19,29 @@ export default class FillShapeTask extends Task {
     ctx.stroke();
 
     var clientX = 0.0;
-     var clientY = 0.0;
+    var clientY = 0.0;
+    var test = false;
      // Record the mouse position when it moves.
-     this.canvasElement.addEventListener('mousemove', function(e) {
-      clientX = e.clientX;
-      clientY = e.clientY;
-      console.log(clientX,clientY);
-      
+     // How to attach an detach events?
+     // E.g only listen to mouse pos when mouse down...
+    this.canvasElement.addEventListener('mousemove', function(e) {
+      if(test)
+      {
+        clientX = e.clientX;
+        clientY = e.clientY;
+        console.log(clientX,clientY);
+      }
     });
+    this.canvasElement.addEventListener("mousedown", function(e) 
+        { 
+            console.log("mousedown")
+            test=true;
+        });
+    this.canvasElement.addEventListener("mouseup", function(e) 
+     { 
+         console.log("mouseup")
+         test=false;
+     });  
   
   //Get Mouse Position
   function getMousePos(canvas, evt) {
@@ -36,10 +51,7 @@ export default class FillShapeTask extends Task {
           y: evt.clientY - rect.top
       };
   }
-  }
- 
-  
-
+  } 
   onUnmounting(): void | Promise<void> {}
 
   async loadFromServer() {
@@ -61,10 +73,12 @@ export default class FillShapeTask extends Task {
 
 customElements.define("fill-shape-task", FillShapeTask);
 
-function getMousePos(canvas, evt) {
-  var rect = canvas.getBoundingClientRect();
-  return {
-    x: evt.clientX - rect.left,
-    y: evt.clientY - rect.top
-  };
+
+class Mouse{
+  canvasElement:HTMLCanvasElement;
+  constructor(canvasElement: HTMLCanvasElement) {
+    this.canvasElement = canvasElement;
+  } 
+}
+class Timer{
 }
