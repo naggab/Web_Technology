@@ -24,6 +24,7 @@ export default class FillShapeTask extends Task {
      // Record the mouse position when it moves.
      // How to attach an detach events?
      // E.g only listen to mouse pos when mouse down...
+     /*
     this.canvasElement.addEventListener('mousemove', function(e) {
       if(test)
       {
@@ -42,8 +43,10 @@ export default class FillShapeTask extends Task {
          console.log("mouseup")
          test=false;
      });  
-  
+  */
   //Get Mouse Position
+  let m = new Mouse(this.canvasElement);
+  m.startTracking(this.canvasElement);
   function getMousePos(canvas, evt) {
       var rect = canvas.getBoundingClientRect();
       return {
@@ -76,9 +79,33 @@ customElements.define("fill-shape-task", FillShapeTask);
 
 class Mouse{
   canvasElement:HTMLCanvasElement;
+  
   constructor(canvasElement: HTMLCanvasElement) {
     this.canvasElement = canvasElement;
   } 
+  startTracking(canvasElement) {
+    var clientX = 0.0;
+    var clientY = 0.0;
+    var test = false;
+    canvasElement.addEventListener('mousemove', function(e) {
+      if(test)
+      {
+        clientX = e.clientX;
+        clientY = e.clientY;
+        console.log(clientX,clientY);
+      }
+    });
+    canvasElement.addEventListener("mousedown", function(e) 
+    { 
+        console.log("mousedown")
+        test=true;
+    });
+    canvasElement.addEventListener("mouseup", function(e) 
+     { 
+         console.log("mouseup")
+         test=false;
+     });  
+  }
 }
 class Timer{
 }

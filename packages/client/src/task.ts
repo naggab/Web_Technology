@@ -20,7 +20,6 @@ export class Task extends HTMLElement {
     }
     this.opts = opts;
   }
-
   private async connectedCallback() {
     const mountResult = this.onMounted();
     if (mountResult) {
