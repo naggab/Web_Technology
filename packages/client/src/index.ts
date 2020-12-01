@@ -1,3 +1,5 @@
+import "./components/button";
+
 import { TaskManger, TaskModule } from "./taskManager";
 
 const linkCollection = document.createElement("div");
