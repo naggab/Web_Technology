@@ -5,6 +5,17 @@ import { TaskModule } from "../../taskManager";
 import { HitContext } from "konva/types/Context";
 import { map } from "lodash";
 
+
+/**
+ * Use this to globally enable / disable all console outputs.
+ */
+var DEBUG_MODE: boolean = true;
+function debugPrint(x: any) {
+  if (DEBUG_MODE) {
+    console.log(x);
+  }
+}
+
 class Coord {
   x: number;
   y: number;
@@ -110,6 +121,16 @@ enum ElementType {
 }
 
 /**
+ * We can collide with walls and tasks, potentially with players (NYI)
+ */
+enum CollisionType {
+  None,
+  Wall,
+  Task,
+  Player,
+}
+
+/**
  * Interface for "player moved" callback function.
  */
 interface IPlayerMovedCB {
@@ -127,7 +148,8 @@ interface IPlaygroundTask {
 }
 
 
-var gridSize: number = 20;
+var gridSize: number = 20; // later overwritten by init
+var gridLength: number = 50; // this defines the actual gridsize based on div width
 var player: Player;
 
 /**
@@ -257,24 +279,25 @@ export class Player {
    * Manual collision detection, checks collisions around the new
    * player position.
    */
-  checkCollision (newPosY: number, newPosX: number): boolean {
-    var foundCollision: boolean = false;
+  checkCollision (newPosY: number, newPosX: number): CollisionType {
+    var col: CollisionType = CollisionType.None;
     var radiusIncr: number = (this.radius - (gridSize / 2)) / gridSize;
     for (let i = -radiusIncr; i <= radiusIncr; i++) {
       for (let j = -radiusIncr; j <= radiusIncr; j++) {
         var newPos = grid[newPosY + i][newPosX + j];
         if (newPos !== undefined) {
           if (newPos.type == ElementType.Wall) {
-            foundCollision = true;
+            col = CollisionType.Wall;
           } else if (newPos.type == ElementType.Task) {
             newPos.shape.fill("red");
             baseLayer.batchDraw();
+            col = CollisionType.Task;
           }
         }
       }
     }
     
-    return foundCollision;
+    return col;
   }
 
   /**
@@ -287,8 +310,8 @@ export class Player {
   moveUp(amount: number) {
     var newPos = grid[this.y - amount][this.x];
     var foundCollision = this.checkCollision(this.y - amount, this.x);
-    console.log(foundCollision);
-    if (newPos !== undefined && !foundCollision) {
+    debugPrint(foundCollision);
+    if (newPos !== undefined && foundCollision != CollisionType.Wall) {
       if (newPos.type != ElementType.Wall) {
         this.model.y(this.model.y() - amount * gridSize);
         this.y -= amount;
@@ -304,7 +327,7 @@ export class Player {
   moveLeft(amount: number) {
     var newPos = grid[this.y][this.x - amount];
     var foundCollision = this.checkCollision(this.y, this.x - amount);
-    if (newPos !== undefined && !foundCollision) {
+    if (newPos !== undefined && foundCollision != CollisionType.Wall) {
       if (newPos.type != ElementType.Wall) {
         this.model.x(this.model.x() - amount * gridSize);
         this.x -= amount;
@@ -381,14 +404,15 @@ export default class GamePlayground extends BaseTask {
   }
 
   onMounted() {
-    console.log(GamePlayground.name, "connected to DOM");
+    debugPrint(GamePlayground.name, "connected to DOM");
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = viewHtml;
+    
     this.setupGrid();
   }
 
   onUnmounting() {
-    console.log(GamePlayground.name, "disconnected from DOM");
+    debugPrint(GamePlayground.name, "disconnected from DOM");
   }
 
   addPlayer(x: number, y: number, col: string, cb: IPlayerMovedCB): Player {
@@ -410,9 +434,13 @@ export default class GamePlayground extends BaseTask {
    */
   setupGrid() {
     /* Initial setup (stage) */
-    var width = window.innerWidth;
-    var height = window.innerHeight;
     var containerDiv: HTMLDivElement = this.shadowRoot.getElementById("container") as HTMLDivElement;
+    
+    var width = containerDiv.clientWidth;
+    var height = containerDiv.clientHeight;
+
+    gridSize = Math.floor(width / gridLength);
+    debugPrint(gridSize);
 
     this.stage = new Konva.Stage({
       container: containerDiv,
@@ -439,7 +467,7 @@ export default class GamePlayground extends BaseTask {
       gridRow = new Array();
       var mult: string = "";
       var x_iter: number = 0;
-      console.log("Parsing row: " + y);
+      debugPrint("Parsing row: " + y);
       for (let i = 0; i < row.length; i++) {
         /* Look for multipliers */
         if (row.charAt(i) != "W" && row.charAt(i) != "O" && row.charAt(i) != "T") {
@@ -467,6 +495,11 @@ export default class GamePlayground extends BaseTask {
                   );
                   break;
               }
+              if (x_iter == 0 && DEBUG_MODE)
+                this.drawText(baseLayer, this.stage, x_iter * gridSize + 1, y * gridSize + 1, y.toString());
+              if (y == 0 && DEBUG_MODE)
+                this.drawText(baseLayer, this.stage, x_iter * gridSize + 1, y * gridSize + 1, x_iter.toString());
+
               x_iter ++;
             }
             mult = "";
@@ -476,17 +509,20 @@ export default class GamePlayground extends BaseTask {
       grid.push(gridRow);
       y += 1;
       x_iter = 0;
+      this.stage.height(this.stage.height() + gridSize);
     });
+    
+    this.stage.add(baseLayer);
 
     /** 
      * Parse all possible task locations (purple).
      */
     gameMap.possibleTasks.forEach((coord) => {
-      console.log(coord);
+      debugPrint("Adding task at: " + coord);
       var newPos = grid[coord.y][coord.x];
       if (newPos !== undefined) {
         newPos.shape.fill("purple");
-        newPos.shape.stroke("black");
+        newPos.type = ElementType.Task;
       }
     });
     baseLayer.batchDraw();
@@ -498,7 +534,7 @@ export default class GamePlayground extends BaseTask {
     
     /* Attach demo callback */
     player.attachCallback(function (x: number, y: number): void {
-      console.log("Player X: " + x + "; Y: " + y);
+      debugPrint("Player X: " + x + "; Y: " + y);
     });
   }
 
@@ -521,17 +557,21 @@ export default class GamePlayground extends BaseTask {
       width: gridSize,
       height: gridSize,
       fill: "gray",
-      stroke: "darkgray",
-      strokeWidth: 1,
     });
+
+    if (DEBUG_MODE) {
+      elem.stroke("darkgray");
+      elem.strokeWidth(1);
+    }
 
     if (type == ElementType.OpenSpace) {
       elem.fill("white");
     } else if (type == ElementType.Task) {
       elem.fill("yellow");
     }
+    elem.listening(false);
+    elem.transformsEnabled("position");
     layer.add(elem);
-    stage.add(layer);
     return elem;
   }
 
@@ -543,12 +583,11 @@ export default class GamePlayground extends BaseTask {
       x: x,
       y: y,
       text: s,
-      fontSize: 8,
+      fontSize: gridSize / 2,
       fontFamily: "Arial",
     });
 
     layer.add(elem);
-    stage.add(layer);
   }
 
   /**
