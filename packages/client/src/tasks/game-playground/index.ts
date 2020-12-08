@@ -200,15 +200,21 @@ export class Player {
   tooltip: Konva.Text;
   tooltipShape: Konva.Rect;
   radius: number;
+  playerID: number;
   public playerMovedCB: IPlayerMovedCB;
 
-  constructor(x: number, y: number, col: string, layer: Konva.Layer, stage: Konva.Stage) {
+  constructor(x: number, y: number, col: string, layer: Konva.Layer, stage: Konva.Stage, playerID?: number) {
     this.x = x;
     this.y = y;
     this.layer = layer;
     this.stage = stage;
     this.col = col;
     this.radius = (gridSize / 2) * 3;
+
+    if (playerID !== undefined)
+      this.playerID = playerID;
+    else
+      this.playerID = -1;
 
     this.model = new Konva.Circle({
       x: (x + 1) * gridSize - gridSize / 2,
@@ -252,6 +258,8 @@ export class Player {
     this.layer.add(this.tooltipShape);
     this.layer.add(this.tooltip);
     this.stage.add(this.layer);
+
+    this.refreshTooltip();
   }
 
   /** 
@@ -261,6 +269,8 @@ export class Player {
   refreshTooltip(text?: string) {
     if (text !== undefined) {
       this.tooltip.text(text);
+    } else if (this.playerID != -1) {
+      this.tooltip.text("P" + this.playerID);
     } else {
       this.tooltip.text(this.x + "," + this.y);
     }
@@ -376,6 +386,7 @@ export class Player {
     this.model.x(x * gridSize + gridSize / 2);
     this.model.y(y * gridSize + gridSize / 2);
 
+    this.refreshTooltip();
     this.redraw();
   }
 }
@@ -415,9 +426,9 @@ export default class GamePlayground extends BaseTask {
     console.log(GamePlayground.name, "disconnected from DOM");
   }
 
-  addPlayer(x: number, y: number, col: string, cb: IPlayerMovedCB): Player {
+  addPlayer(x: number, y: number, col: string, cb: IPlayerMovedCB, id?: number): Player {
     var playerLayer = new Konva.Layer();
-    const newPlayer = new Player(x, y, col, playerLayer, this.stage);
+    const newPlayer = new Player(x, y, col, playerLayer, this.stage, id);
 
     newPlayer.attachCallback(cb);
     return newPlayer;
@@ -529,8 +540,7 @@ export default class GamePlayground extends BaseTask {
 
     /* Create demo player */
     var playerLayer = new Konva.Layer();
-    player = new Player(20, 20, "orange", playerLayer, this.stage);
-    player.refreshTooltip("PLAYER 1");
+    player = new Player(20, 20, "orange", playerLayer, this.stage, 0);
     
     /* Attach demo callback */
     player.attachCallback(function (x: number, y: number): void {
