@@ -404,7 +404,7 @@ export default class GamePlayground extends BaseTask {
   }
 
   onMounted() {
-    debugPrint(GamePlayground.name, "connected to DOM");
+    console.log(GamePlayground.name, "connected to DOM");
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = viewHtml;
     
@@ -412,7 +412,7 @@ export default class GamePlayground extends BaseTask {
   }
 
   onUnmounting() {
-    debugPrint(GamePlayground.name, "disconnected from DOM");
+    console.log(GamePlayground.name, "disconnected from DOM");
   }
 
   addPlayer(x: number, y: number, col: string, cb: IPlayerMovedCB): Player {
