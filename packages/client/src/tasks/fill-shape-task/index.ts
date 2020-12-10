@@ -1,15 +1,20 @@
 import viewHtml from "./view.html";
 import { Task } from "../../task";
+import { Button } from "../../components/button";
 
 export default class FillShapeTask extends Task {
   canvasElement: HTMLCanvasElement;
+  button: Button;
   test: boolean;
   ctx: CanvasRenderingContext2D;
   radius=80;
   pen_thickness = 20;
-  arr_squares = [[]]
-  no_sqares=0
-  help_arr =[]
+  arr_squares = [[]];
+  no_sqares=0;
+  help_arr =[];
+  count_pixel=0;
+  count_total=0;
+  set_saved_pos = new Set();
   constructor(props) {
     super(props);
     this.onMouseMove = this.onMouseMove.bind(this);
@@ -19,6 +24,7 @@ export default class FillShapeTask extends Task {
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = viewHtml;
     this.canvasElement = this.shadowRoot.getElementById("myCanvas") as HTMLCanvasElement;
+    this.button = this.shadowRoot.getElementById("load-button") as Button;
     this.ctx = this.canvasElement.getContext("2d");
     const ctx = this.ctx;
     const rect = this.canvasElement.getBoundingClientRect(); //get size according to html spec
@@ -26,6 +32,7 @@ export default class FillShapeTask extends Task {
     //center canvas drawing panel
     ctx.translate(rect.width / 2, rect.height / 2);
     ctx.beginPath();
+    ctx.strokeStyle = '#ff0000';
     ctx.lineWidth = 1;
     ctx.arc(0, 0, this.radius, 0, 2 * Math.PI);
     
@@ -43,7 +50,8 @@ export default class FillShapeTask extends Task {
     //ctx.fill();
     ctx.closePath();
     ctx.stroke();
-    ctx.lineWidth = 1;
+    
+    
     //fill shape with squares -> remeber pos of each square.
     /*
     for(var _h = this.pen_thickness; _h<=this.radius; _h+=this.pen_thickness){
@@ -74,13 +82,16 @@ export default class FillShapeTask extends Task {
     this.test = false;
     //line thickness
     ctx.lineWidth = this.pen_thickness;
+    ctx.strokeStyle = '#000000';
     ctx.lineCap = "round"; //round line edge
+    
     this.canvasElement.addEventListener("mousemove", this.onMouseMove);
     this.canvasElement.addEventListener("mousedown", (e) => {
       console.log("mousedown");
       this.test = true;
       const relativeMousePos = this.getMousePos(this.canvasElement, e);
       //start stroke (path)
+      //ctx.strokeStyle = '#ff0000';
       ctx.beginPath();
       ctx.moveTo(relativeMousePos.x, relativeMousePos.y);
     });
@@ -89,6 +100,42 @@ export default class FillShapeTask extends Task {
       //end stroke (path)
       ctx.closePath();
       this.test = false;
+     
+    });
+    this.button.addEventListener("click",(c)=>{
+       //calc pixels
+      const offset_x = Math.trunc(rect.width/2)-this.radius;
+      const offset_y = Math.trunc(rect.width/2);
+      //const offset_y = Math.trunc(rect.width/2);
+      //check pixel color in shape:
+      for(var _y=0; _y<this.radius; _y+=2){
+        var new_x = Math.trunc(Math.sqrt(Math.pow(this.radius,2)-Math.pow(_y,2)));
+        for(var _x=new_x; _x<2*new_x; _x+=2)
+        {
+          //console.log(this.ctx.getImageData(offset_x+_x,offset_y+_y,1,1).data,new_x,_x) //down
+          //console.log(this.ctx.getImageData(offset_x+_x,offset_y-_y,1,1).data,new_x,_x) //up
+          
+          const color_up = this.ctx.getImageData(offset_x+_x,offset_y-_y,1,1).data[3];
+          const color_down = this.ctx.getImageData(offset_x+_x,offset_y+_y,1,1).data[3];
+          //check if color changed up or down
+          if(color_up==255 || color_down==255){
+            this.count_pixel++;
+          }
+          this.count_total+=2 //up and down;
+        } 
+      }
+      var percentage_check = this.count_pixel/this.count_total; 
+      console.log(percentage_check,"Drawn: ",this.count_pixel,"Total:",this.count_total);
+      if(percentage_check>0.45 && percentage_check<0.55){
+      
+        alert("("+percentage_check*100+") You did it!!!")
+      }
+      else{
+        alert("("+percentage_check*100+") Nice try")
+        
+      }
+      this.count_pixel = 0;
+      this.count_total = 0;
     });
   }
   onUnmounting(): void | Promise<void> {}
@@ -103,13 +150,16 @@ export default class FillShapeTask extends Task {
       ctx.lineTo(relativeMousePos.x, relativeMousePos.y);
       ctx.stroke();
       //console.log("Abs mous pos",clientX, clientY);
-      console.log("Rel mous pos",relativeMousePos.x, relativeMousePos.y);
-      console.log("seeet",this.help_arr.length)
-      console.log("Percantage covered:",(this.help_arr.length/(this.no_sqares))*100,"%")
+      //console.log("Rel mous pos",relativeMousePos.x, relativeMousePos.y);
+      //console.log("seeet",this.help_arr.length)
+      //console.log("Percantage covered:",(this.help_arr.length/(this.no_sqares))*100,"%")
       //check if mouse is in shape or not. easy with vector length
       if(Math.hypot(relativeMousePos.x, relativeMousePos.y)<this.radius){
         console.log("Inside");
         //check if in test row 
+        
+        this.set_saved_pos.add([Math.trunc(relativeMousePos.x), Math.trunc(relativeMousePos.y)]);
+        console.log(this.set_saved_pos)
       
       console.log("count squares", this.help_arr.length)
         for(var index=0; index < this.arr_squares.length ;index++)
@@ -137,8 +187,6 @@ export default class FillShapeTask extends Task {
 
         }
       }
-       
-      
       else{
         console.log("Outside");
       }
