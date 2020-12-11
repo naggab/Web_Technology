@@ -72,7 +72,6 @@ var map_02: string[] = [
   "WWWWWWWWWWWWWWWWWWWWWW",
 ];
 
-
 var gameMap: GameMap = new GameMap();
 gameMap.map = [
   "50W",
@@ -88,27 +87,32 @@ gameMap.map = [
   "1W48O1W",
   "1W48O1W",
   "13W5O3W3O20W5O1W",
-  "1W11O1W5O1W5O1W24O1W",
-  "1W11O1W5O1W5O1W24O1W",
-  "1W11O1W5O1W5O1W24O1W",
-  "1W11O1W5O7W24O1W",
-  "1W48O1W",
-  "1W48O1W",
-  "1W48O1W",
-  "1W48O1W",
-  "1W48O1W",
-  "1W48O1W",
-  "1W48O1W",
-  "1W48O1W",
-  "1W48O1W",
-  "1W48O1W",
+  "1W11O1W5O1W5O1W18O1W5O1W",
+  "1W11O1W5O1W5O1W18O1W5O1W",
+  "1W11O1W5O1W5O1W18O1W5O1W",
+  "1W11O1W5O7W18O1W5O1W",
+  "1W42O1W5O1W",
+  "1W42O1W5O1W",
+  "1W42O1W5O1W",
+  "1W42O1W5O1W",
+  "1W42O1W5O1W",
+  "5W4O15W3O10W5O38W",
+  "1W8O1W13O1W3O1W8O1W5O3W4O1W",
+  "1W8O1W26O1W12O1W",
+  "1W8O1W26O1W12O1W",
+  "1W8O1W26O1W12O1W",
   "50W",
 ];
 gameMap.possibleTasks = [
   new Coord(1 , 2 ),
   new Coord(10, 10),
   new Coord(15, 15),
-  new Coord(30, 10),
+  new Coord(11, 24),
+  new Coord(34, 24),
+  new Coord(47, 25),
+  new Coord(30, 2),
+  new Coord(46, 2),
+  new Coord(46, 20),
 ];
 
 /**
@@ -418,7 +422,6 @@ export default class GamePlayground extends BaseTask {
     console.log(GamePlayground.name, "connected to DOM");
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = viewHtml;
-    
     this.setupGrid();
   }
 
