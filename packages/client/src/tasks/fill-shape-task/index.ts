@@ -14,6 +14,7 @@ export default class FillShapeTask extends Task {
   help_arr =[];
   count_pixel=0;
   count_total=0;
+  fill_shape = 0.0;
   set_saved_pos = new Set();
   constructor(props) {
     super(props);
@@ -51,6 +52,8 @@ export default class FillShapeTask extends Task {
     ctx.closePath();
     ctx.stroke();
     
+    this.fill_shape = Math.floor(Math.random() * 100);
+    this.button.setAttribute("label","Fill: "+(this.fill_shape)+"%")
     
     //fill shape with squares -> remeber pos of each square.
     /*
@@ -108,7 +111,7 @@ export default class FillShapeTask extends Task {
       const offset_y = Math.trunc(rect.width/2);
       //const offset_y = Math.trunc(rect.width/2);
       //check pixel color in shape:
-      for(var _y=0; _y<this.radius; _y+=2){
+      for(var _y=0; _y<this.radius*2; _y+=2){
         var new_x = Math.trunc(Math.sqrt(Math.pow(this.radius,2)-Math.pow(_y,2)));
         for(var _x=new_x; _x<2*new_x; _x+=2)
         {
@@ -127,14 +130,14 @@ export default class FillShapeTask extends Task {
           this.count_total+=2 //up and down;
         } 
       }
-      var percentage_check = this.count_pixel/this.count_total; 
+      var percentage_check = (this.count_pixel/this.count_total)*100; 
       console.log(percentage_check,"Drawn: ",this.count_pixel,"Total:",this.count_total);
-      if(percentage_check>0.45 && percentage_check<0.55){
+      if(percentage_check>(this.fill_shape-5) && percentage_check<(this.fill_shape+5)){
       
-        alert("("+percentage_check*100+") You did it!!!")
+        alert("("+percentage_check+") You did it!!!")
       }
       else{
-        alert("("+percentage_check*100+") Nice try")
+        alert("("+percentage_check+") Nice try")
         
       }
       this.count_pixel = 0;
