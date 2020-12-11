@@ -118,7 +118,10 @@ export default class FillShapeTask extends Task {
           const color_up = this.ctx.getImageData(offset_x+_x,offset_y-_y,1,1).data[3];
           const color_down = this.ctx.getImageData(offset_x+_x,offset_y+_y,1,1).data[3];
           //check if color changed up or down
-          if(color_up==255 || color_down==255){
+          if(color_up==255){
+            this.count_pixel++;
+          }
+          if(color_down==255){
             this.count_pixel++;
           }
           this.count_total+=2 //up and down;
