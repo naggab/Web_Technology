@@ -9,13 +9,9 @@ export default class FillShapeTask extends Task {
   ctx: CanvasRenderingContext2D;
   radius=80;
   pen_thickness = 20;
-  arr_squares = [[]];
-  no_sqares=0;
-  help_arr =[];
   count_pixel=0;
   count_total=0;
   fill_shape = 0.0;
-  set_saved_pos = new Set();
   constructor(props) {
     super(props);
     this.onMouseMove = this.onMouseMove.bind(this);
@@ -28,59 +24,18 @@ export default class FillShapeTask extends Task {
     this.button = this.shadowRoot.getElementById("load-button") as Button;
     this.ctx = this.canvasElement.getContext("2d");
     const ctx = this.ctx;
-    const rect = this.canvasElement.getBoundingClientRect(); //get size according to html spec
+    const rect = this.canvasElement.getBoundingClientRect(); //get radius according to html spec
 
     //center canvas drawing panel
     ctx.translate(rect.width / 2, rect.height / 2);
-    ctx.beginPath();
-    ctx.strokeStyle = '#ff0000';
-    ctx.lineWidth = 1;
-    ctx.arc(0, 0, this.radius, 0, 2 * Math.PI);
-    
-    //For mathematical purposes
-    /*
-    var arr_y = []; 
-    for (var _x = -this.radius; _x < this.radius; _x++) {
-      arr_y.push(Math.sqrt(Math.pow(this.radius,2)-Math.pow(_x,2)))
-     
-    }
-    console.log(arr_y);
-    */
-    // bezierCurveTo to draw curves
-    //ctx.fillStyle = '#8ED6FF';
-    //ctx.fill();
-    ctx.closePath();
-    ctx.stroke();
-    
+    const circle = new Circle(ctx,0,0,80).DrawCircle();
+    const rect_1 = new Rectangle(ctx,100,100,40,40).DrawRectangle();
+    const rect_2 = new Rectangle(ctx,-100,-100,-40,-40).DrawRectangle();
+    const rect_3 = new Rectangle(ctx,-100,100,40,-40).DrawRectangle();
+    const rect_4 = new Rectangle(ctx,100,-100,-40,40).DrawRectangle();
+
     this.fill_shape = Math.floor(Math.random() * 100);
     this.button.setAttribute("label","Fill: "+(this.fill_shape)+"%")
-    
-    //fill shape with squares -> remeber pos of each square.
-    /*
-    for(var _h = this.pen_thickness; _h<=this.radius; _h+=this.pen_thickness){
-      for (var _i=-this.radius;_i<=this.radius;_i+=this.pen_thickness){
-        //just for visualization: the squares are only saved in an array
-        ctx.strokeRect(_i,0,this.pen_thickness,this.pen_thickness);
-        arr_shapes.push([_i,_h]) 
-      }
-    }
-    console.log(arr_shapes)
-    */
-
-   //get all squares: (negative + positive)
-
-   this.no_sqares = Math.PI*Math.pow(80,2)/(Math.pow(this.pen_thickness,2));
-   console.log(this.no_sqares);
-   for(var row=(-this.radius); row<=this.radius; row+=this.pen_thickness){
-     console.log("here")
-     for(var col=(-this.radius); col<=this.radius; col+=this.pen_thickness){
-       if(row!=0 && col!=0){
-        this.arr_squares.push([row,col])
-       }
-       
-     }
-   }
-   console.log(this.arr_squares)
 
     this.test = false;
     //line thickness
@@ -107,14 +62,15 @@ export default class FillShapeTask extends Task {
     });
     this.button.addEventListener("click",(c)=>{
        //calc pixels
-      const offset_x = Math.trunc(rect.width/2)-this.radius;
+      const offset_x = Math.trunc(rect.width/2-this.radius);
       const offset_y = Math.trunc(rect.width/2);
       //const offset_y = Math.trunc(rect.width/2);
       //check pixel color in shape:
       for(var _y=0; _y<this.radius*2; _y+=2){
         var new_x = Math.trunc(Math.sqrt(Math.pow(this.radius,2)-Math.pow(_y,2)));
-        for(var _x=new_x; _x<2*new_x; _x+=2)
+        for(var _x=0; _x<(2*new_x); _x+=2)
         {
+          //console.log(_x,_y)
           //console.log(this.ctx.getImageData(offset_x+_x,offset_y+_y,1,1).data,new_x,_x) //down
           //console.log(this.ctx.getImageData(offset_x+_x,offset_y-_y,1,1).data,new_x,_x) //up
           
@@ -162,36 +118,7 @@ export default class FillShapeTask extends Task {
       //check if mouse is in shape or not. easy with vector length
       if(Math.hypot(relativeMousePos.x, relativeMousePos.y)<this.radius){
         console.log("Inside");
-        //check if in test row 
-        
-        this.set_saved_pos.add([Math.trunc(relativeMousePos.x), Math.trunc(relativeMousePos.y)]);
-        console.log(this.set_saved_pos)
-      
-      console.log("count squares", this.help_arr.length)
-        for(var index=0; index < this.arr_squares.length ;index++)
-        {
-          //up, yes up is negative :(
-          if(relativeMousePos.y <=0 && relativeMousePos.y <= this.arr_squares[index][0] && relativeMousePos.x <= this.arr_squares[index][1])
-          {
-            
-            this.help_arr.push(this.arr_squares[index])
-            this.arr_squares.splice(index, 1);
-
-            //log the squares currently visting
-            console.log(this.arr_squares[index][0],this.arr_squares[index][1])
-            break;
-          }
-          //down
-          if(relativeMousePos.y > 0 && relativeMousePos.y <= this.arr_squares[index][0] && relativeMousePos.x <= this.arr_squares[index][1])
-          {
-            this.help_arr.push(this.arr_squares[index])
-            this.arr_squares.splice(index, 1);
-            //log the squares currently visting
-            console.log(this.arr_squares[index][0],this.arr_squares[index][1])
-            break;
-          }
-
-        }
+  
       }
       else{
         console.log("Outside");
@@ -240,5 +167,57 @@ class Mouse {
       test = false;
     });
   }
+}*/
+class Circle {
+  ctx: CanvasRenderingContext2D;
+  posX:number;
+  posY:number;
+  radius:number;
+  lineWidth = 1;
+  strokeStyle = '#ff0000';
+  
+  constructor(canvasElement: CanvasRenderingContext2D, posX:number, posY:number, radius:number) {
+    this.ctx = canvasElement;
+    this.posX = posX;
+    this.posY = posY;
+    this.radius = radius;
+    
+  }
+  DrawCircle()
+  {
+    const { ctx,radius,posX,posY,lineWidth,strokeStyle} = this;
+    ctx.beginPath();
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle = strokeStyle
+    ctx.arc(posX, posY, radius, 0, 2 * Math.PI);
+    ctx.closePath();
+    ctx.stroke();
+  }
 }
-class Timer {} */
+class Rectangle {
+  ctx: CanvasRenderingContext2D;
+  posX:number;
+  posY:number;
+  height:number;
+  width:number;
+  lineWidth = 1;
+  strokeStyle = '#ff0000';
+
+  constructor(canvasElement: CanvasRenderingContext2D, posX:number, posY:number, height:number, width:number) {
+    this.ctx = canvasElement;
+    this.posX = posX;
+    this.posY = posY;
+    this.height = height;
+    this.width = width;
+  }
+  DrawRectangle()
+  {
+    const { ctx,posX,posY,width,height, lineWidth, strokeStyle} = this;
+    ctx.beginPath();
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle = strokeStyle;
+    ctx.rect(posX,posY,width,height);
+    ctx.closePath();
+    ctx.stroke();
+  }
+}
