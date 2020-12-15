@@ -12,6 +12,7 @@ export default class FillShapeTask extends Task {
   count_pixel=0;
   count_total=0;
   fill_shape = 0.0;
+  circle:Circle;
   constructor(props) {
     super(props);
     this.onMouseMove = this.onMouseMove.bind(this);
@@ -28,11 +29,12 @@ export default class FillShapeTask extends Task {
 
     //center canvas drawing panel
     ctx.translate(rect.width / 2, rect.height / 2);
-    const circle = new Circle(ctx,0,0,80).DrawCircle();
-    const rect_1 = new Rectangle(ctx,100,100,40,40).DrawRectangle();
-    const rect_2 = new Rectangle(ctx,-100,-100,-40,-40).DrawRectangle();
-    const rect_3 = new Rectangle(ctx,-100,100,40,-40).DrawRectangle();
-    const rect_4 = new Rectangle(ctx,100,-100,-40,40).DrawRectangle();
+    console.log(rect.width,rect.height);
+    this.circle = new Circle(ctx,0,0,60);
+    this.circle.DrawCircle();
+    const rect_1 = new Rectangle(ctx,-100,-100,-90,-90).DrawRectangle();
+    const rect_2 = new Rectangle(ctx,100,-100,-80,80).DrawRectangle();
+    const rect_3 = new Rectangle(ctx,-150,180,-60,300).DrawRectangle();
 
     this.fill_shape = Math.floor(Math.random() * 100);
     this.button.setAttribute("label","Fill: "+(this.fill_shape)+"%")
@@ -62,6 +64,7 @@ export default class FillShapeTask extends Task {
     });
     this.button.addEventListener("click",(c)=>{
        //calc pixels
+       
       const offset_x = Math.trunc(rect.width/2-this.radius);
       const offset_y = Math.trunc(rect.width/2);
       //const offset_y = Math.trunc(rect.width/2);
@@ -86,6 +89,11 @@ export default class FillShapeTask extends Task {
           this.count_total+=2 //up and down;
         } 
       }
+      var z = this.circle.calcPixelsFilled()
+      console.log(z.filled,z.total);
+      /*
+      this.count_pixel = z.filled;
+      this.count_total = z.total;*/
       var percentage_check = (this.count_pixel/this.count_total)*100; 
       console.log(percentage_check,"Drawn: ",this.count_pixel,"Total:",this.count_total);
       if(percentage_check>(this.fill_shape-5) && percentage_check<(this.fill_shape+5)){
@@ -105,7 +113,7 @@ export default class FillShapeTask extends Task {
   onMouseMove(e: MouseEvent) {
     
     if (this.test) {
-      const { ctx, getMousePos } = this;
+      const { ctx, getMousePos,circle} = this;
       const clientX = e.clientX;
       const clientY = e.clientY;
       const relativeMousePos = getMousePos(this.canvasElement, e);
@@ -116,9 +124,8 @@ export default class FillShapeTask extends Task {
       //console.log("seeet",this.help_arr.length)
       //console.log("Percantage covered:",(this.help_arr.length/(this.no_sqares))*100,"%")
       //check if mouse is in shape or not. easy with vector length
-      if(Math.hypot(relativeMousePos.x, relativeMousePos.y)<this.radius){
+      if(circle.isDrawnOutside(relativeMousePos)){
         console.log("Inside");
-  
       }
       else{
         console.log("Outside");
@@ -192,6 +199,35 @@ class Circle {
     ctx.arc(posX, posY, radius, 0, 2 * Math.PI);
     ctx.closePath();
     ctx.stroke();
+  }
+  calcPixelsFilled(){
+    var countPixel = 0;
+    var countTotalPixel = 0;
+    const offsetX = 402.33/2-this.radius;
+    const offsetY = 400/2;
+
+    for(var _y=0; _y<this.radius*2; _y+=2){
+      var newX = Math.trunc(Math.sqrt(Math.pow(this.radius,2)-Math.pow(_y,2)));
+      for(var _x=0; _x<(2*newX); _x+=2){
+        //console.log(_x,_y)
+        //console.log(this.ctx.getImageData(offsetX+_x,offsetY+_y,1,1).data,newX,_x) //down
+        //console.log(this.ctx.getImageData(offsetX+_x,offsetY-_y,1,1).data,newX,_x) //up
+        const color_up = this.ctx.getImageData(offsetX+_x,offsetY-_y,1,1).data[3];
+        const color_down = this.ctx.getImageData(offsetX+_x,offsetY+_y,1,1).data[3];
+        //check if color changed up or down
+        if(color_up==255){
+          countPixel++;
+        }
+        if(color_down==255){
+          countPixel++;
+        }
+        countTotalPixel+=2 //up and down;
+      } 
+    }
+    return {total:countTotalPixel,filled:countPixel}
+  }
+  isDrawnOutside(relativeMousePos){
+    return (Math.hypot(relativeMousePos.x, relativeMousePos.y)<this.radius) ? true: false;
   }
 }
 class Rectangle {
