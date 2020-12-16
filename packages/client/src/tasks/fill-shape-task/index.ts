@@ -1,18 +1,24 @@
 import viewHtml from "./view.html";
 import { Task } from "../../task";
 import { Button } from "../../components/button";
+import { concat } from "lodash";
+import { Collection } from "konva/types/Util";
 
 export default class FillShapeTask extends Task {
   canvasElement: HTMLCanvasElement;
   button: Button;
   test: boolean;
   ctx: CanvasRenderingContext2D;
-  radius=80;
+  radius=60;
   pen_thickness = 20;
   count_pixel=0;
   count_total=0;
   fill_shape = 0.0;
   circle:Circle;
+  rect_1:Rectangle;
+  rect_2:Rectangle;
+  rect_3:Rectangle;
+
   constructor(props) {
     super(props);
     this.onMouseMove = this.onMouseMove.bind(this);
@@ -25,16 +31,19 @@ export default class FillShapeTask extends Task {
     this.button = this.shadowRoot.getElementById("load-button") as Button;
     this.ctx = this.canvasElement.getContext("2d");
     const ctx = this.ctx;
-    const rect = this.canvasElement.getBoundingClientRect(); //get radius according to html spec
+    const canvasPanel = this.canvasElement.getBoundingClientRect(); //get size according to html spec
 
     //center canvas drawing panel
-    ctx.translate(rect.width / 2, rect.height / 2);
-    console.log(rect.width,rect.height);
-    this.circle = new Circle(ctx,0,0,60);
+    ctx.translate(canvasPanel.width / 2, canvasPanel.height / 2);
+    console.log(canvasPanel.width,canvasPanel.height);
+    this.circle = new Circle(ctx,0,0,this.radius,2);
     this.circle.DrawCircle();
-    const rect_1 = new Rectangle(ctx,-100,-100,-90,-90).DrawRectangle();
-    const rect_2 = new Rectangle(ctx,100,-100,-80,80).DrawRectangle();
-    const rect_3 = new Rectangle(ctx,-150,180,-60,300).DrawRectangle();
+    this.rect_1 = new Rectangle(ctx,-100,-100,-90,-90);
+    this.rect_1.drawRectangle();
+    this.rect_2 = new Rectangle(ctx,100,-100,-80,80);
+    this.rect_2.drawRectangle();
+    this.rect_3 = new Rectangle(ctx,-150,180,-60,300);
+    this.rect_3.drawRectangle();
 
     this.fill_shape = Math.floor(Math.random() * 100);
     this.button.setAttribute("label","Fill: "+(this.fill_shape)+"%")
@@ -64,9 +73,9 @@ export default class FillShapeTask extends Task {
     });
     this.button.addEventListener("click",(c)=>{
        //calc pixels
-       
-      const offset_x = Math.trunc(rect.width/2-this.radius);
-      const offset_y = Math.trunc(rect.width/2);
+      /*
+      const offset_x = Math.trunc(canvasPanel.width/2-this.radius);
+      const offset_y = Math.trunc(canvasPanel.width/2);
       //const offset_y = Math.trunc(rect.width/2);
       //check pixel color in shape:
       for(var _y=0; _y<this.radius*2; _y+=2){
@@ -86,16 +95,26 @@ export default class FillShapeTask extends Task {
           if(color_down==255){
             this.count_pixel++;
           }
-          this.count_total+=2 //up and down;
+          this.count_total+=2; //up and down;
         } 
-      }
-      var z = this.circle.calcPixelsFilled()
-      console.log(z.filled,z.total);
+      }*/
+      var outCircle = this.circle.calcPixelsFilled();
+      var outRect1 = this.rect_1.calcPixelsFilled();
+      var outRect2 = this.rect_2.calcPixelsFilled();
+      var outRect3 = this.rect_3.calcPixelsFilled();
+
+      //console.log("Circle_Original",this.count_pixel,this.count_total);
+      console.log("Circle",outCircle.coloredPixel,outCircle.totalPixel);
+      console.log("Rectangle_left",outRect1.coloredPixel,outRect1.totalPixel);
+      console.log("Rectangle_right",outRect2.coloredPixel,outRect2.totalPixel);
+      console.log("Rectangle_bottom",outRect3.coloredPixel,outRect3.totalPixel);
+      
       /*
       this.count_pixel = z.filled;
       this.count_total = z.total;*/
-      var percentage_check = (this.count_pixel/this.count_total)*100; 
-      console.log(percentage_check,"Drawn: ",this.count_pixel,"Total:",this.count_total);
+      var percentage_check = ((outCircle.coloredPixel+outRect1.coloredPixel+outRect2.coloredPixel+outRect3.coloredPixel)/(outCircle.totalPixel+outRect1.totalPixel+outRect2.totalPixel+outRect3.totalPixel))*100; 
+      console.log(percentage_check,"Drawn: ",outCircle.coloredPixel+outRect1.coloredPixel+outRect2.coloredPixel+outRect3.coloredPixel,
+                                   "Total:",outCircle.totalPixel+outRect1.totalPixel+outRect2.totalPixel+outRect3.totalPixel);
       if(percentage_check>(this.fill_shape-5) && percentage_check<(this.fill_shape+5)){
       
         alert("("+percentage_check+") You did it!!!")
@@ -180,15 +199,17 @@ class Circle {
   posX:number;
   posY:number;
   radius:number;
+  pixelSamplingRate:number; //in otder to recalc colored pixel since other shape are sampled pixel wise
+
   lineWidth = 1;
   strokeStyle = '#ff0000';
   
-  constructor(canvasElement: CanvasRenderingContext2D, posX:number, posY:number, radius:number) {
-    this.ctx = canvasElement;
+  constructor(ctx: CanvasRenderingContext2D, posX:number, posY:number, radius:number, pixelSamplingRate:number) {
+    this.ctx = ctx;
     this.posX = posX;
     this.posY = posY;
     this.radius = radius;
-    
+    this.pixelSamplingRate = pixelSamplingRate;
   }
   DrawCircle()
   {
@@ -203,12 +224,12 @@ class Circle {
   calcPixelsFilled(){
     var countPixel = 0;
     var countTotalPixel = 0;
-    const offsetX = 402.33/2-this.radius;
+    const offsetX = 400/2-this.radius;
     const offsetY = 400/2;
 
-    for(var _y=0; _y<this.radius*2; _y+=2){
+    for(var _y=0; _y<this.radius*2; _y+=this.pixelSamplingRate){
       var newX = Math.trunc(Math.sqrt(Math.pow(this.radius,2)-Math.pow(_y,2)));
-      for(var _x=0; _x<(2*newX); _x+=2){
+      for(var _x=0; _x<(2*newX); _x+=this.pixelSamplingRate){
         //console.log(_x,_y)
         //console.log(this.ctx.getImageData(offsetX+_x,offsetY+_y,1,1).data,newX,_x) //down
         //console.log(this.ctx.getImageData(offsetX+_x,offsetY-_y,1,1).data,newX,_x) //up
@@ -222,9 +243,12 @@ class Circle {
           countPixel++;
         }
         countTotalPixel+=2 //up and down;
+        //countTotalPixel+=Math.pow(this.pixelSamplingRate,this.pixelSamplingRate);
       } 
+     
     }
-    return {total:countTotalPixel,filled:countPixel}
+    
+    return {totalPixel:countTotalPixel*Math.pow(this.pixelSamplingRate,2),coloredPixel:countPixel*Math.pow(this.pixelSamplingRate,2)}
   }
   isDrawnOutside(relativeMousePos){
     return (Math.hypot(relativeMousePos.x, relativeMousePos.y)<this.radius) ? true: false;
@@ -246,7 +270,7 @@ class Rectangle {
     this.height = height;
     this.width = width;
   }
-  DrawRectangle()
+  drawRectangle()
   {
     const { ctx,posX,posY,width,height, lineWidth, strokeStyle} = this;
     ctx.beginPath();
@@ -256,4 +280,20 @@ class Rectangle {
     ctx.closePath();
     ctx.stroke();
   }
-}
+  calcPixelsFilled(){
+    const { ctx,posX,posY,width,height, lineWidth, strokeStyle} = this;
+    var data = ctx.getImageData(200+posX,200+posY,width-1,height-1).data
+    var countPixel = 0;
+    var countTotalPixel = 0;
+
+    for (var _i = 0; _i < data.length; _i +=4) {
+
+      if(data[_i+3]==255){
+        countPixel++;
+      }
+      countTotalPixel++;
+    }
+    return {totalPixel:countTotalPixel,coloredPixel:countPixel}
+
+  }
+} 
