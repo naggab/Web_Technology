@@ -43,38 +43,9 @@ class GameMap {
 /**
  * Maps are parsed rows -> columns.
  */
-var map_01: string[] = [
-  "WWWWWWWWWWWWW",
-  "WTOOOOOOTOOOW",
-  "WWWOOOOOOOOWW",
-  "WWWOOOOOOWWWW",
-  "WWOOOTOOOWWWW",
-  "WOOOOOOOOOOOW",
-  "WWOOWOOOOWOOW",
-  "WWOWWWWWWWTOW",
-  "WOOWWWWWWWWOW",
-  "WOWWWOOWWWWOW",
-  "WOOOOOTOOOOOW",
-  "WWWWWWWWWWWWW",
-];
-
-var map_02: string[] = [
-  "WWWWWWWWWWWWWWWWWWWWWW",
-  "WTOOOOOOOOOOOOOOOOOOOW",
-  "WOWWWWWWWWOWWWWWWWWWTW",
-  "WOWWWOOOOOOWWWWWTWWWWW",
-  "WOOOOOOOOOOWWWWWOWWWWW",
-  "WOOOOOOOOOOOOOOOOOOOTW",
-  "WOOOOOOOOOOOOOOOOOOOOW",
-  "WOOOOOOOWWWOWOOOOOOOOW",
-  "WOOOOWWWWWWOWWWWWOWWWW",
-  "WOOTWWWWWWTOWWWWTOWWWW",
-  "WWWWWWWWWWWWWWWWWWWWWW",
-];
-
 var gameMap: GameMap = new GameMap();
 gameMap.map = [
-  "50W",
+  "50x30",
   "1W8O1W18O1W20O1W",
   "1W8O1W18O1W20O1W",
   "1W8O1W15O3O1W20O1W",
@@ -113,6 +84,7 @@ gameMap.possibleTasks = [
   new Coord(30, 2),
   new Coord(46, 2),
   new Coord(46, 20),
+  new Coord (11,2),
 ];
 
 /**
@@ -481,10 +453,12 @@ export default class GamePlayground extends BaseTask {
       gridRow = new Array();
       var mult: string = "";
       var x_iter: number = 0;
+      var gridRepeat: boolean = false;
+      var gridWidth: number = 0;
       debugPrint("Parsing row: " + y);
       for (let i = 0; i < row.length; i++) {
         /* Look for multipliers */
-        if (row.charAt(i) != "W" && row.charAt(i) != "O" && row.charAt(i) != "T") {
+        if (row.charAt(i) != "W" && row.charAt(i) != "O" && row.charAt(i) != "T" && row.charAt(i) != "x") {
           mult = mult + row.charAt(i);
         } else {
           if (mult == "")
@@ -508,6 +482,9 @@ export default class GamePlayground extends BaseTask {
                     ),
                   );
                   break;
+                case "x":
+                  gridRepeat = true;
+                  gridWidth = Number(mult);
               }
               if (x_iter == 0 && DEBUG_MODE)
                 this.drawText(baseLayer, this.stage, x_iter * gridSize + 1, y * gridSize + 1, y.toString());
@@ -520,19 +497,55 @@ export default class GamePlayground extends BaseTask {
           }
         }
       }
-      grid.push(gridRow);
-      y += 1;
-      x_iter = 0;
-      this.stage.height(this.stage.height() + gridSize);
+      /* If the row parsing is done and gridRepeat was set to true we loop through the required size */
+      if (gridRepeat) {
+        debugPrint("gridRepeat mode - width: " + gridWidth + ", height: " + Number(mult));
+        for (let h = 0; h < Number(mult); h++) {
+          gridRow = new Array();
+          for (let w = 0; w < gridWidth; w++) {
+            if (w != 0 && h != 0 && w != gridWidth - 1 && h != Number(mult) - 1) {
+              gridRow.push(
+                new GridObject(
+                  ElementType.OpenSpace,
+                  this.drawRect(baseLayer, this.stage, w * gridSize, y * gridSize, ElementType.OpenSpace),
+                ),
+              );
+            } else {
+              /* Automatically place walls around the specified size */
+              gridRow.push(
+                new GridObject(
+                  ElementType.Wall,
+                  this.drawRect(baseLayer, this.stage, w * gridSize, y * gridSize, ElementType.Wall),
+                ),
+              );
+            }
+            /* Debug grid indicators */
+            if (w == 0 && DEBUG_MODE)
+                this.drawText(baseLayer, this.stage, w * gridSize + 1, y * gridSize + 1, h.toString());
+            if (h == 0 && DEBUG_MODE)
+                this.drawText(baseLayer, this.stage, w * gridSize + 1, y * gridSize + 1, w.toString());
+
+          }
+          
+          grid.push(gridRow);
+          y += 1;
+          this.stage.height(this.stage.height() + gridSize);
+        }
+        gridRepeat = false;
+      } else {
+        grid.push(gridRow);
+        y += 1;
+        x_iter = 0;
+        this.stage.height(this.stage.height() + gridSize);
+      }
     });
     
     this.stage.add(baseLayer);
 
-    /** 
-     * Parse all possible task locations (purple).
-     */
+    /* DEMO - Adding tasks in all possible locations */
+    debugPrint("Adding Tasks ...");
     gameMap.possibleTasks.forEach((coord) => {
-      debugPrint("Adding task at: " + coord);
+      debugPrint(coord);
       var newPos = grid[coord.y][coord.x];
       if (newPos !== undefined) {
         newPos.shape.fill("purple");
@@ -549,6 +562,12 @@ export default class GamePlayground extends BaseTask {
     player.attachCallback(function (x: number, y: number): void {
       debugPrint("Player X: " + x + "; Y: " + y);
     });
+
+    /* Add demo wall */
+    this.addWall([new Coord(5,17), new Coord(10,17), new Coord(10,22), new Coord(30,22)]);
+
+    /* Demo remove wall */
+    this.removeWall([new Coord(10,29), new Coord(27,29)]);
   }
 
 
@@ -618,10 +637,75 @@ export default class GamePlayground extends BaseTask {
         elem.shape.stroke("black");
         activeTasks.push(task);
         res = true;
-        baseLayer.batchDraw();
       }
     });
+    baseLayer.batchDraw();
     return res;
+  }
+
+  /**
+   * Adds a single wall to the board and draw it.
+   * 
+   * @param wall The coordinates of a single wall, given as an Array.
+   */
+  addWall(wall: Coord[]): void {
+    this.modifyElements(wall, ElementType.Wall);
+  }
+
+  /**
+   * Removes a single wall from the board.
+   * 
+   * @param wall The coordinates of a single wall, given as an Array.
+   */
+  removeWall(wall: Coord[]): void {
+    this.modifyElements(wall, ElementType.OpenSpace);
+  }
+
+  /**
+   * Modifies an array of coordinates on the board.
+   * Coordinates are parsed as "edge points", meaning a wall can be defined by all its corners
+   * 
+   * @param coord Array of x,y coordinates
+   * @param elemType ElementType that should be applied to all coordinates
+   */
+  modifyElements(coord: Coord[], elemType: ElementType): void {
+    var previousCoord: Coord = undefined;
+    var start_y: number;
+    var end_y: number;
+    var start_x: number;
+    var end_x: number;
+    coord.forEach(c => {
+      if (grid[c.y] !== undefined) {
+        if (grid[c.y][c.x] !== undefined) {
+          if (previousCoord !== undefined) {
+            debugPrint("Inside the thing, c.x: " + c.x + ", c.y: " + c.y + " // p.x: " + previousCoord.x + ", p.y: " + previousCoord.y);
+            if (previousCoord.y < c.y) {
+              start_y = previousCoord.y;
+              end_y = c.y;
+            } else {
+              start_y = c.y;
+              end_y = previousCoord.y;
+            }
+            if (previousCoord.x < c.x) {
+              start_x = previousCoord.x;
+              end_x = c.x;
+            } else {
+              start_x = c.x;
+              end_x = previousCoord.x;
+            }
+            debugPrint("start_y: " + start_y + ", end_y: " + end_y + ", start_x: " + start_x + ", end_x: " + end_x);
+            for (let i = start_y; i <= end_y; i++) {
+               for (let j = start_x; j <= end_x; j++) {
+                  grid[i][j].shape = this.drawRect(baseLayer, this.stage, j * gridSize, i * gridSize, elemType),
+                  grid[i][j].type = elemType;
+               }
+            }
+          }
+         previousCoord = c;
+        }
+      }
+    });
+    baseLayer.batchDraw();
   }
 
   /**
