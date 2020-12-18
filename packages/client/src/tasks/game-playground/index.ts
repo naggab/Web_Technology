@@ -429,9 +429,9 @@ export default class GamePlayground extends BaseTask {
     
     containerDiv.setAttribute("style", "width: 100%");
     containerDiv.style.width = "100%";
-    
+
     var width = containerDiv.clientWidth;
-    var height = containerDiv.clientHeight;
+    var height = 0;
 
     gridSize = Math.floor(width / gridLength);
     debugPrint(gridSize);
