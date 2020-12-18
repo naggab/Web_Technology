@@ -428,6 +428,9 @@ export default class GamePlayground extends BaseTask {
     gridSize = Math.floor(width / gridLength);
     debugPrint(gridSize);
 
+    containerDiv.setAttribute("style", "display:block; width: " + (gridSize * gridLength).toString() + "px");
+    containerDiv.style.width = (gridSize * gridLength).toString() + "px";
+
     this.stage = new Konva.Stage({
       container: containerDiv,
       width: width,
