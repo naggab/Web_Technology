@@ -394,6 +394,10 @@ export default class GamePlayground extends BaseTask {
     console.log(GamePlayground.name, "connected to DOM");
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = viewHtml;
+    
+    window.addEventListener('resize', (event) => {
+      this.setupGrid();
+    });
     this.setupGrid();
   }
 
@@ -420,7 +424,11 @@ export default class GamePlayground extends BaseTask {
    */
   setupGrid() {
     /* Initial setup (stage) */
+
     var containerDiv: HTMLDivElement = this.shadowRoot.getElementById("container") as HTMLDivElement;
+    
+    containerDiv.setAttribute("style", "width: 100%");
+    containerDiv.style.width = "100%";
     
     var width = containerDiv.clientWidth;
     var height = containerDiv.clientHeight;
@@ -428,7 +436,7 @@ export default class GamePlayground extends BaseTask {
     gridSize = Math.floor(width / gridLength);
     debugPrint(gridSize);
 
-    containerDiv.setAttribute("style", "display:block; width: " + (gridSize * gridLength).toString() + "px");
+    containerDiv.setAttribute("style", "width: " + (gridSize * gridLength).toString() + "px");
     containerDiv.style.width = (gridSize * gridLength).toString() + "px";
 
     this.stage = new Konva.Stage({
