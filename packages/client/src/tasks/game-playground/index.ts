@@ -280,7 +280,8 @@ export class Player {
           } else if (newPos.type == ElementType.Task) {
             newPos.shape.fill("red");
             baseLayer.batchDraw();
-            col = CollisionType.Task;
+            if (col != CollisionType.Wall)
+              col = CollisionType.Task;
           }
         }
       }
