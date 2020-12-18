@@ -4,6 +4,7 @@ import { TaskOpts, Task as BaseTask, Task } from "../../task";
 import { TaskModule } from "../../taskManager";
 import { HitContext } from "konva/types/Context";
 import { map } from "lodash";
+import { container, debug } from "webpack";
 
 
 /**
@@ -126,6 +127,8 @@ interface IPlaygroundTask {
 
 var gridSize: number = 20; // later overwritten by init
 var gridLength: number = 50; // this defines the actual gridsize based on div width
+var gridSizeHeight: number = 10;
+var gridRows: number = 57;
 var player: Player;
 
 /**
@@ -431,14 +434,19 @@ export default class GamePlayground extends BaseTask {
     containerDiv.style.width = "100%";
 
     var width = containerDiv.clientWidth;
-    var height = 0;
+    var height = containerDiv.clientHeight;
 
+    gridSizeHeight = Math.floor(height / gridRows);
     gridSize = Math.floor(width / gridLength);
-    debugPrint(gridSize);
+
+    gridSize = Math.min(gridSizeHeight, gridSize);
 
     containerDiv.setAttribute("style", "width: " + (gridSize * gridLength).toString() + "px");
+    containerDiv.setAttribute("style", "height: " + (gridSize * gridRows).toString() + "px");
     containerDiv.style.width = (gridSize * gridLength).toString() + "px";
 
+    width = gridSize * gridLength;
+    height = gridSize * gridRows;
     this.stage = new Konva.Stage({
       container: containerDiv,
       width: width,
@@ -540,14 +548,14 @@ export default class GamePlayground extends BaseTask {
           
           grid.push(gridRow);
           y += 1;
-          this.stage.height(this.stage.height() + gridSize);
+          //this.stage.height(this.stage.height() + gridSize);
         }
         gridRepeat = false;
       } else {
         grid.push(gridRow);
         y += 1;
         x_iter = 0;
-        this.stage.height(this.stage.height() + gridSize);
+        //this.stage.height(this.stage.height() + gridSize);
       }
     });
     
