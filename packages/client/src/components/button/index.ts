@@ -36,7 +36,6 @@ export class Button extends HTMLElement {
         break;
     }
   }
-
   connectedCallback() {
     this._a.innerHTML = this.label;
     this._a.classList.add(this.styleType);

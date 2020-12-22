@@ -202,7 +202,7 @@ class Circle {
   pixelSamplingRate:number; //in otder to recalc colored pixel since other shape are sampled pixel wise
 
   lineWidth = 1;
-  strokeStyle = '#ff0000';
+  fillStyle = '#fff000';
   
   constructor(ctx: CanvasRenderingContext2D, posX:number, posY:number, radius:number, pixelSamplingRate:number) {
     this.ctx = ctx;
@@ -213,11 +213,13 @@ class Circle {
   }
   DrawCircle()
   {
-    const { ctx,radius,posX,posY,lineWidth,strokeStyle} = this;
+    const { ctx,radius,posX,posY,lineWidth,fillStyle: fillStyle} = this;
     ctx.beginPath();
     ctx.lineWidth = lineWidth;
-    ctx.strokeStyle = strokeStyle
+    ctx.fillStyle = fillStyle;
+    ctx.strokeStyle = fillStyle;
     ctx.arc(posX, posY, radius, 0, 2 * Math.PI);
+    ctx.fill();
     ctx.closePath();
     ctx.stroke();
   }
@@ -233,13 +235,13 @@ class Circle {
         //console.log(_x,_y)
         //console.log(this.ctx.getImageData(offsetX+_x,offsetY+_y,1,1).data,newX,_x) //down
         //console.log(this.ctx.getImageData(offsetX+_x,offsetY-_y,1,1).data,newX,_x) //up
-        const color_up = this.ctx.getImageData(offsetX+_x,offsetY-_y,1,1).data[3];
-        const color_down = this.ctx.getImageData(offsetX+_x,offsetY+_y,1,1).data[3];
+        const color_up = this.ctx.getImageData(offsetX+_x,offsetY-_y,1,1).data;
+        const color_down = this.ctx.getImageData(offsetX+_x,offsetY+_y,1,1).data;
         //check if color changed up or down
-        if(color_up==255){
+        if(color_up[1]==0 && color_up[2]==0 && color_up[3]==255){
           countPixel++;
         }
-        if(color_down==255){
+        if(color_down[1]==0 && color_down[2]==0 && color_down[3]==255){
           countPixel++;
         }
         countTotalPixel+=2 //up and down;
@@ -261,7 +263,7 @@ class Rectangle {
   height:number;
   width:number;
   lineWidth = 1;
-  strokeStyle = '#ff0000';
+  fillStyle = '#fff000';
 
   constructor(canvasElement: CanvasRenderingContext2D, posX:number, posY:number, height:number, width:number) {
     this.ctx = canvasElement;
@@ -272,23 +274,23 @@ class Rectangle {
   }
   drawRectangle()
   {
-    const { ctx,posX,posY,width,height, lineWidth, strokeStyle} = this;
+    const { ctx,posX,posY,width,height, lineWidth, fillStyle: fillStyle} = this;
     ctx.beginPath();
     ctx.lineWidth = lineWidth;
-    ctx.strokeStyle = strokeStyle;
-    ctx.rect(posX,posY,width,height);
+    ctx.fillStyle = fillStyle;
+    ctx.fillRect(posX,posY,width,height);
     ctx.closePath();
     ctx.stroke();
   }
   calcPixelsFilled(){
-    const { ctx,posX,posY,width,height, lineWidth, strokeStyle} = this;
+    const { ctx,posX,posY,width,height, lineWidth, fillStyle: strokeStyle} = this;
     var data = ctx.getImageData(200+posX,200+posY,width-1,height-1).data
     var countPixel = 0;
     var countTotalPixel = 0;
 
     for (var _i = 0; _i < data.length; _i +=4) {
 
-      if(data[_i+3]==255){
+      if(data[_i+1]==0 && data[_i+2]==0 && data[_i+3]==255){
         countPixel++;
       }
       countTotalPixel++;
