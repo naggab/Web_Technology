@@ -1,4 +1,4 @@
-export default class {
+export default class{
     constructor() {
 
     }
@@ -9,5 +9,8 @@ export default class {
 
     async getHtml(){
         return "";
+    }
+    setProperties(){
+
     }
 }
