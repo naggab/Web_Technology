@@ -3,6 +3,7 @@ import expressWSWrapper, { Application } from "express-ws";
 const app: Application = expressWSWrapper(express(), undefined, { wsOptions: { clientTracking: true } }).app;
 import WebSocket from "ws";
 import { Broker } from "./broker";
+import path from "path";
 
 const port = 3000;
 
@@ -34,6 +35,15 @@ app.ws("/ws", function (ws, req) {
     name: req.query["name"]?.toString() || "Player",
   });
 });
+
+//Gabriel start
+app.use("/screens", express.static(path.resolve(__dirname, "client", "screens")));
+app.get("/*", (req, res)=>{
+  res.sendFile(path.resolve(__dirname, "client", "index.html"));
+
+});
+
+//Gabriel end
 
 const cleanup = async () => {
   console.log("cleanup");

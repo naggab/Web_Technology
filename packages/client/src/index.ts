@@ -1,68 +1,68 @@
 import "./components/button";
+import viewHtml from "./tasks/sample-task/view.html";
+import {Button} from "./components/button";
 
-import { TaskManger, TaskModule } from "./taskManager";
 
-const linkCollection = document.createElement("div");
-const taskWrapper = document.createElement("div");
 
-function main() {
-  linkCollection.setAttribute(
-    "style",
-    `
-  height: 44px; 
-  display: flex; 
-  justify-content: space-around;
-   align-items: center
-`,
-  );
-  taskWrapper.setAttribute(
-    "style",
-    `
-  width: 100%; 
-  border: 1px solid #EFEFEF;
-`,
-  );
+import Welcome from "./screens/welcome/index";
+import EnterExistingGame from "./screens/enterExistingGame/index";
+import CreateNewGame from "./screens/createNewGame/index";
+import ShowTasks  from "./screens/listAllTasks/index";
+const navigateTo = url => {
+    history.pushState(null, null, url);
+    router();
+}
+const router = async () => {
+    const routes = [
+        {path: "/", view: () => new Welcome},
+        {path: "/joinGame", view: () => new EnterExistingGame},
+        {path: "/newGame", view: () => new CreateNewGame},
+        {path: "/showTasks", view: () => new ShowTasks},
 
-  document.body.appendChild(linkCollection);
-  document.body.appendChild(taskWrapper);
+    ];
 
-  const tasks = TaskManger.getTasks();
+    const potentialMatches = routes.map(route => {
+        return {
+            route: route,
+            isMatch: location.pathname === route.path
+        }
+    })
 
-  /**
-   * unmounts any previous task before creating and mounting a new task
-   */
-  function mountTask(module: TaskModule) {
-    const instance = TaskManger.createTaskInstance(module, (duration, success) => {
-      if (success) {
-        alert(`task ${module.name} finished in ${duration}ms. Success: ${success}`);
-      }
-      taskWrapper.innerHTML = "";
-    });
-    taskWrapper.innerHTML = "";
-    taskWrapper.appendChild(instance);
-  }
+    let match = potentialMatches.find(potentialMatch => potentialMatch.isMatch);
 
-  // create links in the 'LinkCollection' for every found task
-  for (let task of tasks) {
-    const link = document.createElement("a");
-    link.onclick = () => {
-      mountTask(task);
-    };
-    link.href = `#${task.name}`;
-    link.innerText = task.name;
-    linkCollection.appendChild(link);
-  }
-
-  // check if task is already selected by hash in url
-  if (window.location.hash) {
-    const taskName = window.location.hash.substring(1);
-    const task = TaskManger.findTask(taskName);
-    if (task) {
-      mountTask(task);
+    if (!match) {
+        match = {
+            route: routes[0],
+            isMatch: true
+        };
     }
-  }
+    const screen = match.route.view();
+    document.querySelector("#app").innerHTML = await screen.getHtml();
+    console.log(match.route.view());
 }
 
-window.addEventListener("load", () => {
-  main();
+function main() {
+    document.body.style.backgroundImage = require('./assets/img/bg.png');
+    //const welcome_screen = this.shadowRoot.getElementById("welcome-screen") as Welcome;
+
+
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    document.body.addEventListener("click", e => {
+        const target = e.target as HTMLAnchorElement;
+
+        if (target.matches("[data-link]")) {
+            e.preventDefault();
+            navigateTo(target.href);
+        }
+    });
+    router();
 });
+
+window.addEventListener("popstate", router);
+
+window.addEventListener("load", () => {
+    main();
+});
+

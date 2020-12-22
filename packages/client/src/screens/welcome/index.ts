@@ -1,4 +1,18 @@
+import AbstractScreen from "../AbstractScreen";
 import templateHTML from "./template.html";
+
+export default class extends AbstractScreen{
+  constructor() {
+    super();
+    this.setTitle("Welcome");
+  }
+  async getHtml(){
+    return templateHTML;
+  }
+}
+
+/*
+import { Button } from "../../components/button";
 
 export class Welcome extends HTMLElement {
   constructor() {
@@ -11,3 +25,4 @@ export class Welcome extends HTMLElement {
 }
 
 customElements.define("welcome-screen", Welcome);
+*/
