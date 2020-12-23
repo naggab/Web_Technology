@@ -1,5 +1,5 @@
 import viewHtml from "./view.html";
-import { default as GamePlayground, Player } from "../game-playground";
+import { default as GamePlayground, Player } from "../../screens/game/game-playground";
 import { GameSession } from "../../gameSession";
 import { Task, TaskOpts } from "../../task";
 import { GameEvent, GameEventOp } from "@apirush/common";

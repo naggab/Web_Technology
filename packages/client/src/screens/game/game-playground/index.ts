@@ -1,11 +1,10 @@
 import Konva from "konva";
 import viewHtml from "./view.html";
-import { TaskOpts, Task as BaseTask, Task } from "../../task";
-import { TaskModule } from "../../taskManager";
+import { TaskOpts, Task as BaseTask, Task } from "../../../task";
+import { TaskModule } from "../../../taskManager";
 import { HitContext } from "konva/types/Context";
 import { map } from "lodash";
 import { container, debug } from "webpack";
-
 
 /**
  * Use this to globally enable / disable all console outputs.
@@ -46,7 +45,7 @@ class GameMap {
  */
 var gameMap: GameMap = new GameMap();
 gameMap.map = [
-  "50x30",/*
+  "50x30" /*
   "1W8O1W18O1W20O1W",
   "1W8O1W18O1W20O1W",
   "1W8O1W15O3O1W20O1W",
@@ -73,10 +72,10 @@ gameMap.map = [
   "1W8O1W26O1W12O1W",
   "1W8O1W26O1W12O1W",
   "1W8O1W26O1W12O1W",
-  "50W",*/
+  "50W",*/,
 ];
 gameMap.possibleTasks = [
-  new Coord(1 , 2 ),
+  new Coord(1, 2),
   new Coord(10, 10),
   new Coord(15, 15),
   new Coord(11, 24),
@@ -85,7 +84,7 @@ gameMap.possibleTasks = [
   new Coord(30, 2),
   new Coord(46, 2),
   new Coord(46, 20),
-  new Coord (11,2),
+  new Coord(11, 2),
 ];
 
 /**
@@ -123,7 +122,6 @@ interface IPlaygroundTask {
   x?: number;
   y?: number;
 }
-
 
 var gridSize: number = 20; // simple default value, overwritten later
 var gridLength: number = 50; // this defines the actual gridsize based on div width
@@ -190,10 +188,8 @@ export class Player {
     this.col = col;
     this.radius = (gridSize / 2) * 3;
 
-    if (playerID !== undefined)
-      this.playerID = playerID;
-    else
-      this.playerID = -1;
+    if (playerID !== undefined) this.playerID = playerID;
+    else this.playerID = -1;
 
     this.model = new Konva.Circle({
       x: (x + 1) * gridSize - gridSize / 2,
@@ -213,15 +209,15 @@ export class Player {
       x: x * gridSize,
       y: y * gridSize,
       text: x + "," + y,
-      fontFamily: 'Arial',
+      fontFamily: "Arial",
       fontSize: 12,
       padding: 5,
-      fill: 'white',
+      fill: "white",
       alpha: 0.75,
       visible: true,
     });
-    this.tooltip.x(this.tooltip.x() + (gridSize / 2) - this.tooltip.width() / 2);
-    this.tooltip.y(this.tooltip.y() + (gridSize / 2) - this.tooltip.height() / 2);
+    this.tooltip.x(this.tooltip.x() + gridSize / 2 - this.tooltip.width() / 2);
+    this.tooltip.y(this.tooltip.y() + gridSize / 2 - this.tooltip.height() / 2);
 
     /* Add a shape to draw the tooltip on */
     this.tooltipShape = new Konva.Rect({
@@ -229,7 +225,7 @@ export class Player {
       y: this.tooltip.y(),
       width: this.tooltip.width(),
       height: this.tooltip.height() - 2,
-      fill: 'black',
+      fill: "black",
       cornerRadius: 5,
       opacity: 0.6,
     });
@@ -241,7 +237,7 @@ export class Player {
     this.refreshTooltip();
   }
 
-  /** 
+  /**
    * Redraw the tooltip with new movement information.
    * Automatically centers the text inside the background object
    */
@@ -253,8 +249,8 @@ export class Player {
     } else {
       this.tooltip.text(this.x + "," + this.y);
     }
-    this.tooltip.x(this.x * gridSize + (gridSize / 2) - this.tooltip.width() / 2);
-    this.tooltip.y(this.y * gridSize + (gridSize / 2) - this.tooltip.height() / 2);
+    this.tooltip.x(this.x * gridSize + gridSize / 2 - this.tooltip.width() / 2);
+    this.tooltip.y(this.y * gridSize + gridSize / 2 - this.tooltip.height() / 2);
 
     this.tooltipShape.x(this.tooltip.x());
     this.tooltipShape.y(this.tooltip.y());
@@ -268,9 +264,9 @@ export class Player {
    * Manual collision detection, checks collisions around the new
    * player position.
    */
-  checkCollision (newPosY: number, newPosX: number): CollisionType {
+  checkCollision(newPosY: number, newPosX: number): CollisionType {
     var col: CollisionType = CollisionType.None;
-    var radiusIncr: number = (this.radius - (gridSize / 2)) / gridSize;
+    var radiusIncr: number = (this.radius - gridSize / 2) / gridSize;
     for (let i = -radiusIncr; i <= radiusIncr; i++) {
       for (let j = -radiusIncr; j <= radiusIncr; j++) {
         var newPos = grid[newPosY + i][newPosX + j];
@@ -280,13 +276,12 @@ export class Player {
           } else if (newPos.type == ElementType.Task) {
             newPos.shape.fill("red");
             baseLayer.batchDraw();
-            if (col != CollisionType.Wall)
-              col = CollisionType.Task;
+            if (col != CollisionType.Wall) col = CollisionType.Task;
           }
         }
       }
     }
-    
+
     return col;
   }
 
@@ -398,8 +393,8 @@ export default class GamePlayground extends BaseTask {
     console.log(GamePlayground.name, "connected to DOM");
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = viewHtml;
-    
-    window.addEventListener('resize', (event) => {
+
+    window.addEventListener("resize", (event) => {
       this.setupGrid();
     });
     this.setupGrid();
@@ -421,14 +416,12 @@ export default class GamePlayground extends BaseTask {
     gridLength = width;
     gridRows = height;
     if (map !== undefined)
-      if (map.map !== undefined)
-        gameMap = map;
+      if (map.map !== undefined) gameMap = map;
       else {
         map.map = [gridLength.toString() + "x" + gridRows.toString()];
         gameMap = map;
       }
-    else
-      gameMap = new GameMap([gridLength.toString() + "x" + gridRows.toString()]);
+    else gameMap = new GameMap([gridLength.toString() + "x" + gridRows.toString()]);
   }
 
   /**
@@ -440,7 +433,7 @@ export default class GamePlayground extends BaseTask {
     /* Initial setup (stage) */
 
     var containerDiv: HTMLDivElement = this.shadowRoot.getElementById("container") as HTMLDivElement;
-    
+
     containerDiv.setAttribute("style", "width: 100%");
     containerDiv.style.width = "100%";
 
@@ -491,8 +484,7 @@ export default class GamePlayground extends BaseTask {
         if (row.charAt(i) != "W" && row.charAt(i) != "O" && row.charAt(i) != "T" && row.charAt(i) != "x") {
           mult = mult + row.charAt(i);
         } else {
-          if (mult == "")
-            mult = "1";
+          if (mult == "") mult = "1";
           if (mult != "" && Number(mult) > 0) {
             for (let j = 0; j < Number(mult); j++) {
               switch (row.charAt(i)) {
@@ -521,7 +513,7 @@ export default class GamePlayground extends BaseTask {
               if (y == 0 && DEBUG_MODE)
                 this.drawText(baseLayer, this.stage, x_iter * gridSize + 1, y * gridSize + 1, x_iter.toString());
 
-              x_iter ++;
+              x_iter++;
             }
             mult = "";
           }
@@ -551,12 +543,11 @@ export default class GamePlayground extends BaseTask {
             }
             /* Debug grid indicators */
             if (w == 0 && DEBUG_MODE)
-                this.drawText(baseLayer, this.stage, w * gridSize + 1, y * gridSize + 1, h.toString());
+              this.drawText(baseLayer, this.stage, w * gridSize + 1, y * gridSize + 1, h.toString());
             if (h == 0 && DEBUG_MODE)
-                this.drawText(baseLayer, this.stage, w * gridSize + 1, y * gridSize + 1, w.toString());
-
+              this.drawText(baseLayer, this.stage, w * gridSize + 1, y * gridSize + 1, w.toString());
           }
-          
+
           grid.push(gridRow);
           y += 1;
           //this.stage.height(this.stage.height() + gridSize);
@@ -569,7 +560,7 @@ export default class GamePlayground extends BaseTask {
         //this.stage.height(this.stage.height() + gridSize);
       }
     });
-    
+
     this.stage.add(baseLayer);
 
     /* DEMO - Adding tasks in all possible locations */
@@ -587,19 +578,18 @@ export default class GamePlayground extends BaseTask {
     /* Create demo player */
     var playerLayer = new Konva.Layer();
     player = new Player(20, 20, "orange", playerLayer, this.stage, 0);
-    
+
     /* Attach demo callback */
     player.attachCallback(function (x: number, y: number): void {
       debugPrint("Player X: " + x + "; Y: " + y);
     });
 
     /* Add demo wall */
-    this.addWall([new Coord(5,17), new Coord(10,17), new Coord(10,22), new Coord(30,22)]);
+    this.addWall([new Coord(5, 17), new Coord(10, 17), new Coord(10, 22), new Coord(30, 22)]);
 
     /* Demo remove wall */
-    this.removeWall([new Coord(10,29), new Coord(27,29)]);
+    this.removeWall([new Coord(10, 29), new Coord(27, 29)]);
   }
-
 
   /**
    * Draws a single rectangle on the stage. ElementType defines the type of
@@ -654,7 +644,7 @@ export default class GamePlayground extends BaseTask {
 
   /**
    * Add a single task to the board and draw it.
-   * 
+   *
    * Returns true if the task was added and false on error / no free space.
    */
   addTask(task: IPlaygroundTask): boolean {
@@ -675,7 +665,7 @@ export default class GamePlayground extends BaseTask {
 
   /**
    * Adds a single wall to the board and draw it.
-   * 
+   *
    * @param wall The coordinates of a single wall, given as an Array.
    */
   addWall(wall: Coord[]): void {
@@ -684,7 +674,7 @@ export default class GamePlayground extends BaseTask {
 
   /**
    * Removes a single wall from the board.
-   * 
+   *
    * @param wall The coordinates of a single wall, given as an Array.
    */
   removeWall(wall: Coord[]): void {
@@ -694,7 +684,7 @@ export default class GamePlayground extends BaseTask {
   /**
    * Modifies an array of coordinates on the board.
    * Coordinates are parsed as "edge points", meaning a wall can be defined by all its corners
-   * 
+   *
    * @param coord Array of x,y coordinates
    * @param elemType ElementType that should be applied to all coordinates
    */
@@ -704,11 +694,20 @@ export default class GamePlayground extends BaseTask {
     var end_y: number;
     var start_x: number;
     var end_x: number;
-    coord.forEach(c => {
+    coord.forEach((c) => {
       if (grid[c.y] !== undefined) {
         if (grid[c.y][c.x] !== undefined) {
           if (previousCoord !== undefined) {
-            debugPrint("Inside the thing, c.x: " + c.x + ", c.y: " + c.y + " // p.x: " + previousCoord.x + ", p.y: " + previousCoord.y);
+            debugPrint(
+              "Inside the thing, c.x: " +
+                c.x +
+                ", c.y: " +
+                c.y +
+                " // p.x: " +
+                previousCoord.x +
+                ", p.y: " +
+                previousCoord.y,
+            );
             if (previousCoord.y < c.y) {
               start_y = previousCoord.y;
               end_y = c.y;
@@ -725,13 +724,13 @@ export default class GamePlayground extends BaseTask {
             }
             debugPrint("start_y: " + start_y + ", end_y: " + end_y + ", start_x: " + start_x + ", end_x: " + end_x);
             for (let i = start_y; i <= end_y; i++) {
-               for (let j = start_x; j <= end_x; j++) {
-                  grid[i][j].shape = this.drawRect(baseLayer, this.stage, j * gridSize, i * gridSize, elemType),
-                  grid[i][j].type = elemType;
-               }
+              for (let j = start_x; j <= end_x; j++) {
+                (grid[i][j].shape = this.drawRect(baseLayer, this.stage, j * gridSize, i * gridSize, elemType)),
+                  (grid[i][j].type = elemType);
+              }
             }
           }
-         previousCoord = c;
+          previousCoord = c;
         }
       }
     });

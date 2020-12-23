@@ -17,7 +17,6 @@ type ShapeConstructor = new (
 ) => ShapeI;
 
 const shapes: Array<ShapeConstructor> = [];
-
 export default class FillShapeTask extends Task {
   canvasElement: HTMLCanvasElement;
   button: Button;
