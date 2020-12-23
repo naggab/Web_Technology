@@ -4,8 +4,12 @@
   "private": true,
   "dependencies": {
     "@apirush/common": "^0.0.0",
+    "copy-webpack-plugin": "^7.0.0",
+    "file-loader": "^6.2.0",
+    "image-webpack-loader": "^7.0.1",
     "konva": "^7.1.4",
-    "lodash": "^4.17.20"
+    "lodash": "^4.17.20",
+    "url-loader": "^4.1.1"
   },
   "devDependencies": {
     "@types/jest": "^26.0.15",
