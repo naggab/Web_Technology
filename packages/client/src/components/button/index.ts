@@ -17,11 +17,15 @@ export class Button extends HTMLElement {
   }
 
   get label() {
+    if (this.innerHTML) {
+      return this.innerHTML;
+    }
     return this.getAttribute("label") || "";
   }
 
-  get styleType(): ButtonStyleType {
-    return (this.getAttribute("styleType") as ButtonStyleType) || "white";
+  get styleType(): ButtonStyleType[] {
+    const styleList = this.getAttribute("styleType");
+    return (styleList.split(",") as ButtonStyleType[]) || ["white"];
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -31,7 +35,7 @@ export class Button extends HTMLElement {
         this._a.innerHTML = newValue;
         break;
       case "styleType":
-        this._a.classList.add(this.styleType);
+        this._a.classList.add(...this.styleType);
       default:
         break;
     }
@@ -39,7 +43,7 @@ export class Button extends HTMLElement {
 
   connectedCallback() {
     this._a.innerHTML = this.label;
-    this._a.classList.add(this.styleType);
+    this._a.classList.add(...this.styleType);
   }
 }
 

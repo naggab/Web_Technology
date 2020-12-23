@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@apirush/common": "^0.0.0",
+    "copy-webpack-plugin": "^7.0.0",
     "konva": "^7.1.4",
     "lodash": "^4.17.20"
   },
