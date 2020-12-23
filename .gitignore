@@ -38,3 +38,4 @@ pids
 *.seed
 *.pid.lock
 packages/server/coverage/
+.idea/discord.xml

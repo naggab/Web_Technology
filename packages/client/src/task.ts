@@ -21,6 +21,9 @@ export class Task extends HTMLElement {
     this.opts = opts;
   }
   private async connectedCallback() {
+    if (this.startTime) {
+      return;
+    }
     const mountResult = this.onMounted();
     if (mountResult) {
       await mountResult;
