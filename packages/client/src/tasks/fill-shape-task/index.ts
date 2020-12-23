@@ -11,13 +11,16 @@ export default class FillShapeTask extends Task {
   ctx: CanvasRenderingContext2D;
   radius=60;
   pen_thickness = 20;
-  count_pixel=0;
-  count_total=0;
   fill_shape = 0.0;
   circle:Circle;
   rect_1:Rectangle;
   rect_2:Rectangle;
   rect_3:Rectangle;
+  smiley:Smiley;
+  pyramid:Pyramid;
+  cnt_max_px_outside=100;
+  cnt_max_outside = 3;
+  //flagOutside=true;
 
   constructor(props) {
     super(props);
@@ -34,19 +37,17 @@ export default class FillShapeTask extends Task {
     const canvasPanel = this.canvasElement.getBoundingClientRect(); //get size according to html spec
 
     //center canvas drawing panel
-    ctx.translate(canvasPanel.width / 2, canvasPanel.height / 2);
-    console.log(canvasPanel.width,canvasPanel.height);
-    this.circle = new Circle(ctx,0,0,this.radius,2);
-    this.circle.DrawCircle();
-    this.rect_1 = new Rectangle(ctx,-100,-100,-90,-90);
-    this.rect_1.drawRectangle();
-    this.rect_2 = new Rectangle(ctx,100,-100,-80,80);
-    this.rect_2.drawRectangle();
-    this.rect_3 = new Rectangle(ctx,-150,180,-60,300);
-    this.rect_3.drawRectangle();
+    //cannot ceneter, otherwise calc inside/outside would be to expensive
+    //ctx.translate(canvasPanel.width / 2, canvasPanel.height / 2);
 
     this.fill_shape = Math.floor(Math.random() * 100);
     this.button.setAttribute("label","Fill: "+(this.fill_shape)+"%")
+
+    //this.smiley = new Smiley(this.ctx,this.cnt_max_px_outside,this.cnt_max_outside,this.fill_shape)
+    //this.smiley.drawSmiley()
+
+    this.pyramid = new Pyramid(this.ctx,this.cnt_max_px_outside,this.cnt_max_outside,this.fill_shape)
+    this.pyramid.drawPyramid()
 
     this.test = false;
     //line thickness
@@ -72,64 +73,17 @@ export default class FillShapeTask extends Task {
      
     });
     this.button.addEventListener("click",(c)=>{
-       //calc pixels
-      /*
-      const offset_x = Math.trunc(canvasPanel.width/2-this.radius);
-      const offset_y = Math.trunc(canvasPanel.width/2);
-      //const offset_y = Math.trunc(rect.width/2);
-      //check pixel color in shape:
-      for(var _y=0; _y<this.radius*2; _y+=2){
-        var new_x = Math.trunc(Math.sqrt(Math.pow(this.radius,2)-Math.pow(_y,2)));
-        for(var _x=0; _x<(2*new_x); _x+=2)
-        {
-          //console.log(_x,_y)
-          //console.log(this.ctx.getImageData(offset_x+_x,offset_y+_y,1,1).data,new_x,_x) //down
-          //console.log(this.ctx.getImageData(offset_x+_x,offset_y-_y,1,1).data,new_x,_x) //up
-          
-          const color_up = this.ctx.getImageData(offset_x+_x,offset_y-_y,1,1).data[3];
-          const color_down = this.ctx.getImageData(offset_x+_x,offset_y+_y,1,1).data[3];
-          //check if color changed up or down
-          if(color_up==255){
-            this.count_pixel++;
-          }
-          if(color_down==255){
-            this.count_pixel++;
-          }
-          this.count_total+=2; //up and down;
-        } 
-      }*/
-      var outCircle = this.circle.calcPixelsFilled();
-      var outRect1 = this.rect_1.calcPixelsFilled();
-      var outRect2 = this.rect_2.calcPixelsFilled();
-      var outRect3 = this.rect_3.calcPixelsFilled();
-
-      //console.log("Circle_Original",this.count_pixel,this.count_total);
-      console.log("Circle",outCircle.coloredPixel,outCircle.totalPixel);
-      console.log("Rectangle_left",outRect1.coloredPixel,outRect1.totalPixel);
-      console.log("Rectangle_right",outRect2.coloredPixel,outRect2.totalPixel);
-      console.log("Rectangle_bottom",outRect3.coloredPixel,outRect3.totalPixel);
+      if(this.smiley)
+        this.smiley.checkFillStatus()
+      if(this.pyramid)
+        this.pyramid.checkFillStatus()
       
-      /*
-      this.count_pixel = z.filled;
-      this.count_total = z.total;*/
-      var percentage_check = ((outCircle.coloredPixel+outRect1.coloredPixel+outRect2.coloredPixel+outRect3.coloredPixel)/(outCircle.totalPixel+outRect1.totalPixel+outRect2.totalPixel+outRect3.totalPixel))*100; 
-      console.log(percentage_check,"Drawn: ",outCircle.coloredPixel+outRect1.coloredPixel+outRect2.coloredPixel+outRect3.coloredPixel,
-                                   "Total:",outCircle.totalPixel+outRect1.totalPixel+outRect2.totalPixel+outRect3.totalPixel);
-      if(percentage_check>(this.fill_shape-5) && percentage_check<(this.fill_shape+5)){
-      
-        alert("("+percentage_check+") You did it!!!")
-      }
-      else{
-        alert("("+percentage_check+") Nice try")
-        
-      }
-      this.count_pixel = 0;
-      this.count_total = 0;
     });
   }
   onUnmounting(): void | Promise<void> {}
 
   onMouseMove(e: MouseEvent) {
+    
     
     if (this.test) {
       const { ctx, getMousePos,circle} = this;
@@ -143,12 +97,14 @@ export default class FillShapeTask extends Task {
       //console.log("seeet",this.help_arr.length)
       //console.log("Percantage covered:",(this.help_arr.length/(this.no_sqares))*100,"%")
       //check if mouse is in shape or not. easy with vector length
-      if(circle.isDrawnOutside(relativeMousePos)){
-        console.log("Inside");
-      }
-      else{
-        console.log("Outside");
-      }
+      
+      if(this.smiley)
+        this.smiley.checkOutside(relativeMousePos);
+
+      if(this.pyramid)
+        this.pyramid.checkOutside(relativeMousePos);
+
+     
     }
   }
   //Get Mouse Position
@@ -158,8 +114,8 @@ export default class FillShapeTask extends Task {
   getMousePos(canvas: HTMLCanvasElement, evt) {
     const rect = canvas.getBoundingClientRect();
     return {
-      x: evt.clientX - (rect.left + rect.width / 2),
-      y: evt.clientY - (rect.top + rect.height / 2),
+      x: evt.clientX - (rect.left),
+      y: evt.clientY - (rect.top),
     };
   }
 }
@@ -211,8 +167,7 @@ class Circle {
     this.radius = radius;
     this.pixelSamplingRate = pixelSamplingRate;
   }
-  DrawCircle()
-  {
+  DrawCircle(){
     const { ctx,radius,posX,posY,lineWidth,fillStyle: fillStyle} = this;
     ctx.beginPath();
     ctx.lineWidth = lineWidth;
@@ -226,8 +181,8 @@ class Circle {
   calcPixelsFilled(){
     var countPixel = 0;
     var countTotalPixel = 0;
-    const offsetX = 400/2-this.radius;
-    const offsetY = 400/2;
+    const offsetX = this.posX-this.radius;
+    const offsetY = this.posY;
 
     for(var _y=0; _y<this.radius*2; _y+=this.pixelSamplingRate){
       var newX = Math.trunc(Math.sqrt(Math.pow(this.radius,2)-Math.pow(_y,2)));
@@ -252,8 +207,8 @@ class Circle {
     
     return {totalPixel:countTotalPixel*Math.pow(this.pixelSamplingRate,2),coloredPixel:countPixel*Math.pow(this.pixelSamplingRate,2)}
   }
-  isDrawnOutside(relativeMousePos){
-    return (Math.hypot(relativeMousePos.x, relativeMousePos.y)<this.radius) ? true: false;
+  isDrawnInside(relativeMousePos){
+    return (Math.pow(relativeMousePos.x-this.posX,2) + Math.pow(relativeMousePos.y-this.posY,2)<Math.pow(this.radius,2)) ? true: false;
   }
 }
 class Rectangle {
@@ -284,7 +239,7 @@ class Rectangle {
   }
   calcPixelsFilled(){
     const { ctx,posX,posY,width,height, lineWidth, fillStyle: strokeStyle} = this;
-    var data = ctx.getImageData(200+posX,200+posY,width-1,height-1).data
+    var data = ctx.getImageData(posX,posY,width-1,height-1).data
     var countPixel = 0;
     var countTotalPixel = 0;
 
@@ -298,4 +253,171 @@ class Rectangle {
     return {totalPixel:countTotalPixel,coloredPixel:countPixel}
 
   }
+  isDrawnInside(relativeMousePos){
+    return relativeMousePos.x>this.posX && 
+           relativeMousePos.x < this.posX+this.width &&
+           relativeMousePos.y > this.posY && 
+           relativeMousePos.y < this.posY+this.height ? true:false
+  }
+ 
 } 
+class Smiley {
+  ctx: CanvasRenderingContext2D
+  circle:Circle
+  rect_1:Rectangle
+  rect_2:Rectangle
+  rect_3:Rectangle
+  cnt_max_px_outside:number;
+  cnt_max_outside :number;
+  flagOutside=true;
+  fill_shape:number;
+
+  constructor(canvasElement:CanvasRenderingContext2D,cnt_max_px_outside:number,cnt_max_outside:number,fill_shape:number) {
+    this.ctx = canvasElement;
+    this.cnt_max_px_outside = cnt_max_px_outside;
+    this.cnt_max_outside = cnt_max_outside;
+    this.fill_shape = fill_shape;
+    
+  }
+  drawSmiley()
+  {
+    this.circle = new Circle(this.ctx,200,200,60,2);
+    this.circle.DrawCircle();
+    this.rect_1 = new Rectangle(this.ctx,20,20,90,90);
+    this.rect_1.drawRectangle();
+    this.rect_2 = new Rectangle(this.ctx,300,20,80,80);
+    this.rect_2.drawRectangle();
+    this.rect_3 = new Rectangle(this.ctx,50,280,60,300);
+    this.rect_3.drawRectangle();
+  }
+  checkOutside(relativeMousePos)
+  {
+    if(this.circle.isDrawnInside(relativeMousePos) || this.rect_1.isDrawnInside(relativeMousePos) || this.rect_2.isDrawnInside(relativeMousePos) || this.rect_3.isDrawnInside(relativeMousePos)){
+      this.flagOutside=false;
+      console.log(this.cnt_max_outside)
+    }
+    else{
+      if(!this.flagOutside){
+        this.flagOutside = true;
+        
+        this.cnt_max_outside--;
+      }
+      if(this.cnt_max_px_outside<0){
+        //to do break game
+        alert("Woops, too many  pixels colored outside")
+      }
+      if(this.cnt_max_outside<0){
+        alert("Woops, too many times colored outside")
+      }
+      this.cnt_max_px_outside--;
+    }
+  }
+  checkFillStatus(){
+    var outCircle = this.circle.calcPixelsFilled();
+    var outRect1 = this.rect_1.calcPixelsFilled();
+    var outRect2 = this.rect_2.calcPixelsFilled();
+    var outRect3 = this.rect_3.calcPixelsFilled();
+
+    //console.log("Circle_Original",this.count_pixel,this.count_total);
+    console.log("Circle",outCircle.coloredPixel,outCircle.totalPixel);
+    console.log("Rectangle_left",outRect1.coloredPixel,outRect1.totalPixel);
+    console.log("Rectangle_right",outRect2.coloredPixel,outRect2.totalPixel);
+    console.log("Rectangle_bottom",outRect3.coloredPixel,outRect3.totalPixel);
+    
+    /*
+    this.count_pixel = z.filled;
+    this.count_total = z.total;*/
+    var percentage_check = ((outCircle.coloredPixel+outRect1.coloredPixel+outRect2.coloredPixel+outRect3.coloredPixel)/(outCircle.totalPixel+outRect1.totalPixel+outRect2.totalPixel+outRect3.totalPixel))*100; 
+    console.log(percentage_check,"Drawn: ",outCircle.coloredPixel+outRect1.coloredPixel+outRect2.coloredPixel+outRect3.coloredPixel,
+                                  "Total:",outCircle.totalPixel+outRect1.totalPixel+outRect2.totalPixel+outRect3.totalPixel);
+    if(percentage_check>(this.fill_shape-5) && percentage_check<(this.fill_shape+5)){
+    
+      alert("("+percentage_check+") You did it!!!")
+    }
+    else{
+      alert("("+percentage_check+") Nice try")
+      
+    }
+  }
+  
+}
+
+class Pyramid {
+  ctx: CanvasRenderingContext2D
+  rect_1:Rectangle
+  rect_2:Rectangle
+  rect_3:Rectangle
+  rect_4:Rectangle
+  cnt_max_px_outside:number;
+  cnt_max_outside :number;
+  flagOutside=true;
+  fill_shape:number;
+
+  constructor(canvasElement:CanvasRenderingContext2D,cnt_max_px_outside:number,cnt_max_outside:number,fill_shape:number) {
+    this.ctx = canvasElement;
+    this.cnt_max_px_outside = cnt_max_px_outside;
+    this.cnt_max_outside = cnt_max_outside;
+    this.fill_shape = fill_shape;
+    
+  }
+  drawPyramid()
+  {
+    this.rect_1 = new Rectangle(this.ctx,175,100,60,50);
+    this.rect_1.drawRectangle();
+    this.rect_2 = new Rectangle(this.ctx,150,160,60,100);
+    this.rect_2.drawRectangle();
+    this.rect_3 = new Rectangle(this.ctx,100,220,60,200);
+    this.rect_3.drawRectangle();
+    this.rect_4 = new Rectangle(this.ctx,50,280,60,300);
+    this.rect_4.drawRectangle();
+  }
+  checkOutside(relativeMousePos)
+  {
+    if(this.rect_1.isDrawnInside(relativeMousePos) || this.rect_2.isDrawnInside(relativeMousePos) || this.rect_3.isDrawnInside(relativeMousePos) || this.rect_4.isDrawnInside(relativeMousePos)){
+      this.flagOutside=false;
+      console.log(this.cnt_max_outside)
+    }
+    else{
+      if(!this.flagOutside){
+        this.flagOutside = true;
+        
+        this.cnt_max_outside--;
+      }
+      if(this.cnt_max_px_outside<0){
+        //to do break game
+        alert("Woops, too many  pixels colored outside")
+      }
+      if(this.cnt_max_outside<0){
+        alert("Woops, too many times colored outside")
+      }
+      this.cnt_max_px_outside--;
+    }
+  }
+  checkFillStatus(){
+    var outRect1 = this.rect_1.calcPixelsFilled();
+    var outRect2 = this.rect_2.calcPixelsFilled();
+    var outRect3 = this.rect_3.calcPixelsFilled();
+    var outRect4 = this.rect_4.calcPixelsFilled();
+
+    console.log("Rectangle_left",outRect1.coloredPixel,outRect1.totalPixel);
+    console.log("Rectangle_right",outRect2.coloredPixel,outRect2.totalPixel);
+    console.log("Rectangle_bottom",outRect3.coloredPixel,outRect3.totalPixel);
+    
+    /*
+    this.count_pixel = z.filled;
+    this.count_total = z.total;*/
+    var percentage_check = ((outRect1.coloredPixel+outRect2.coloredPixel+outRect3.coloredPixel+outRect4.coloredPixel)/(outRect1.totalPixel+outRect2.totalPixel+outRect3.totalPixel+outRect4.totalPixel))*100; 
+    console.log(percentage_check,"Drawn: ",outRect1.coloredPixel+outRect2.coloredPixel+outRect3.coloredPixel+outRect4.coloredPixel,
+                                  "Total:",outRect1.totalPixel+outRect2.totalPixel+outRect3.totalPixel+outRect4.totalPixel);
+    if(percentage_check>(this.fill_shape-5) && percentage_check<(this.fill_shape+5)){
+    
+      alert("("+percentage_check+") You did it!!!")
+    }
+    else{
+      alert("("+percentage_check+") Nice try")
+      
+    }
+  }
+  
+}
+
