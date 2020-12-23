@@ -43,11 +43,11 @@ export default class FillShapeTask extends Task {
     this.fill_shape = Math.floor(Math.random() * 100);
     this.button.setAttribute("label","Fill: "+(this.fill_shape)+"%")
 
-    //this.smiley = new Smiley(this.ctx,this.cnt_max_px_outside,this.cnt_max_outside,this.fill_shape)
-    //this.smiley.drawSmiley()
+    this.smiley = new Smiley(this.ctx,this.cnt_max_px_outside,this.cnt_max_outside,this.fill_shape)
+    this.smiley.drawSmiley()
 
-    this.pyramid = new Pyramid(this.ctx,this.cnt_max_px_outside,this.cnt_max_outside,this.fill_shape)
-    this.pyramid.drawPyramid()
+    //this.pyramid = new Pyramid(this.ctx,this.cnt_max_px_outside,this.cnt_max_outside,this.fill_shape)
+    //this.pyramid.drawPyramid()
 
     this.test = false;
     //line thickness
