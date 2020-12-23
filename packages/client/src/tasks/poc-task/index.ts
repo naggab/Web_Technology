@@ -49,7 +49,7 @@ export default class POCTask extends Task {
   }
 
   addForeignPlayer(id: number, x: number = 5, y: number = 5, color: string = "#EFEFEF") {
-    const newPlayer = this.gamePlayground.addPlayer(x, y, color, undefined);
+    const newPlayer = this.gamePlayground.addPlayer(x, y, color, undefined, id);
     this.otherPlayers.set(id, newPlayer);
   }
 
