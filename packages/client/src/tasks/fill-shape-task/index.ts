@@ -4,6 +4,20 @@ import { Button } from "../../components/button";
 import { concat } from "lodash";
 import { Collection } from "konva/types/Util";
 
+interface ShapeI {
+  checkOutside(mousePos: any);
+  draw();
+}
+
+type ShapeConstructor = new (
+  canvasElement: CanvasRenderingContext2D,
+  cnt_max_px_outside: number,
+  cnt_max_outside: number,
+  fill_shape: number,
+) => ShapeI;
+
+const shapes: Array<ShapeConstructor> = [];
+
 export default class FillShapeTask extends Task {
   canvasElement: HTMLCanvasElement;
   button: Button;
