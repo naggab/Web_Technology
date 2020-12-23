@@ -46,7 +46,7 @@ class GameMap {
  */
 var gameMap: GameMap = new GameMap();
 gameMap.map = [
-  "50x30",
+  "50x30",/*
   "1W8O1W18O1W20O1W",
   "1W8O1W18O1W20O1W",
   "1W8O1W15O3O1W20O1W",
@@ -73,7 +73,7 @@ gameMap.map = [
   "1W8O1W26O1W12O1W",
   "1W8O1W26O1W12O1W",
   "1W8O1W26O1W12O1W",
-  "50W",
+  "50W",*/
 ];
 gameMap.possibleTasks = [
   new Coord(1 , 2 ),
@@ -125,10 +125,10 @@ interface IPlaygroundTask {
 }
 
 
-var gridSize: number = 20; // later overwritten by init
+var gridSize: number = 20; // simple default value, overwritten later
 var gridLength: number = 50; // this defines the actual gridsize based on div width
 var gridSizeHeight: number = 10;
-var gridRows: number = 57;
+var gridRows: number = 30;
 var player: Player;
 
 /**
@@ -417,8 +417,18 @@ export default class GamePlayground extends BaseTask {
     return newPlayer;
   }
 
-  setMap(m: GameMap) {
-    gameMap = m;
+  setMap(width: number, height: number, map?: GameMap) {
+    gridLength = width;
+    gridRows = height;
+    if (map !== undefined)
+      if (map.map !== undefined)
+        gameMap = map;
+      else {
+        map.map = [gridLength.toString() + "x" + gridRows.toString()];
+        gameMap = map;
+      }
+    else
+      gameMap = new GameMap([gridLength.toString() + "x" + gridRows.toString()]);
   }
 
   /**
