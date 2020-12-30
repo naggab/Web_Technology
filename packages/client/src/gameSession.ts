@@ -1,8 +1,9 @@
-import { GameEvent, GameEventOp } from "@apirush/common";
+import { Event, GameEventOp } from "@apirush/common";
+import { EventOp } from "@apirush/common/src";
 
-type SubscriberCallback<T extends GameEventOp> = (evt: GameEvent<T>) => void;
+type SubscriberCallback<T extends EventOp> = (evt: Event<T>) => void;
 
-type SubscriberEntry<T extends GameEventOp> = SubscriberCallback<T>;
+type SubscriberEntry<T extends EventOp> = SubscriberCallback<T>;
 
 const BroadcastSymbol = Symbol("broadcast_all");
 
@@ -22,7 +23,7 @@ export class GameSession {
   }
 
   private OnMessageReceived(ev: MessageEvent) {
-    let gameEvent: GameEvent | undefined = undefined;
+    let gameEvent: Event | undefined = undefined;
     try {
       gameEvent = JSON.parse(ev.data);
     } catch (e) {
@@ -40,7 +41,7 @@ export class GameSession {
     });
   }
 
-  private OnErrorOccurred(ev: Event) {
+  private OnErrorOccurred(ev) {
     console.error("WebSocket failed", ev);
   }
 
@@ -70,12 +71,12 @@ export class GameSession {
     this.ws.close();
   }
 
-  send(ev: GameEvent) {
+  send(ev: Event) {
     if (!this.ws) return;
     this.ws.send(JSON.stringify(ev));
   }
 
-  private lookupSubscribers(op: GameEventOp): SubscriberEntry<GameEventOp>[] {
+  private lookupSubscribers(op: EventOp): SubscriberEntry<EventOp>[] {
     const result = [];
     if (this.subscribers[op]) {
       result.push(...this.subscribers[op]);

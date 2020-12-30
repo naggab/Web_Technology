@@ -1,9 +1,9 @@
 import express from "express";
 import expressWSWrapper, { Application } from "express-ws";
 const app: Application = expressWSWrapper(express(), undefined, { wsOptions: { clientTracking: true } }).app;
-import WebSocket from "ws";
 import { Broker } from "./broker";
 import path from "path";
+import { GameMaster } from "./gameMaster";
 
 const port = 3000;
 
@@ -14,33 +14,17 @@ app.get("/api/test", (req, res) => {
   console.log("client requested", req.originalUrl);
 });
 
-const errorMsg = {
-  op: "INVALID_GAME_ID",
-  payload: {},
-};
-
-const broker = new Broker();
+const gameMaster = new GameMaster();
+const broker = new Broker(gameMaster);
 
 app.ws("/ws", function (ws, req) {
-  const gameIdStr = req.query["gameId"];
-  if (!gameIdStr || typeof gameIdStr !== "string" || isNaN(gameIdStr as any)) {
-    ws.send(JSON.stringify(errorMsg));
-    ws.close();
-    return;
-  }
-  const gameId = parseInt(gameIdStr, 10);
-  broker.onPlayerConnected(gameId, {
-    ws,
-    color: "red",
-    name: req.query["name"]?.toString() || "Player",
-  });
+  broker.onConnected(ws);
 });
 
 //Gabriel start
 app.use("/screens", express.static(path.resolve(__dirname, "client", "screens")));
-app.get("/*", (req, res)=>{
+app.get("/*", (req, res) => {
   res.sendFile(path.resolve(__dirname, "client", "index.html"));
-
 });
 
 //Gabriel end

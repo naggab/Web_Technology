@@ -3,6 +3,7 @@
   "compilerOptions": {
     "outDir": "./dist/",
     "module": "commonjs",
-    "typeRoots": ["node_modules/@types", "src/@types"]
+    "typeRoots": ["../../node_modules/@types", "node_modules/@types", "./src/@types"],
+    "types": ["webpack-env", "jest"]
   }
 }
