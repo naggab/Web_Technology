@@ -5,7 +5,12 @@
   "workspaces": [
     "packages/**"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "@material-ui/core": "^4.11.2",
+    "@material/textfield": "^8.0.0",
+    "input": "^1.0.1",
+    "lit-element": "^2.4.0"
+  },
   "devDependencies": {
     "concurrently": "^5.3.0",
     "prettier": "^2.1.2",

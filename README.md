@@ -42,3 +42,6 @@ This repo is equipped with a configured [`prettier`](https://prettier.io/) confi
 `yarn run fix-codestyle` to auto-fix issues if possible
 
 In `WebStorm` code-styling is applied automatically each time a file is saved
+
+
+#Web Componnts
