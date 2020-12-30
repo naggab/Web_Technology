@@ -1,6 +1,6 @@
 export type PlayerIdType = number;
 
-export type Position = {
+export type Coordinate = {
   x: number;
   y: number;
 };
@@ -9,7 +9,7 @@ export type PlayerInGameI = {
   id: PlayerIdType;
   name: string;
   color: string;
-  position: Position;
+  position: Coordinate;
 };
 
 export type PlayerInLobbyI = Omit<PlayerInGameI, "color" | "position">;

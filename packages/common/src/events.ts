@@ -1,4 +1,4 @@
-import { GameDetails, GameIdType, PlayerIdType, PlayerInGameI, Position } from "./types";
+import { GameDetails, GameIdType, PlayerIdType, PlayerInGameI, Coordinate } from "./types";
 import { PlayerInGame } from "@apirush/server/src/types";
 
 export enum ServerEventOp {
@@ -34,7 +34,7 @@ export type GameEventOpPayloadMap = {
 
   [GameEventOp.PLAYER_JOINED]: PlayerInGameI;
   [GameEventOp.PLAYER_LEFT]: { id: PlayerIdType };
-  [GameEventOp.PLAYER_MOVED]: { id: PlayerIdType; position: Position };
+  [GameEventOp.PLAYER_MOVED]: { id: PlayerIdType; position: Coordinate };
 };
 
 export type EventOpPayloadMap = ServerEventOpPayloadMap & GameEventOpPayloadMap;

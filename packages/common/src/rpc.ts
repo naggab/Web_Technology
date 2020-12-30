@@ -1,4 +1,4 @@
-import { GameDetails, GameIdType, PlayerIdType, PlayerInGameI, Position } from "./types";
+import { GameDetails, GameIdType, PlayerIdType, PlayerInGameI, Coordinate } from "./types";
 
 export enum CommandOps {
   HELLO = "HELLO",
@@ -18,7 +18,7 @@ export type CommandRequest =
   | Request<CommandOps.LIST_GAMES>
   | Request<CommandOps.CREATE_GAME, { name: string }>
   | Request<CommandOps.JOIN_GAME, { id: GameIdType }>
-  | Request<CommandOps.MOVE, { position: Position }>
+  | Request<CommandOps.MOVE, { position: Coordinate }>
   | Request<CommandOps.START_GAME>
   | Request<CommandOps.ABORT_GAME>
   | Request<CommandOps.DECLARE_WIN>;

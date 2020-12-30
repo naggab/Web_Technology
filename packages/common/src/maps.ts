@@ -1,4 +1,4 @@
-import { Coordinate } from "@apirush/common";
+import { Coordinate } from "./types";
 
 export interface MapI {
   id: string;

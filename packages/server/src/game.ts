@@ -7,7 +7,7 @@ import {
   GameIdType,
   GameState,
   PlayerIdType,
-  Position,
+  Coordinate,
 } from "@apirush/common";
 import { GameMaster } from "./gameMaster";
 import { ERR_PLAYER_NOT_EXISTENT, PLAYER_COLORS } from "./constants";
@@ -100,7 +100,7 @@ export class Game {
     this.gm.onGameStateUpdate(this);
   }
 
-  movePlayer(id: PlayerIdType, p: Position) {
+  movePlayer(id: PlayerIdType, p: Coordinate) {
     const player = this.players.get(id);
     if (!player) {
       throw ERR_PLAYER_NOT_EXISTENT;
@@ -126,7 +126,7 @@ export class Game {
 
     this.emitEvent(evt, (player) => player.id !== id);
   }
-  emitOnPlayerMoved(id: PlayerIdType, position: Position) {
+  emitOnPlayerMoved(id: PlayerIdType, position: Coordinate) {
     const evt: Event<GameEventOp.PLAYER_MOVED> = {
       op: GameEventOp.PLAYER_MOVED,
       payload: { id, position },
