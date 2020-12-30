@@ -26,11 +26,17 @@ export class GameMaster {
   }
 
   createGameAndJoin(name: string, creator: PlayerInLobby) {
+    const creatorPlayer = this.unassignedPlayers.get(creator.id);
+    if (!creatorPlayer) {
+      throw ERR_PLAYER_NOT_EXISTENT;
+    }
+    this.unassignedPlayers.delete(creatorPlayer.id);
+
     const id = findNextId(this.games, "game_");
     const game = new Game(id, name, this);
     this.games.set(game.id, game);
-    const player = this.addPlayerToGame(game.id, creator.id);
     this.emitOnGameAdded(game);
+    const player = game.addPlayer(creatorPlayer);
     return { game, player };
   }
 

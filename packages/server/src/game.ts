@@ -32,6 +32,7 @@ export class Game {
     this.name = name;
     this.gm = gm;
     this.seed = getRandomInt(1, 5000);
+    this.players = new Map<PlayerIdType, PlayerInGame>();
   }
 
   get state() {
@@ -70,7 +71,7 @@ export class Game {
       let isUnused = true;
       for (let [_, player] of this.players) {
         if (player.color === PLAYER_COLORS[i]) {
-          isUnused = true;
+          isUnused = false;
         }
       }
       if (isUnused) {
