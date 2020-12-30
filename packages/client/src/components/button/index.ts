@@ -6,7 +6,7 @@ export class Button extends HTMLElement {
   _a: HTMLAnchorElement;
 
   static get observedAttributes() {
-    return ["label", "styleType"];
+    return ["styletype","label"];
   }
 
   constructor() {
@@ -23,26 +23,28 @@ export class Button extends HTMLElement {
     return this.getAttribute("label") || "";
   }
 
-  get styleType(): ButtonStyleType[] {
-    const styleList = this.getAttribute("styleType");
+  get styletype(): ButtonStyleType[] {
+    const styleList = this.getAttribute("styletype");
     return (styleList.split(",") as ButtonStyleType[]) || ["white"];
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    console.log("attributeChangedCallback");
+    console.log("attributeChangedCallback",name,oldValue,newValue);
     switch (name) {
       case "label":
         this._a.innerHTML = newValue;
         break;
-      case "styleType":
-        this._a.classList.add(...this.styleType);
+      case "styletype":
+        console.log(this.styletype);
+        this._a.className = "";
+        this._a.classList.add(...this.styletype);
       default:
         break;
     }
   }
   connectedCallback() {
     this._a.innerHTML = this.label;
-    this._a.classList.add(...this.styleType);
+    this._a.classList.add(...this.styletype);
   }
 }
 
