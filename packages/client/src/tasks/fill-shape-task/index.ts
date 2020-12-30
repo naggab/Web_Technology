@@ -1,7 +1,7 @@
 import viewHtml from "./view.html";
 import { Task } from "../../task";
 import { Button } from "../../components/button";
-import { concat } from "lodash";
+import { concat, times } from "lodash";
 import { Collection } from "konva/types/Util";
 
 interface ShapeI {
@@ -16,7 +16,7 @@ type ShapeConstructor = new (
   cnt_max_outside: number,
   fill_shape: number,
   canvasPx: number,
-  tolerance: number
+  tolerancePx: number,
 ) => ShapeI;
 
 const shapes: Array<ShapeConstructor> = [];
@@ -56,8 +56,8 @@ export default class FillShapeTask extends Task {
     this.fill_shape = Math.floor(Math.random() * 100);
     this.infoButton.setAttribute("label", "Fill: " + this.fill_shape + "%");
 
-    shapes.push(Smiley,Pyramid,Tree)
-    this.shape  = new shapes[2](this.ctx,100,3,this.fill_shape,400,5)
+    shapes.push(Smiley,Pyramid,Tree,Cactus);
+    this.shape  = new shapes[3](this.ctx,100,5,this.fill_shape,400,5);
     this.shape.draw();
 
     this.test = false;
@@ -261,6 +261,7 @@ class Smiley implements ShapeI {
   fill_shape: number;
   canvasPx:number;
   tolerance:number;
+  
 
   constructor(
     canvasElement: CanvasRenderingContext2D,
@@ -553,4 +554,126 @@ class Tree implements ShapeI {
     }
   }
 }
+class Cactus implements ShapeI {
+  ctx: CanvasRenderingContext2D;
+  middle: Rectangle;
+  rightBranchTop: Rectangle;
+  rightBranchBottom: Rectangle;
+  rightBBLeave: Rectangle;
+  leftBranchTop: Rectangle;
+  leftBTLeave: Rectangle;
+  rightBTLeave: Rectangle;
+  root: Rectangle;
+  cnt_max_px_outside: number;
+  cnt_max_outside: number;
+  flagOutside = true;
+  fill_shape: number;
+  canvasPx: number;
+  tolerance:number;
+
+  constructor(
+    canvasElement: CanvasRenderingContext2D,
+    cnt_max_px_outside: number,
+    cnt_max_outside: number,
+    fill_shape: number,
+    canvasPx: number,
+    tolerance:number
+  ) {
+    this.ctx = canvasElement;
+    this.cnt_max_px_outside = cnt_max_px_outside;
+    this.cnt_max_outside = cnt_max_outside;
+    this.fill_shape = fill_shape;
+    this.canvasPx = canvasPx;
+    this.tolerance = tolerance;
+  }
+  draw() {
+    const color = "#0cae5b"
+    this.middle = new Rectangle(this.ctx, (this.canvasPx-80)/2, 20, 300, 80);
+    this.middle.fillStyle = color;
+    this.middle.drawRectangle();
+
+    this.rightBranchTop = new Rectangle(this.ctx, (this.canvasPx+this.middle.width)/2, 80, 20, 120);
+    this.rightBranchTop.fillStyle = color;
+    this.rightBranchTop.drawRectangle();
+    this.rightBTLeave = new Rectangle(this.ctx,  (this.canvasPx+this.middle.width)/2+this.rightBranchTop.width-50,this.rightBranchTop.posY-40,40,50);
+    this.rightBTLeave.fillStyle = color;
+    this.rightBTLeave.drawRectangle();
+
+    this.rightBranchBottom =  new Rectangle(this.ctx, (this.canvasPx+this.middle.width)/2, 200, 20, 100);
+    this.rightBranchBottom.fillStyle = color;
+    this.rightBranchBottom.drawRectangle();
+    this.rightBBLeave = new Rectangle(this.ctx,  (this.canvasPx+this.middle.width)/2+this.rightBranchBottom.width-50,this.rightBranchBottom.posY-40,40,50);
+    this.rightBBLeave.fillStyle = color;
+    this.rightBBLeave.drawRectangle();
+
+    this.leftBranchTop = new Rectangle(this.ctx, (this.canvasPx-this.middle.width-120*2)/2, 160, 20, 120);
+    this.leftBranchTop.fillStyle = color;
+    this.leftBranchTop.drawRectangle();
+    this.leftBTLeave = new Rectangle(this.ctx, (this.canvasPx-this.middle.width-this.leftBranchTop.width*2)/2,80, 80, 40);
+    this.leftBTLeave.fillStyle = color;
+    this.leftBTLeave.drawRectangle();
+    
+    
+    this.root = new Rectangle(this.ctx, (this.canvasPx-150)/2,this.middle.posY+this.middle.height, 30, 150);
+    this.root.fillStyle = "#ab6134";
+    this.root.drawRectangle();
+  }
+  checkOutside(relativeMousePos: any) {
+    if (
+      this.middle.isDrawnInside(relativeMousePos) ||
+      this.rightBranchTop.isDrawnInside(relativeMousePos) ||
+      this.rightBTLeave.isDrawnInside(relativeMousePos) ||
+      this.rightBranchBottom.isDrawnInside(relativeMousePos) ||
+      this.rightBBLeave.isDrawnInside(relativeMousePos) ||
+      this.leftBranchTop.isDrawnInside(relativeMousePos) ||
+      this.leftBTLeave.isDrawnInside(relativeMousePos) ||
+      this.root.isDrawnInside(relativeMousePos)
+    ) {
+      this.flagOutside = false;
+      console.log(this.cnt_max_outside);
+    } else {
+      if (!this.flagOutside) {
+        this.flagOutside = true;
+
+        this.cnt_max_outside--;
+      }
+      if (this.cnt_max_px_outside < 0) {
+        //to do break game
+        alert("Woops, too many  pixels colored outside");
+      }
+      if (this.cnt_max_outside < 0) {
+        alert("Woops, too many times colored outside");
+      }
+      this.cnt_max_px_outside--;
+    }
+  }
+  checkFillStatus() {
+    var middle = this.middle.calcPixelsFilled();
+    var rightBranchTop = this.rightBranchTop.calcPixelsFilled();
+    var rightBTLeave = this.rightBTLeave.calcPixelsFilled();
+    var rightBranchBottom = this.rightBranchBottom.calcPixelsFilled();
+    var rightBBLeave = this.rightBBLeave.calcPixelsFilled();
+    var leftBranchTop = this.leftBranchTop.calcPixelsFilled();
+    var leftBTLeave = this.leftBTLeave.calcPixelsFilled();
+    var root = this.root.calcPixelsFilled();
+
+    var percentage_check =
+      ((middle.coloredPixel + rightBranchTop.coloredPixel + leftBranchTop.coloredPixel + leftBTLeave.coloredPixel + rightBTLeave.coloredPixel + root.coloredPixel + rightBranchBottom.coloredPixel + rightBBLeave.coloredPixel) /
+        (middle.totalPixel + rightBranchTop.totalPixel + leftBranchTop.totalPixel + leftBTLeave.totalPixel + rightBTLeave.totalPixel + root.totalPixel + rightBranchBottom.totalPixel + rightBBLeave.totalPixel)) *
+      100;
+    console.log(
+      percentage_check,
+      "Drawn: ",
+      middle.coloredPixel + rightBranchTop.coloredPixel + leftBranchTop.coloredPixel + leftBTLeave.coloredPixel + rightBTLeave.coloredPixel + root.coloredPixel + rightBranchBottom.coloredPixel + rightBBLeave.coloredPixel,
+      "Total:",
+      middle.totalPixel + rightBranchTop.totalPixel + leftBranchTop.totalPixel + leftBTLeave.totalPixel + rightBTLeave.totalPixel + root.totalPixel + rightBranchBottom.totalPixel + rightBBLeave.totalPixel,
+    );
+    if (percentage_check > this.fill_shape - 5 && percentage_check < this.fill_shape + 5) {
+      return [true,"You did it! ("+Math.trunc(percentage_check)+"% / "+this.fill_shape+"%, +/-"+ this.tolerance+"%)"];
+    } else {
+      return [false,"Nope. Nice Try. ("+Math.trunc(percentage_check)+"% / "+this.fill_shape+"%, +/-"+ this.tolerance+"%)"];
+    }
+  }
+}
+
 
