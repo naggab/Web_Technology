@@ -57,7 +57,7 @@ export default class FillShapeTask extends Task {
     this.infoButton.setAttribute("label", "Fill: " + this.fill_shape + "%");
 
     shapes.push(Smiley,Pyramid,Tree,Cactus);
-    this.shape  = new shapes[3](this.ctx,100,5,this.fill_shape,400,5);
+    this.shape  = new shapes[2](this.ctx,100,5,this.fill_shape,400,5);
     this.shape.draw();
 
     this.test = false;
@@ -92,7 +92,7 @@ export default class FillShapeTask extends Task {
       {
         this.finish(this.tupleResult[0])
       }
-      this.infoButton.setAttribute("styleType", this.tupleResult[0] ? "green" :"red");
+      this.infoButton.setAttribute("styletype", this.tupleResult[0] ? "green" :"red");
       this.checkButton.setAttribute("label", "Back");
 
       this.cnt_button_clicks++;
