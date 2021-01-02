@@ -30,13 +30,11 @@ export class Button extends HTMLElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    console.log("attributeChangedCallback",name,oldValue,newValue);
     switch (name) {
       case "label":
         this._a.innerHTML = newValue;
         break;
       case "styletype":
-        console.log(this.styletype);
         this._a.className = "";
         this._a.classList.add(...this.styletype);
       default:

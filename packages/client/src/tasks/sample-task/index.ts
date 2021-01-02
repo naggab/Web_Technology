@@ -1,13 +1,13 @@
 import viewHtml from "./view.html";
 import { Task } from "../../task";
-import {TextBox} from "../../components/inputBox";
+//import {TextBox} from "../../components/inputBox";
 
 import { Button } from "../../components/button";
 
 
 export default class SampleTask extends Task {
   loadButton: Button;
-  loadInput: TextBox;
+  //loadInput: TextBox;
   serverResponseSpan: HTMLSpanElement;
   counter: number = 0;
 
