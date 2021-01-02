@@ -1,5 +1,6 @@
 import { PlayerInGame, PlayerInLobby, PlayersInGameMap } from "./types";
 import {
+  Coordinate,
   Event,
   EventOp,
   GameDetails,
@@ -7,10 +8,10 @@ import {
   GameIdType,
   GameState,
   PlayerIdType,
-  Coordinate,
 } from "@apirush/common";
 import { GameMaster } from "./gameMaster";
 import { ERR_PLAYER_NOT_EXISTENT, PLAYER_COLORS } from "./constants";
+import { GameI } from "./gameI";
 
 function getRandomInt(min, max) {
   min = Math.ceil(min);
@@ -18,7 +19,7 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
-export class Game {
+export class Game implements GameI {
   readonly id: GameIdType;
   readonly gm: GameMaster;
   readonly name: string;
@@ -33,6 +34,20 @@ export class Game {
     this.gm = gm;
     this.seed = getRandomInt(1, 5000);
     this.players = new Map<PlayerIdType, PlayerInGame>();
+  }
+
+  forEachPlayer(cb: (player: any) => void): void {
+    this.players.forEach(cb);
+  }
+
+  hasPlayer(id: number): boolean {
+    return this.players.has(id);
+  }
+  getPlayer(id: number): PlayerInGame {
+    return this.players.get(id);
+  }
+  hasNoPlayers(): boolean {
+    return this.players.size === 0;
   }
 
   get state() {

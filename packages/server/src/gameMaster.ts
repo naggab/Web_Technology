@@ -1,16 +1,20 @@
-import { CLEANUP_SCHEDULE, ERR_GAME_NOT_EXISTENT, ERR_PLAYER_NOT_EXISTENT } from "./constants";
-import { GamesMap, PlayerInLobby, PlayersMap, ServerEventNotifyCb } from "./types";
+import { ERR_GAME_NOT_EXISTENT, ERR_PLAYER_NOT_EXISTENT } from "./constants";
+import { PlayerInLobby, PlayersMap, ServerEventNotifyCb } from "./types";
 import { GameIdType, PlayerIdType } from "@apirush/common/src/types";
 import { Event, EventOp, ServerEventOp } from "@apirush/common/src/events";
+import { GameI } from "./gameI";
+import { findNextId } from "./utils";
 import { Game } from "./game";
-import { findNextId, seekUnusedNumericId } from "./utils";
+import { GameMasterI } from "./gameMasterI";
 
-export class GameMaster {
-  games: GamesMap;
+export class GameMaster implements GameMasterI {
+  static GameConstructor = Game;
+
+  games: Map<string, GameI>;
   unassignedPlayers: PlayersMap;
 
   constructor() {
-    this.games = new Map<GameIdType, Game>();
+    this.games = new Map<GameIdType, GameI>();
     this.unassignedPlayers = new Map<PlayerIdType, PlayerInLobby>();
   }
 
@@ -18,7 +22,7 @@ export class GameMaster {
     return Array.from(this.games.values()).map((game) => game.details);
   }
 
-  getGame(id: GameIdType): Game {
+  getGame(id: GameIdType): GameI {
     if (!this.games.has(id)) {
       throw ERR_GAME_NOT_EXISTENT;
     }
@@ -33,7 +37,7 @@ export class GameMaster {
     this.unassignedPlayers.delete(creatorPlayer.id);
 
     const id = findNextId(this.games, "game_");
-    const game = new Game(id, name, this);
+    const game = new GameMaster.GameConstructor(id, name, this);
     this.games.set(game.id, game);
     this.emitOnGameAdded(game);
     const player = game.addPlayer(creatorPlayer);
@@ -48,7 +52,7 @@ export class GameMaster {
         continue;
       }
       for (var [_, game] of this.games) {
-        if (game.players.has(newId)) {
+        if (game.hasPlayer(newId)) {
           newId++;
         }
       }
@@ -84,13 +88,13 @@ export class GameMaster {
 
   removePlayerFromGame(gameId: GameIdType, playerId: PlayerIdType) {
     const game = this.getGame(gameId);
-    if (!game.players.has(playerId)) {
+    if (!game.hasPlayer(playerId)) {
       throw ERR_PLAYER_NOT_EXISTENT;
     }
-    const player = game.players.get(playerId);
+    const player = game.getPlayer(playerId);
     game.removePlayer(playerId);
 
-    if (game.players.size === 0) {
+    if (game.hasNoPlayers()) {
       this.games.delete(game.id);
       this.emitOnGameRemoved(game);
     }
@@ -98,21 +102,21 @@ export class GameMaster {
   }
 
   // Callbacks / Notifications
-  private emitOnGameAdded(game: Game) {
+  private emitOnGameAdded(game: GameI) {
     const evt: Event<ServerEventOp.GAME_ADDED> = {
       op: ServerEventOp.GAME_ADDED,
       payload: game.details,
     };
     this.emitEventToUnassigned(evt);
   }
-  onGameStateUpdate(game: Game) {
+  onGameStateUpdate(game: GameI) {
     const evt: Event<ServerEventOp.GAME_STATE_UPDATED> = {
       op: ServerEventOp.GAME_STATE_UPDATED,
       payload: game.details,
     };
     this.emitEventToUnassigned(evt);
   }
-  private emitOnGameRemoved(game: Game) {
+  private emitOnGameRemoved(game: GameI) {
     const evt: Event<ServerEventOp.GAME_REMOVED> = {
       op: ServerEventOp.GAME_REMOVED,
       payload: { id: game.id },
@@ -133,7 +137,7 @@ export class GameMaster {
     });
 
     this.games.forEach((game) => {
-      game.players.forEach((player) => {
+      game.forEachPlayer((player) => {
         player.notify(evt);
       });
     });

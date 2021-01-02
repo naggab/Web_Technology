@@ -125,4 +125,33 @@ describe("GameMaster", () => {
     notifyPlayer1.mockClear();
     notifyPlayer2.mockClear();
   });
+
+  it("notifies of leave", () => {
+    const gm = new GameMaster();
+    const notifyPlayer1 = jest.fn();
+    const notifyPlayer2 = jest.fn();
+
+    let player1 = gm.createPlayer("Player 1", notifyPlayer1);
+    let player2 = gm.createPlayer("Player 2", notifyPlayer2);
+
+    const { game: game1, player: player1InGame } = gm.createGameAndJoin("Demo 1", player1);
+    const player2InGame = gm.addPlayerToGame(game1.id, player2.id);
+
+    game1.start();
+
+    notifyPlayer1.mockClear();
+    notifyPlayer2.mockClear();
+
+    gm.removePlayerFromGame(game1.id, player1InGame.id);
+
+    expect(notifyPlayer1).not.toHaveBeenCalled();
+    expect(notifyPlayer2).toHaveBeenCalledTimes(1);
+    expect(notifyPlayer2).toHaveBeenLastCalledWith({
+      op: GameEventOp.PLAYER_LEFT,
+      payload: { id: player1InGame.id },
+    });
+
+    notifyPlayer1.mockClear();
+    notifyPlayer2.mockClear();
+  });
 });
