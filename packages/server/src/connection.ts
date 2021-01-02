@@ -13,15 +13,19 @@ import {
   Event,
 } from "@apirush/common";
 
+export interface WebSocketI {
+  send(data: any, cb?: (err?: Error) => void): void;
+}
+
 export class Connection {
-  readonly ws: WebSocket;
+  readonly ws: WebSocketI;
   readonly gm: GameMasterI;
   ok: boolean;
 
   player: PlayerInLobby | PlayerInGame | null;
   game: GameI | null;
 
-  constructor(ws: WebSocket, gm: GameMasterI) {
+  constructor(ws: WebSocketI, gm: GameMasterI) {
     this.ws = ws;
     this.gm = gm;
     this.ok = true;
