@@ -4,13 +4,14 @@ import { Button } from "../../components/button";
 
 
 const filesArray: Array<[string,string]> = [];
-const randomSeed: number = Math.floor(Math.random() * 100); 
+var randomSeed: number;
 
 export default class DragAndDropTask extends Task {
     backButton: Button;
     serverResponseSpan: HTMLSpanElement;
     dropZone: HTMLDivElement;
     result: any;
+    selectedFile:any;
 
   async onMounted() {
     this.attachShadow({ mode: "open" });
@@ -21,8 +22,11 @@ export default class DragAndDropTask extends Task {
    
     //for later using random seed to determine how many files will be picked!
     //add data
-    filesArray.push(["hello.txt","Yes you downloaded the correct file!"],["bye.txt","The file says goodbye!"])
-    this.dropZone.innerHTML = "Drag and Drop file '"+filesArray[0][0]+"' from Downloads";
+    filesArray.push(["hello.txt","Yes you downloaded the correct file!"],["bye.txt","The file says goodbye!"],["ciao.txt","File is correct"],["adios.txt","File es correcto"])
+    randomSeed = Math.floor(Math.random() * Math.floor(filesArray.length));
+    this.selectedFile = filesArray[randomSeed];
+
+    this.dropZone.innerHTML = "Drag and Drop file '"+this.selectedFile[0]+"' from Downloads";
     this.backButton.hidden = true;
 
     this.dropZone.addEventListener("dragover",(e) => {
@@ -43,7 +47,7 @@ export default class DragAndDropTask extends Task {
         console.log("dropped");
         var files = e.dataTransfer.files;
 
-        this.result = await checkUpload(files,filesArray[0]);
+        this.result = await checkUpload(files,this.selectedFile);
     
         this.dropZone.style.background = this.result[0]?"green":"red";
         this.dropZone.innerHTML = this.result[1].toString();
@@ -54,7 +58,7 @@ export default class DragAndDropTask extends Task {
     this.backButton.addEventListener("click", (e)=>{
         this.finish(this.result[0]);;
     })
-    //download(filesArray[0]);
+    download(this.selectedFile);
   }
 
   onUnmounting(): void | Promise<void> {}
