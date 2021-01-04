@@ -1,87 +1,85 @@
 <style>
-    *{
-        margin: 0;
-        padding: 0;
-    }
+  * {
+    margin: 0;
+    padding: 0;
+  }
 
-    h1, h2, h3{
-        color: white;
-        font-family: "Roboto", sans-serif;
-        text-align: center;
-    }
-    h1{
-        margin-top: 5%;
-        font-size: 100px;
-        font-weight: bold;
-    }
-    h2{
-        font-size: 50px;
-        font-weight: normal;
-    }
-    #nav{
-        width: 50%;
-        height: 30vh;
-        padding: 10px;
-        margin-top: 10vh;
-        margin-left: auto;
-        margin-right: auto;
-        border: 3px solid black;
-        border-radius: 25px;
-        background: rgba(255, 255, 255, 0.4);
-        align-content: center;
-    }
-    .button{
+  h1,
+  h2,
+  h3 {
+    color: white;
+    font-family: "Roboto", sans-serif;
+    text-align: center;
+  }
+  h1 {
+    margin-top: 5%;
+    font-size: 400%;
+    font-weight: bold;
+  }
+  h2 {
+    font-size: 300%;
+    font-weight: normal;
+  }
+  #container {
+    width: 50%;
+    padding: 20px;
+    margin-top: 10vh;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 25px;
+    background: rgba(255, 255, 255, 0.4);
+  }
 
-    }
-
-
-    #footer{
-        background: rgba(255, 255, 255, 0.6);
-        position: fixed;
-        left: 0;
-        bottom: -1.25%;
-        width: 100%;
-        height: 3.5%;
-        border-radius: 20px;
-        display:flow;
-
-    }
-    h3{
-        position:absolute;
-        bottom: 30px;
-        font-size: 30px;
-        text-align: center;
-    }
-    #left{
-        left: 10px;
-    }
-    #center{
-        left: 47%;
-    }
-    #right{
-        right: 20px;
-    }
+  #footer {
+    background: rgba(255, 255, 255, 0.6);
+    position: fixed;
+    left: 0;
+    bottom: -1.25%;
+    width: 100%;
+    height: 3.5%;
+    border-radius: 20px;
+    display: flow;
+  }
+  h3 {
+    position: absolute;
+    bottom: 40%;
+    font-size: 100%;
+    text-align: center;
+  }
+  #left {
+    left: 10px;
+  }
+  #center {
+    left: 47%;
+  }
+  #right {
+    right: 20px;
+  }
 </style>
 
 <div class="root">
-        <h1>WELCOME TO APIRUSH</h1>
-        <h2>THE BEST GAME EVER</h2>
+  <h1>WELCOME TO APIRUSH</h1>
+  <h2>THE BEST GAME EVER</h2>
 
-
-
-    <h2 style="margin-top: 150px; margin-bottom: 75px">TEXTINPUT</h2>
-    <div id = "nav">
-        <apirush-button class="button" id="enter-existing-game-button" label="ENTER EXISTING GAME" styleType="transparent"></apirush-button><br>
-        <apirush-button class="button" id="create-new-game-button" label="CREATE A NEW GAME" styleType="transparent"></apirush-button>
-
-    </div>
-    <div id="footer">
-        <h3 id="left">v1.0 APIRush</h3>
-        <h3 id="center">TEAMNAME</h3id>
-        <h3 id="right">Change Language: ENGLISH</h3>
-    </div>
-
-
-
-
+  <h2 style="margin-top: 150px; margin-bottom: 75px">TEXTINPUT</h2>
+  <div id="container">
+    <apirush-button
+      id="enter-existing-game-button"
+      label="ENTER EXISTING GAME"
+      styletype="transparent,xlarge"
+      onclick="/joinGame"
+    ></apirush-button
+    ><br />
+    <apirush-button
+      id="create-new-game-button"
+      label="CREATE A NEW GAME"
+      styletype="transparent,xlarge"
+      onclick="/newGame"
+    ></apirush-button>
+  </div>
+  <div id="footer">
+    <h3 id="left">v1.0 APIRush</h3>
+    <h3 id="center">TEAMNAME</h3>
+    <h3 id="right">Change Language: ENGLISH</h3>
+  </div>
 </div>
