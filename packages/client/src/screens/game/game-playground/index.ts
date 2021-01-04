@@ -1,10 +1,14 @@
 import Konva from "konva";
 import viewHtml from "./view.html";
-import { TaskOpts, Task as BaseTask, Task } from "../../../task";
+import { TaskOpts, Task as BaseTask } from "../../../task";
 import { TaskModule } from "../../../taskManager";
 import { HitContext } from "konva/types/Context";
 import { map } from "lodash";
 import { container, debug } from "webpack";
+import { MapI, MapStorage } from "@apirush/common/src/maps";
+import { Coordinate as Coord } from "@apirush/common/src/types";
+
+const cord = (x: number, y: number) => ({ x, y });
 
 /**
  * Use this to globally enable / disable all console outputs.
@@ -15,77 +19,6 @@ function debugPrint(x: any) {
     console.log(x);
   }
 }
-
-class Coord {
-  x: number;
-  y: number;
-
-  constructor(x: number, y: number) {
-    this.x = x;
-    this.y = y;
-  }
-}
-
-/**
- * Interface for the game map.
- */
-class GameMap {
-  map: string[];
-  possibleTasks: Coord[];
-  possibleSpawns: Coord[];
-  constructor(map?: string[], possibleTasks?: Coord[], possibleSpawns?: Coord[]) {
-    this.map = map;
-    this.possibleTasks = possibleTasks;
-    this.possibleSpawns = possibleSpawns;
-  }
-}
-
-/**
- * Maps are parsed rows -> columns.
- */
-var gameMap: GameMap = new GameMap();
-gameMap.map = [
-  "50x30" /*
-  "1W8O1W18O1W20O1W",
-  "1W8O1W18O1W20O1W",
-  "1W8O1W15O3O1W20O1W",
-  "5W3O17W3O1W10W9O2W",
-  "1W47O2W",
-  "1W47O2W",
-  "1W47O2W",
-  "1W4O45W",
-  "1W48O1W",
-  "1W48O1W",
-  "1W48O1W",
-  "13W5O3W3O20W5O1W",
-  "1W11O1W5O1W5O1W18O1W5O1W",
-  "1W11O1W5O1W5O1W18O1W5O1W",
-  "1W11O1W5O1W5O1W18O1W5O1W",
-  "1W11O1W5O7W18O1W5O1W",
-  "1W42O1W5O1W",
-  "1W42O1W5O1W",
-  "1W42O1W5O1W",
-  "1W42O1W5O1W",
-  "1W42O1W5O1W",
-  "5W4O15W3O10W5O8W",
-  "1W8O1W13O1W3O1W8O1W5O3W4O1W",
-  "1W8O1W26O1W12O1W",
-  "1W8O1W26O1W12O1W",
-  "1W8O1W26O1W12O1W",
-  "50W",*/,
-];
-gameMap.possibleTasks = [
-  new Coord(1, 2),
-  new Coord(10, 10),
-  new Coord(15, 15),
-  new Coord(11, 24),
-  new Coord(34, 24),
-  new Coord(47, 25),
-  new Coord(30, 2),
-  new Coord(46, 2),
-  new Coord(46, 20),
-  new Coord(11, 2),
-];
 
 /**
  * The element type of a specific field on the grid.
@@ -114,6 +47,13 @@ interface IPlayerMovedCB {
 }
 
 /**
+ * Interface for "player opens task" callback function.
+ */
+interface IOnTaskOpenCB {
+  (id: string): void;
+}
+
+/**
  * Interface for a task drawn on screen.
  */
 interface IPlaygroundTask {
@@ -121,6 +61,19 @@ interface IPlaygroundTask {
   isCompleted?: boolean;
   x?: number;
   y?: number;
+  id?: string;
+}
+
+class Task {
+  id: string;
+  position: Coord;
+  isCompleted: boolean;
+
+  constructor(id: string, position: Coord, isCompleted: boolean) {
+    this.id = id;
+    this.position = position;
+    this.isCompleted = isCompleted;
+  }
 }
 
 var gridSize: number = 20; // simple default value, overwritten later
@@ -134,30 +87,7 @@ var player: Player;
  */
 var baseLayer: Konva.Layer;
 var grid: GridObject[][];
-
-/**
- * List of currently active tasks. These are all the tasks the player
- * needs to complete in order to win the game.
- */
-var activeTasks: IPlaygroundTask[] = new Array();
-
-/**
- * Check for task completion (win state).
- */
-function checkTaskCompletion(): boolean {
-  var done: boolean = true;
-  activeTasks.forEach((task) => {
-    if (task.isCompleted == false) {
-      done = false;
-    }
-  });
-  if (done) {
-    alert("you won :)");
-    return false;
-  } else {
-    return true;
-  }
-}
+var tasks: Task[];
 
 /**
  * Defines the player and stores the associated layer we used to draw him.
@@ -179,6 +109,7 @@ export class Player {
   radius: number;
   playerID: number;
   public playerMovedCB: IPlayerMovedCB;
+  public onTaskOpenCB: IOnTaskOpenCB;
 
   constructor(x: number, y: number, col: string, layer: Konva.Layer, stage: Konva.Stage, playerID?: number) {
     this.x = x;
@@ -264,7 +195,7 @@ export class Player {
    * Manual collision detection, checks collisions around the new
    * player position.
    */
-  checkCollision(newPosY: number, newPosX: number): CollisionType {
+  checkCollision(newPosY: number, newPosX: number, openTask?: boolean): CollisionType {
     var col: CollisionType = CollisionType.None;
     var radiusIncr: number = (this.radius - gridSize / 2) / gridSize;
     for (let i = -radiusIncr; i <= radiusIncr; i++) {
@@ -274,8 +205,13 @@ export class Player {
           if (newPos.type == ElementType.Wall) {
             col = CollisionType.Wall;
           } else if (newPos.type == ElementType.Task) {
-            newPos.shape.fill("red");
-            baseLayer.batchDraw();
+            if (openTask !== undefined) {
+              if (openTask) {
+                this.onTaskOpenCB(newPos.task);
+                newPos.shape.fill("red");
+                baseLayer.batchDraw();
+              }
+            }
             if (col != CollisionType.Wall) col = CollisionType.Task;
           }
         }
@@ -348,6 +284,10 @@ export class Player {
     this.playerMovedCB = cb;
   }
 
+  attachOnTaskOpenCb(cb: IOnTaskOpenCB) {
+    this.onTaskOpenCB = cb;
+  }
+
   /**
    * Moves the player to the specified position and redraws.
    *
@@ -374,9 +314,9 @@ export class Player {
 class GridObject {
   type: ElementType;
   shape: Konva.Shape;
-  task: IPlaygroundTask;
+  task: string;
 
-  constructor(type: ElementType, shape: Konva.Shape, task?: IPlaygroundTask) {
+  constructor(type: ElementType, shape: Konva.Shape, task?: string) {
     this.type = type;
     this.shape = shape;
     if (task !== undefined) this.task = task;
@@ -385,6 +325,7 @@ class GridObject {
 
 export default class GamePlayground extends BaseTask {
   stage: Konva.Stage;
+  map: MapI;
   constructor(opts: TaskOpts) {
     super(opts);
   }
@@ -397,7 +338,10 @@ export default class GamePlayground extends BaseTask {
     window.addEventListener("resize", (event) => {
       this.setupGrid();
     });
-    this.setupGrid();
+    //this.setupGrid();
+
+    /* DEMO */
+    this.setMap(MapStorage.map1);
   }
 
   onUnmounting() {
@@ -412,16 +356,29 @@ export default class GamePlayground extends BaseTask {
     return newPlayer;
   }
 
-  setMap(width: number, height: number, map?: GameMap) {
-    gridLength = width;
-    gridRows = height;
-    if (map !== undefined)
-      if (map.map !== undefined) gameMap = map;
-      else {
-        map.map = [gridLength.toString() + "x" + gridRows.toString()];
-        gameMap = map;
+  setPlayer(x: number, y: number, col: string, cb: IPlayerMovedCB, id?: number): Player {
+    var playerLayer = new Konva.Layer();
+    player = new Player(20, 20, "orange", playerLayer, this.stage, 0);
+    return player;
+  }
+
+  setTaskComplete(id: string) {
+    tasks.forEach((task) => {
+      if (task.id == id) {
+        var gridElement = grid[task.position.y][task.position.x];
+        gridElement.shape.fill("green");
+        task.isCompleted = true;
       }
-    else gameMap = new GameMap([gridLength.toString() + "x" + gridRows.toString()]);
+    });
+  }
+
+  setMap(map: MapI) {
+    if (map !== undefined) {
+      this.map = map;
+      gridLength = map.width;
+      gridRows = map.height;
+      this.setupGrid();
+    }
   }
 
   /**
@@ -472,123 +429,83 @@ export default class GamePlayground extends BaseTask {
     /**
      * Parse the map.
      */
-    gameMap.map.forEach((row) => {
+    debugPrint("Empty map mode - width: " + this.map.width + ", height: " + this.map.height);
+    for (let h = 0; h < this.map.height; h++) {
       gridRow = new Array();
-      var mult: string = "";
-      var x_iter: number = 0;
-      var gridRepeat: boolean = false;
-      var gridWidth: number = 0;
-      debugPrint("Parsing row: " + y);
-      for (let i = 0; i < row.length; i++) {
-        /* Look for multipliers */
-        if (row.charAt(i) != "W" && row.charAt(i) != "O" && row.charAt(i) != "T" && row.charAt(i) != "x") {
-          mult = mult + row.charAt(i);
+      for (let w = 0; w < this.map.width; w++) {
+        if (w != 0 && h != 0 && w != this.map.width - 1 && h != this.map.height - 1) {
+          gridRow.push(
+            new GridObject(
+              ElementType.OpenSpace,
+              this.drawRect(baseLayer, this.stage, w * gridSize, y * gridSize, ElementType.OpenSpace),
+            ),
+          );
         } else {
-          if (mult == "") mult = "1";
-          if (mult != "" && Number(mult) > 0) {
-            for (let j = 0; j < Number(mult); j++) {
-              switch (row.charAt(i)) {
-                case "W":
-                  gridRow.push(
-                    new GridObject(
-                      ElementType.Wall,
-                      this.drawRect(baseLayer, this.stage, x_iter * gridSize, y * gridSize, ElementType.Wall),
-                    ),
-                  );
-                  break;
-                case "O":
-                  gridRow.push(
-                    new GridObject(
-                      ElementType.OpenSpace,
-                      this.drawRect(baseLayer, this.stage, x_iter * gridSize, y * gridSize, ElementType.OpenSpace),
-                    ),
-                  );
-                  break;
-                case "x":
-                  gridRepeat = true;
-                  gridWidth = Number(mult);
-              }
-              if (x_iter == 0 && DEBUG_MODE)
-                this.drawText(baseLayer, this.stage, x_iter * gridSize + 1, y * gridSize + 1, y.toString());
-              if (y == 0 && DEBUG_MODE)
-                this.drawText(baseLayer, this.stage, x_iter * gridSize + 1, y * gridSize + 1, x_iter.toString());
-
-              x_iter++;
-            }
-            mult = "";
-          }
+          /* Automatically place walls around the specified size */
+          gridRow.push(
+            new GridObject(
+              ElementType.Wall,
+              this.drawRect(baseLayer, this.stage, w * gridSize, y * gridSize, ElementType.Wall),
+            ),
+          );
         }
+        /* Debug grid indicators */
+        if (w == 0 && DEBUG_MODE)
+          this.drawText(baseLayer, this.stage, w * gridSize + 1, y * gridSize + 1, h.toString());
+        if (h == 0 && DEBUG_MODE)
+          this.drawText(baseLayer, this.stage, w * gridSize + 1, y * gridSize + 1, w.toString());
       }
-      /* If the row parsing is done and gridRepeat was set to true we loop through the required size */
-      if (gridRepeat) {
-        debugPrint("gridRepeat mode - width: " + gridWidth + ", height: " + Number(mult));
-        for (let h = 0; h < Number(mult); h++) {
-          gridRow = new Array();
-          for (let w = 0; w < gridWidth; w++) {
-            if (w != 0 && h != 0 && w != gridWidth - 1 && h != Number(mult) - 1) {
-              gridRow.push(
-                new GridObject(
-                  ElementType.OpenSpace,
-                  this.drawRect(baseLayer, this.stage, w * gridSize, y * gridSize, ElementType.OpenSpace),
-                ),
-              );
-            } else {
-              /* Automatically place walls around the specified size */
-              gridRow.push(
-                new GridObject(
-                  ElementType.Wall,
-                  this.drawRect(baseLayer, this.stage, w * gridSize, y * gridSize, ElementType.Wall),
-                ),
-              );
-            }
-            /* Debug grid indicators */
-            if (w == 0 && DEBUG_MODE)
-              this.drawText(baseLayer, this.stage, w * gridSize + 1, y * gridSize + 1, h.toString());
-            if (h == 0 && DEBUG_MODE)
-              this.drawText(baseLayer, this.stage, w * gridSize + 1, y * gridSize + 1, w.toString());
-          }
 
-          grid.push(gridRow);
-          y += 1;
-          //this.stage.height(this.stage.height() + gridSize);
-        }
-        gridRepeat = false;
-      } else {
-        grid.push(gridRow);
-        y += 1;
-        x_iter = 0;
-        //this.stage.height(this.stage.height() + gridSize);
-      }
-    });
+      grid.push(gridRow);
+      y += 1;
+      //this.stage.height(this.stage.height() + gridSize);
+    }
 
     this.stage.add(baseLayer);
 
+    /* Draw all the specified walls */
+    this.map.walls.forEach((wall) => {
+      this.addWall(wall);
+    });
+
     /* DEMO - Adding tasks in all possible locations */
-    debugPrint("Adding Tasks ...");
-    gameMap.possibleTasks.forEach((coord) => {
-      debugPrint(coord);
-      var newPos = grid[coord.y][coord.x];
+
+    for (var key in this.map.taskPositions) {
+      debugPrint(
+        "Adding task [" +
+          key +
+          "] on coordinates (X,Y) [" +
+          this.map.taskPositions[key].x +
+          ", " +
+          this.map.taskPositions[key].y +
+          "]",
+      );
+      var newPos = grid[this.map.taskPositions[key].y][this.map.taskPositions[key].x];
       if (newPos !== undefined) {
         newPos.shape.fill("purple");
         newPos.type = ElementType.Task;
+        newPos.task = key;
+        if (tasks === undefined) tasks = new Array();
+        tasks.push(new Task(key, cord(this.map.taskPositions[key].x, this.map.taskPositions[key].y), false));
       }
-    });
-    baseLayer.batchDraw();
+    }
 
-    /* Create demo player */
+    /* DEMO IMPLEMENTATION BLOCK
+    // PLAYER
     var playerLayer = new Konva.Layer();
     player = new Player(20, 20, "orange", playerLayer, this.stage, 0);
 
-    /* Attach demo callback */
+    // CALLBACK
     player.attachCallback(function (x: number, y: number): void {
       debugPrint("Player X: " + x + "; Y: " + y);
     });
 
-    /* Add demo wall */
+    // + WALL
     this.addWall([new Coord(5, 17), new Coord(10, 17), new Coord(10, 22), new Coord(30, 22)]);
 
-    /* Demo remove wall */
+    // - WALL
     this.removeWall([new Coord(10, 29), new Coord(27, 29)]);
+    */
   }
 
   /**
@@ -640,27 +557,6 @@ export default class GamePlayground extends BaseTask {
     });
 
     layer.add(elem);
-  }
-
-  /**
-   * Add a single task to the board and draw it.
-   *
-   * Returns true if the task was added and false on error / no free space.
-   */
-  addTask(task: IPlaygroundTask): boolean {
-    var res: boolean = false;
-    gameMap.possibleTasks.forEach((coord) => {
-      var elem = grid[coord.y][coord.x];
-      if (elem !== undefined) {
-        elem.type = ElementType.Task;
-        elem.shape.fill("yellow");
-        elem.shape.stroke("black");
-        activeTasks.push(task);
-        res = true;
-      }
-    });
-    baseLayer.batchDraw();
-    return res;
   }
 
   /**
@@ -754,6 +650,13 @@ export default class GamePlayground extends BaseTask {
       case 68:
         player.moveRight(1);
         break; // D
+      case 32:
+        if (player.checkCollision(player.y, player.x, true) == CollisionType.Task) {
+          debugPrint("[SPCBR] pressed on player position: " + player.x + "," + player.y + " returns TASK in proximity");
+        } else {
+          debugPrint("[SPCBR] pressed on player position: " + player.x + "," + player.y + " ... no task in prox");
+        }
+        break;
     }
     player.redraw();
   }

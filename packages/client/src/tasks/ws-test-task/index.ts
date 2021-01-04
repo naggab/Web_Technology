@@ -1,7 +1,7 @@
 import viewHtml from "./view.html";
-import { GameSession } from "../../gameSession";
+import { ServerSession } from "../../serverSession";
 import { Task, TaskOpts } from "../../task";
-import { GameEvent, GameEventOp } from "@apirush/common";
+import { Event, GameEventOp } from "@apirush/common";
 
 export default class WsTestTask extends Task {
   nameInput: HTMLInputElement;
@@ -11,7 +11,7 @@ export default class WsTestTask extends Task {
   movementInput: HTMLInputElement;
   movementSendButton: HTMLButtonElement;
 
-  session: GameSession | null = null;
+  session: ServerSession | null = null;
 
   constructor(opts: TaskOpts) {
     super(opts);
@@ -20,7 +20,7 @@ export default class WsTestTask extends Task {
     this.onSendActionClicked = this.onSendActionClicked.bind(this);
   }
 
-  onGameEvent(ev: GameEvent) {
+  onGameEvent(ev: Event) {
     const entry = document.createElement("div");
     entry.innerText = JSON.stringify(ev);
     this.msgList.appendChild(entry);
@@ -37,7 +37,7 @@ export default class WsTestTask extends Task {
     this.msgList.innerHTML = "";
     const name = this.nameInput.value;
     try {
-      this.session = new GameSession(name);
+      this.session = new ServerSession();
       this.session.subscribeToAll(this.onGameEvent);
 
       await this.session.connect();
@@ -53,13 +53,10 @@ export default class WsTestTask extends Task {
     if (!this.session) {
       return;
     }
-    const location = this.movementInput.value;
 
-    const event: GameEvent<GameEventOp.DEMO> = {
-      op: GameEventOp.DEMO,
-      payload: {
-        msg: location,
-      },
+    const event: Event<GameEventOp.GAME_STARTED> = {
+      op: GameEventOp.GAME_STARTED,
+      payload: {},
     };
 
     this.session.send(event);
