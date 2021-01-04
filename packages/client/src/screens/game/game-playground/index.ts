@@ -1,6 +1,6 @@
 import Konva from "konva";
 import viewHtml from "./view.html";
-import { TaskOpts, Task as BaseTask, Task } from "../../../task";
+import { TaskOpts, Task as BaseTask } from "../../../task";
 import { TaskModule } from "../../../taskManager";
 import { HitContext } from "konva/types/Context";
 import { map } from "lodash";
