@@ -90,31 +90,6 @@ var grid: GridObject[][];
 var tasks: Task[];
 
 /**
- * List of currently active tasks. These are all the tasks the player
- * needs to complete in order to win the game.
- */
-//var activeTasks: IPlaygroundTask[] = new Array();
-
-/**
- * Check for task completion (win state).
- */
-/*
-function checkTaskCompletion(): boolean {
-  var done: boolean = true;
-  activeTasks.forEach((task) => {
-    if (task.isCompleted == false) {
-      done = false;
-    }
-  });
-  if (done) {
-    alert("you won :)");
-    return false;
-  } else {
-    return true;
-  }
-}*/
-
-/**
  * Defines the player and stores the associated layer we used to draw him.
  * The player layer is different to the base layer for redrawing purposes.
  *
@@ -231,10 +206,12 @@ export class Player {
             col = CollisionType.Wall;
           } else if (newPos.type == ElementType.Task) {
             if (openTask !== undefined) {
-              if (openTask) this.onTaskOpenCB(newPos.task);
+              if (openTask) {
+                this.onTaskOpenCB(newPos.task);
+                newPos.shape.fill("red");
+                baseLayer.batchDraw();
+              }
             }
-            //newPos.shape.fill("red");
-            //baseLayer.batchDraw();
             if (col != CollisionType.Wall) col = CollisionType.Task;
           }
         }
@@ -513,31 +490,22 @@ export default class GamePlayground extends BaseTask {
       }
     }
 
-    /*
-    debugPrint("Adding Tasks ...");
-    this.map.taskPositions.forEach(([id: string]:coord) => {
-      debugPrint(coord);
-      var newPos = grid[coord.y][coord.x];
-      if (newPos !== undefined) {
-        newPos.shape.fill("purple");
-        newPos.type = ElementType.Task;
-      }
-    });
-    baseLayer.batchDraw();*/
+    /* DEMO IMPLEMENTATION BLOCK
+    // PLAYER
+    var playerLayer = new Konva.Layer();
+    player = new Player(20, 20, "orange", playerLayer, this.stage, 0);
 
-    /* Create demo player */
-    /*var playerLayer = new Konva.Layer();
-    player = new Player(20, 20, "orange", playerLayer, this.stage, 0);*/
-
-    /* Attach demo callback */
-    /*player.attachCallback(function (x: number, y: number): void {
+    // CALLBACK
+    player.attachCallback(function (x: number, y: number): void {
       debugPrint("Player X: " + x + "; Y: " + y);
-    });*/
+    });
 
-    //this.addWall([new Coord(5, 17), new Coord(10, 17), new Coord(10, 22), new Coord(30, 22)]);
+    // + WALL
+    this.addWall([new Coord(5, 17), new Coord(10, 17), new Coord(10, 22), new Coord(30, 22)]);
 
-    /* Demo remove wall */
-    //this.removeWall([new Coord(10, 29), new Coord(27, 29)]);
+    // - WALL
+    this.removeWall([new Coord(10, 29), new Coord(27, 29)]);
+    */
   }
 
   /**
@@ -590,28 +558,6 @@ export default class GamePlayground extends BaseTask {
 
     layer.add(elem);
   }
-
-  /**
-   * Add a single task to the board and draw it.
-   *
-   * Returns true if the task was added and false on error / no free space.
-   */
-  /*
-  addTask(task: IPlaygroundTask): boolean {
-    var res: boolean = false;
-    gameMap.possibleTasks.forEach((coord) => {
-      var elem = grid[coord.y][coord.x];
-      if (elem !== undefined) {
-        elem.type = ElementType.Task;
-        elem.shape.fill("yellow");
-        elem.shape.stroke("black");
-        activeTasks.push(task);
-        res = true;
-      }
-    });
-    baseLayer.batchDraw();
-    return res;
-  }*/
 
   /**
    * Adds a single wall to the board and draw it.
@@ -705,7 +651,7 @@ export default class GamePlayground extends BaseTask {
         player.moveRight(1);
         break; // D
       case 32:
-        if (player.checkCollision(player.y, player.x) == CollisionType.Task) {
+        if (player.checkCollision(player.y, player.x, true) == CollisionType.Task) {
           debugPrint("[SPCBR] pressed on player position: " + player.x + "," + player.y + " returns TASK in proximity");
         } else {
           debugPrint("[SPCBR] pressed on player position: " + player.x + "," + player.y + " ... no task in prox");
