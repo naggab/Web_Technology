@@ -28,23 +28,31 @@ export class Button extends HTMLElement {
     return (styleList.split(",") as ButtonStyleType[]) || ["white"];
   }
 
+  get onClick() {
+    const href = this.getAttribute("onClick");
+    if (href != null) {
+      return href;
+    }
+  }
+
   attributeChangedCallback(name, oldValue, newValue) {
-    console.log("attributeChangedCallback",name,oldValue,newValue);
     switch (name) {
       case "label":
         this._a.innerHTML = newValue;
         break;
       case "styletype":
-        console.log(this.styletype);
         this._a.className = "";
         this._a.classList.add(...this.styletype);
+        break;
       default:
         break;
     }
   }
+
   connectedCallback() {
     this._a.innerHTML = this.label;
     this._a.classList.add(...this.styletype);
+    this._a.href = this.onClick;
   }
 }
 

@@ -39,3 +39,4 @@ pids
 *.pid.lock
 packages/server/coverage/
 .idea/discord.xml
+yarn.lock

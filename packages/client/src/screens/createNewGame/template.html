@@ -1,20 +1,88 @@
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+  }
+
+  h1,
+  h2,
+  h3 {
+    color: white;
+    font-family: "Roboto", sans-serif;
+    text-align: center;
+  }
+
+  h1 {
+    margin-top: 5%;
+    font-size: 400%;
+    font-weight: bold;
+    margin-bottom: 5%;
+  }
+
+  h2 {
+    font-size: 300%;
+    font-weight: normal;
+    margin-bottom: 5%;
+  }
+  .container {
+    width: 50%;
+    height: 50vh;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 25px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 20px;
+  }
+  .container > * {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 40%;
+  }
+  .drop_down {
+    background-color: transparent;
+    color: white;
+    padding: 5px;
+  }
+
+  input {
+    background-color: transparent;
+    color: white;
+  }
+
+  #max_players {
+    width: 10%;
+  }
+</style>
+
 <div class="root">
-    <div>
-        <h1>CREATE HERE NEW GAME</h1>
-    </div>
-    <div>
-        <h2>blablabla</h2>
-    </div>
-    <nav class="nav">
-        <a href="/" class="nav_link" style="display:none" data-link>Welcome</a>
-        <a href="/joinGame" class="nav_link" data-link>ENTER EXISTING GAME</a>
-        <a href="/newGame" class="nav_link" data-link>CREATE A NEW GAME</a>
-        <a href="/showTasks" class="nav_link">SHOW ALL TASKS</a>
+  <div>
+    <h1>CREATE HERE NEW GAME</h1>
+  </div>
+  <div>
+    <h2>TEXTINPUT</h2>
+  </div>
+  <div class="container">
+    <h3>ENTER NAME</h3>
+    <input type="text" content="CHOOSE NAME" />
+    <h3>LANGUAGE</h3>
+    <select class="drop_down">
+      <option label="Deutsch"></option>
+      <option label="Englisch"></option>
+    </select>
 
+    <h3>NUMBER OF MAX PLAYERS</h3>
+    <select id="max_players" class="drop_down">
+      <option label="5"></option>
+      <option label="10"></option>
+    </select>
 
-    </nav>
-
-    <!--<apirush-button id="enter-existing-game-button" label="Enter existing game"></apirush-button>
-    <apirush-button id="create-new-game-button" label="Create new game"></apirush-button>-->
-
+    <h3>CODE: ??????</h3>
+    <apirush-button
+      id="enter-existing-game-button"
+      label="CREATE GAME"
+      styletype="green"
+      onclick="/joinLobby"
+    ></apirush-button>
+  </div>
 </div>
