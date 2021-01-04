@@ -1,3 +1,5 @@
+import { MapStorage } from "./maps";
+
 export type PlayerIdType = number;
 
 export type Coordinate = {
@@ -10,9 +12,10 @@ export type PlayerInGameI = {
   name: string;
   color: string;
   position: Coordinate;
+  bibNumber: number;
 };
 
-export type PlayerInLobbyI = Omit<PlayerInGameI, "color" | "position">;
+export type PlayerInLobbyI = Omit<PlayerInGameI, "color" | "position" | "bibNumber">;
 
 export type GameIdType = string;
 
@@ -25,4 +28,5 @@ export type GameDetails = {
   playersCount: number;
   maxPlayersCount: number;
   seed: number;
+  map: keyof typeof MapStorage;
 };

@@ -24,7 +24,6 @@ type RpcResponseList = {
 
 export class ServerSession {
   ws: WebSocket | null = null;
-  playerName: string;
 
   private subscribers: SubscriberList = {};
   private rpcQueue: RpcResponseList = {};

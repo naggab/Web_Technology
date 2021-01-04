@@ -12,6 +12,7 @@ import {
 import { GameMaster } from "./gameMaster";
 import { ERR_PLAYER_NOT_EXISTENT, PLAYER_COLORS } from "./constants";
 import { GameI } from "./gameI";
+import { MapStorage } from "@apirush/common/src/maps";
 
 function getRandomInt(min, max) {
   min = Math.ceil(min);
@@ -25,6 +26,7 @@ export class Game implements GameI {
   readonly name: string;
   readonly seed: number;
   players: PlayersInGameMap;
+  readonly map: keyof typeof MapStorage;
 
   private state_: GameState;
 
@@ -34,6 +36,8 @@ export class Game implements GameI {
     this.gm = gm;
     this.seed = getRandomInt(1, 5000);
     this.players = new Map<PlayerIdType, PlayerInGame>();
+    const availableMaps = Object.keys(MapStorage);
+    this.map = availableMaps[this.seed % availableMaps.length] as any;
   }
 
   forEachPlayer(cb: (player: any) => void): void {
@@ -78,6 +82,7 @@ export class Game implements GameI {
       playersCount: this.players.size,
       seed: this.seed,
       state: this.state,
+      map: this.map,
     };
   }
 
@@ -96,11 +101,30 @@ export class Game implements GameI {
     return PLAYER_COLORS[0];
   }
 
+  findNextBibNumber() {
+    let bibNumber = 0;
+    while (true) {
+      let isUnused = true;
+      for (let [_, player] of this.players) {
+        if (player.bibNumber === bibNumber) {
+          isUnused = false;
+        }
+      }
+      if (isUnused) {
+        return bibNumber;
+      }
+      bibNumber++;
+    }
+  }
+
   addPlayer(details: PlayerInLobby): PlayerInGame {
+    const bibNumber = this.findNextBibNumber();
+    const position = MapStorage[this.map].spawns[bibNumber];
     const player: PlayerInGame = {
       ...details,
       color: this.findFreeColor(),
-      position: { x: 0, y: 0 },
+      bibNumber,
+      position,
     };
 
     this.players.set(details.id, player);
