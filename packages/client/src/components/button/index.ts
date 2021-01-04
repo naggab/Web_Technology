@@ -53,7 +53,9 @@ export class Button extends HTMLElement {
   connectedCallback() {
     this._a.innerHTML = this.label;
     this._a.classList.add(...this.styletype);
-    this._a.href = this.onClick;
+    if(this.onClick) {
+      this._a.href = this.onClick;
+    }
   }
 }
 
