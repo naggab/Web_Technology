@@ -1,6 +1,6 @@
 import { GameDetails, GameIdType, PlayerIdType, PlayerInGameI, Coordinate } from "./types";
 
-export enum CommandOps {
+export enum CommandOp {
   HELLO = "HELLO",
   LIST_GAMES = "LIST_GAMES",
   CREATE_GAME = "CREATE_GAME",
@@ -11,41 +11,46 @@ export enum CommandOps {
   DECLARE_WIN = "DECLARE_WIN",
 }
 
-export type CommandOp = typeof CommandOps[keyof typeof CommandOps];
+export interface CommandOpParamsMap {
+  [CommandOp.HELLO]: { name: string };
+  [CommandOp.LIST_GAMES]: {};
+  [CommandOp.CREATE_GAME]: { name: string };
+  [CommandOp.JOIN_GAME]: { id: GameIdType };
 
-export type CommandRequest =
-  | Request<CommandOps.HELLO, { name: string }>
-  | Request<CommandOps.LIST_GAMES>
-  | Request<CommandOps.CREATE_GAME, { name: string }>
-  | Request<CommandOps.JOIN_GAME, { id: GameIdType }>
-  | Request<CommandOps.MOVE, { position: Coordinate }>
-  | Request<CommandOps.START_GAME>
-  | Request<CommandOps.ABORT_GAME>
-  | Request<CommandOps.DECLARE_WIN>;
+  [CommandOp.MOVE]: { position: Coordinate };
+  [CommandOp.START_GAME]: {};
+  [CommandOp.ABORT_GAME]: {};
+  [CommandOp.DECLARE_WIN]: {};
+}
 
-export type CommandResponse =
-  | SuccessResponseBody<CommandOps.HELLO, { id: string }>
-  | SuccessResponseBody<CommandOps.LIST_GAMES, { games: GameDetails[] }>
-  | SuccessResponseBody<CommandOps.CREATE_GAME, { game: GameDetails; player: PlayerInGameI }>
-  | SuccessResponseBody<CommandOps.JOIN_GAME, { player: PlayerInGameI }>
-  | SuccessResponseBody<CommandOps.MOVE>
-  | SuccessResponseBody<CommandOps.START_GAME>
-  | SuccessResponseBody<CommandOps.ABORT_GAME>
-  | SuccessResponseBody<CommandOps.DECLARE_WIN>;
+export interface CommandOpResultMap {
+  [CommandOp.HELLO]: { id: number };
+  [CommandOp.LIST_GAMES]: { games: GameDetails[] };
+  [CommandOp.CREATE_GAME]: { game: GameDetails; player: PlayerInGameI };
+  [CommandOp.JOIN_GAME]: { player: PlayerInGameI };
+
+  [CommandOp.MOVE]: {};
+  [CommandOp.START_GAME]: {};
+  [CommandOp.ABORT_GAME]: {};
+  [CommandOp.DECLARE_WIN]: {};
+}
 
 export interface Respondable {
   /** Matches response with request it replies to. */
   id: string;
 }
 
-export interface RequestBody<Op extends CommandOps, Data extends {} = {}> {
+export interface RequestBody<Op extends CommandOp, Data = CommandOpParamsMap[Op]> {
   op: Op;
   params: Data;
 }
 
-export interface Request<Op extends CommandOps, Data extends {} = {}> extends RequestBody<Op, Data>, Respondable {}
+export interface Request<Op extends CommandOp> extends RequestBody<Op>, Respondable {}
 
-export interface SuccessResponseBody<Op extends CommandOps, Data extends {} = {}> {
+export interface SuccessResponseBody<
+  Op extends CommandOp,
+  Data extends CommandOpResultMap[Op] = CommandOpResultMap[Op]
+> {
   op: Op;
   result: Data;
 }
@@ -54,8 +59,6 @@ export interface ErrorResponseBody {
   error: string;
 }
 
-export interface SuccessResponse<Op extends CommandOps, Data extends {} = {}>
-  extends SuccessResponseBody<Op, Data>,
-    Respondable {}
+export interface SuccessResponse<Op extends CommandOp> extends SuccessResponseBody<Op>, Respondable {}
 
 export interface ErrorResponse extends ErrorResponseBody, Respondable {}

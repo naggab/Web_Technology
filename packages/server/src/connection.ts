@@ -2,19 +2,22 @@ import WebSocket from "ws";
 import { GameMasterI } from "./gameMasterI";
 import { PlayerInGame, PlayerInLobby } from "./types";
 import { GameI } from "./gameI";
-import { ERR_PLAYER_ALREADY_GREETED, ERR_PLAYER_DID_NOT_GREET } from "./constants";
+import { ERR_PLAYER_ALREADY_GREETED, ERR_PLAYER_DID_NOT_GREET, ERR_PLAYER_DID_NOT_JOIN_GAME } from "./constants";
 import {
-  CommandOps,
-  CommandRequest,
-  CommandResponse,
+  Request,
+  CommandOp,
   ErrorResponseBody,
   EventOp,
   Respondable,
   Event,
+  CommandOpParamsMap,
 } from "@apirush/common";
+import { CommandOpResultMap } from "@apirush/common";
+import { SuccessResponse } from "@apirush/common/src";
 
 export interface WebSocketI {
   send(data: any, cb?: (err?: Error) => void): void;
+  close();
 }
 
 export class Connection {
@@ -33,18 +36,18 @@ export class Connection {
     this.game = null;
   }
 
-  onMessage(msg: WebSocket.Data) {
+  onMessage<T extends CommandOp>(msg: WebSocket.Data) {
     console.log(`broker: onMessage`);
-    let req: CommandRequest;
+    let req: Request<any>;
     try {
-      req = JSON.parse(msg.toString()) as CommandRequest;
+      req = JSON.parse(msg.toString());
     } catch (e) {
       console.error("unable to parse message, will be ignored");
       return;
     }
-    let responseBody: Omit<CommandResponse, "id">;
+    let responseBody: CommandOpResultMap[T];
     try {
-      responseBody = this.executeRPC(req);
+      responseBody = this.executeRPC<T>(req.op, req.params);
     } catch (e) {
       this.respondWith({
         id: req.id,
@@ -54,9 +57,8 @@ export class Connection {
     }
     this.respondWith({
       id: req.id,
-      // @ts-ignore
-      op: responseBody.op,
-      result: responseBody.result,
+      op: req.op,
+      result: responseBody,
     });
   }
 
@@ -76,83 +78,75 @@ export class Connection {
 
   ensureJoinedGame() {
     if (!this.hasJoinedGame) {
-      throw ERR_PLAYER_DID_NOT_GREET;
+      throw ERR_PLAYER_DID_NOT_JOIN_GAME;
     }
   }
 
-  executeRPC(req: Exclude<CommandRequest, "id">) {
-    switch (req.op) {
-      case CommandOps.HELLO: {
+  executeRPC<Op extends CommandOp>(op: Op, untypedParams: CommandOpParamsMap[Op]): CommandOpResultMap[Op];
+  executeRPC<Op extends CommandOp>(op: Op, untypedParams: any): any {
+    switch (op) {
+      case CommandOp.HELLO: {
+        const params = untypedParams as CommandOpParamsMap[CommandOp.HELLO];
         if (this.hasGreeted) {
           throw ERR_PLAYER_ALREADY_GREETED;
         }
-        this.player = this.gm.createPlayer(req.params.name, this.sendEvent.bind(this));
+        this.player = this.gm.createPlayer(params.name, this.sendEvent.bind(this));
         return {
-          op: req.op,
-          result: { id: this.player.id },
+          id: this.player.id,
         };
       }
-      case CommandOps.LIST_GAMES: {
+      case CommandOp.LIST_GAMES: {
         const games = this.gm.getGameList();
         return {
-          op: req.op,
-          result: { games },
+          games,
         };
       }
-      case CommandOps.CREATE_GAME: {
+      case CommandOp.CREATE_GAME: {
         this.ensureGreeted();
-        const { game, player } = this.gm.createGameAndJoin(req.params.name, this.player);
+        const params = untypedParams as CommandOpParamsMap[CommandOp.CREATE_GAME];
+
+        const { game, player } = this.gm.createGameAndJoin(params.name, this.player);
         this.game = game;
         this.player = player;
         return {
-          op: req.op,
-          result: { game: this.game.details, player: this.player },
+          game: this.game.details,
+          player: this.player,
         };
       }
-      case CommandOps.JOIN_GAME: {
+      case CommandOp.JOIN_GAME: {
         this.ensureGreeted();
-        const { id } = req.params;
+        const params = untypedParams as CommandOpParamsMap[CommandOp.JOIN_GAME];
+        const { id } = params;
         this.player = this.gm.addPlayerToGame(id, this.player.id);
         return {
-          op: req.op,
-          result: { player: this.player },
+          player: this.player,
         };
       }
-      case CommandOps.MOVE: {
+      case CommandOp.MOVE: {
         this.ensureGreeted();
         this.ensureJoinedGame();
-        this.game.movePlayer(this.player.id, req.params.position);
-        return {
-          op: req.op,
-          result: {},
-        };
+        const params = untypedParams as CommandOpParamsMap[CommandOp.MOVE];
+
+        this.game.movePlayer(this.player.id, params.position);
+        return {};
       }
-      case CommandOps.START_GAME: {
+      case CommandOp.START_GAME: {
         this.ensureGreeted();
         this.ensureJoinedGame();
         this.game.start();
-        return {
-          op: req.op,
-          result: {},
-        };
+        return {};
       }
-      case CommandOps.ABORT_GAME: {
+      case CommandOp.ABORT_GAME: {
         this.ensureGreeted();
         this.ensureJoinedGame();
         this.game.abort();
-        return {
-          op: req.op,
-          result: {},
-        };
+        return {};
       }
-      case CommandOps.DECLARE_WIN: {
+      case CommandOp.DECLARE_WIN: {
         this.ensureGreeted();
         this.ensureJoinedGame();
         this.game.finish(this.player.id);
-        return {
-          op: req.op,
-          result: {},
-        };
+        return {};
       }
     }
   }
@@ -170,7 +164,7 @@ export class Connection {
 
   sendEvent<T extends EventOp>(evt: Event<T>) {}
 
-  respondWith(res: (CommandResponse | ErrorResponseBody) & Respondable) {
+  respondWith(res: (SuccessResponse<any> | ErrorResponseBody) & Respondable) {
     const dataStr = JSON.stringify(res);
     this.ws.send(dataStr);
   }

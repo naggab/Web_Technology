@@ -2,7 +2,7 @@ import { GameMaster } from "./gameMaster";
 import { PlayerInLobby } from "./types";
 import { Game } from "./game";
 import { Connection, WebSocketI } from "./connection";
-import { CommandOps } from "@apirush/common/src";
+import { CommandOp } from "@apirush/common/src";
 import WebSocket from "ws";
 import { ERR_PLAYER_ALREADY_GREETED } from "./constants";
 
@@ -41,14 +41,14 @@ describe("Connection", () => {
     conn.onMessage(
       JSON.stringify({
         id: "1",
-        op: CommandOps.HELLO,
+        op: CommandOp.HELLO,
         params: { name: DummyLobbyPlayer.name },
       }),
     );
 
     expect(respondWithMock).toHaveBeenCalledWith({
       id: "1",
-      op: CommandOps.HELLO,
+      op: CommandOp.HELLO,
       result: { id: DummyLobbyPlayer.id },
     });
   });
@@ -57,7 +57,7 @@ describe("Connection", () => {
     expect(() => {
       const response = conn.executeRPC({
         id: "1",
-        op: CommandOps.HELLO,
+        op: CommandOp.HELLO,
         params: { name: DummyLobbyPlayer.name },
       });
     }).toThrow(ERR_PLAYER_ALREADY_GREETED);
@@ -66,13 +66,13 @@ describe("Connection", () => {
   it("can handle LIST_GAMES", () => {
     const response = conn.executeRPC({
       id: "1",
-      op: CommandOps.LIST_GAMES,
+      op: CommandOp.LIST_GAMES,
       params: {},
     });
 
     expect(response).toBeDefined();
     expect(response.result).toBeDefined();
-    expect(response.op).toEqual(CommandOps.LIST_GAMES);
+    expect(response.op).toEqual(CommandOp.LIST_GAMES);
     expect(response.result.games).toEqual([Game1, Game2]);
   });
 });

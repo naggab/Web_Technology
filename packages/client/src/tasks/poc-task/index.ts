@@ -1,13 +1,13 @@
 import viewHtml from "./view.html";
 import { default as GamePlayground, Player } from "../../screens/game/game-playground";
-import { GameSession } from "../../gameSession";
+import { ServerSession } from "../../serverSession";
 import { Task, TaskOpts } from "../../task";
 import { Event, EventOp } from "@apirush/common";
-import { GameEventOp } from "@apirush/common/src";
+import { CommandOp, GameEventOp } from "@apirush/common/src";
 
 export default class POCTask extends Task {
   gamePlayground: GamePlayground;
-  gameSession: GameSession;
+  gameSession: ServerSession;
 
   currentPlayerId: number;
 
@@ -17,7 +17,7 @@ export default class POCTask extends Task {
     super(opts);
     this.otherPlayers = new Map();
     this.gamePlayground = new GamePlayground({ finishCb: () => {} });
-    this.gameSession = new GameSession("Player");
+    this.gameSession = new ServerSession();
     this.onPlayerMoveReceived = this.onPlayerMoveReceived.bind(this);
     this.sendPlayerMove = this.sendPlayerMove.bind(this);
     this.onPlayerJoined = this.onPlayerJoined.bind(this);
@@ -35,7 +35,7 @@ export default class POCTask extends Task {
     this.gameSession.subscribe(GameEventOp.PLAYER_MOVED, this.onPlayerMoveReceived);
     this.gameSession.subscribe(GameEventOp.PLAYER_JOINED, this.onPlayerJoined);
     this.gameSession.subscribe(GameEventOp.PLAYER_LEFT, this.onPlayerLeave);
-
+    (<any>window).srvSession = this.gameSession;
     this.gameSession
       .connect()
       .then(() => {
@@ -83,16 +83,7 @@ export default class POCTask extends Task {
   }
 
   sendPlayerMove(x: number, y: number) {
-    this.gameSession.send({
-      op: GameEventOp.PLAYER_MOVED,
-      payload: {
-        id: this.currentPlayerId,
-        position: {
-          x,
-          y,
-        },
-      },
-    });
+    this.gameSession.sendRPC(CommandOp.MOVE, { position: { x, y } });
   }
 
   onUnmounting() {
