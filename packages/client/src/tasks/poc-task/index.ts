@@ -3,7 +3,7 @@ import { default as GamePlayground, Player } from "../../screens/game/game-playg
 import { ServerSession } from "../../serverSession";
 import { Task, TaskOpts } from "../../task";
 import { Event, EventOp } from "@apirush/common";
-import { CommandOp, GameEventOp } from "@apirush/common/src";
+import { CommandOp, GameEventOp, PlayerInGameI, Coordinate } from "@apirush/common/src";
 
 export default class POCTask extends Task {
   gamePlayground: GamePlayground;
@@ -30,7 +30,15 @@ export default class POCTask extends Task {
     this.shadowRoot.innerHTML = viewHtml;
 
     this.shadowRoot.appendChild(this.gamePlayground);
-    this.gamePlayground.getCurrentPlayer().attachCallback(this.sendPlayerMove);
+    let pig: PlayerInGameI = {
+      id: 0,
+      name: "test",
+      color: "orange",
+      position: { x: 20, y: 20 },
+      bibNumber: 0,
+    };
+    this.gamePlayground.setMyPlayer(pig, this.sendPlayerMove);
+    //this.gamePlayground.getCurrentPlayer().attachCallback(this.sendPlayerMove);
 
     this.gameSession.subscribe(GameEventOp.PLAYER_MOVED, this.onPlayerMoveReceived);
     this.gameSession.subscribe(GameEventOp.PLAYER_JOINED, this.onPlayerJoined);
@@ -48,7 +56,14 @@ export default class POCTask extends Task {
   }
 
   addForeignPlayer(id: number, x: number = 5, y: number = 5, color: string = "#EFEFEF") {
-    const newPlayer = this.gamePlayground.addPlayer(x, y, color, undefined, id);
+    let pig: PlayerInGameI = {
+      id: id,
+      name: "test",
+      color: color,
+      position: { x, y },
+      bibNumber: 0,
+    };
+    const newPlayer = this.gamePlayground.addForeignPlayer(pig);
     this.otherPlayers.set(id, newPlayer);
   }
 

@@ -7,6 +7,7 @@ import { map } from "lodash";
 import { container, debug } from "webpack";
 import { MapI, MapStorage } from "@apirush/common/src/maps";
 import { Coordinate as Coord } from "@apirush/common/src/types";
+import { PlayerInGameI } from "@apirush/common/src/types";
 
 const cord = (x: number, y: number) => ({ x, y });
 
@@ -53,17 +54,6 @@ interface IOnTaskOpenCB {
   (id: string): void;
 }
 
-/**
- * Interface for a task drawn on screen.
- */
-interface IPlaygroundTask {
-  taskModule: TaskModule;
-  isCompleted?: boolean;
-  x?: number;
-  y?: number;
-  id?: string;
-}
-
 class Task {
   id: string;
   position: Coord;
@@ -88,6 +78,12 @@ var player: Player;
 var baseLayer: Konva.Layer;
 var grid: GridObject[][];
 var tasks: Task[];
+
+// Layer for all other players
+var foreignPlayerLayer: Konva.Layer;
+
+// Keep a reference to all foreign players
+var foreignPlayers: Player[];
 
 /**
  * Defines the player and stores the associated layer we used to draw him.
@@ -129,6 +125,7 @@ export class Player {
       fill: col,
       stroke: "black",
       strokeWidth: 2,
+      name: playerID.toString(),
     });
 
     this.layer.add(this.model);
@@ -146,6 +143,7 @@ export class Player {
       fill: "white",
       alpha: 0.75,
       visible: true,
+      name: playerID.toString(),
     });
     this.tooltip.x(this.tooltip.x() + gridSize / 2 - this.tooltip.width() / 2);
     this.tooltip.y(this.tooltip.y() + gridSize / 2 - this.tooltip.height() / 2);
@@ -159,6 +157,7 @@ export class Player {
       fill: "black",
       cornerRadius: 5,
       opacity: 0.6,
+      name: playerID.toString(),
     });
 
     this.layer.add(this.tooltipShape);
@@ -348,20 +347,65 @@ export default class GamePlayground extends BaseTask {
     console.log(GamePlayground.name, "disconnected from DOM");
   }
 
-  addPlayer(x: number, y: number, col: string, cb: IPlayerMovedCB, id?: number): Player {
-    var playerLayer = new Konva.Layer();
-    const newPlayer = new Player(x, y, col, playerLayer, this.stage, id);
-
-    newPlayer.attachCallback(cb);
+  /**
+   * Add a foreign player to the game and keep a reference to the object.
+   *
+   * @param fpl Player information
+   */
+  addForeignPlayer(fpl: PlayerInGameI): Player {
+    if (!foreignPlayerLayer || !foreignPlayers) {
+      foreignPlayerLayer = new Konva.Layer();
+      foreignPlayers = new Array();
+    }
+    const newPlayer = new Player(fpl.position.x, fpl.position.y, fpl.color, foreignPlayerLayer, this.stage, fpl.id);
+    foreignPlayers.push(newPlayer);
     return newPlayer;
   }
 
-  setPlayer(x: number, y: number, col: string, cb: IPlayerMovedCB, id?: number): Player {
+  /**
+   * Removes a foreign player from the stage, clearing the reference to the object.
+   * Specifically, destroys every node in the foreignPlayerLayer whose name matches the playerID given in the
+   * reference to the player object, including the shape itself and its associated tooltip.
+   *
+   * @param fpl A reference to the player object that should be removed. ID and object must be identical.
+   */
+  removeForeignPlayer(fpl: Player): boolean {
+    var foundElem = false;
+    for (let i = 0; i < foreignPlayers.length; i++) {
+      if (foreignPlayers[i] == fpl && foreignPlayers[i].playerID == fpl.playerID) {
+        foreignPlayers.splice(i, 1);
+        foreignPlayerLayer
+          .find("." + fpl.playerID)
+          .toArray()
+          .forEach((node) => {
+            node.destroy();
+          });
+        foundElem = true;
+      }
+    }
+
+    return foundElem;
+  }
+
+  /**
+   * Set the current "main" player (myPlayer).
+   *
+   * @param mpl Player information
+   * @param cb Callback that is to be executed when the player executes a move command
+   */
+  setMyPlayer(mpl: PlayerInGameI, cb: IPlayerMovedCB): Player {
     var playerLayer = new Konva.Layer();
-    player = new Player(20, 20, "orange", playerLayer, this.stage, 0);
+    player = new Player(mpl.position.x, mpl.position.y, mpl.color, playerLayer, this.stage, mpl.id);
+
+    player.attachCallback(cb);
     return player;
   }
 
+  /**
+   * Mark a task as complete.
+   *
+   * @param id The task ID (string)
+   */
   setTaskComplete(id: string) {
     tasks.forEach((task) => {
       if (task.id == id) {
@@ -372,6 +416,11 @@ export default class GamePlayground extends BaseTask {
     });
   }
 
+  /**
+   * Change the currently active map and setup the grid accordingly.
+   *
+   * @param map Map information
+   */
   setMap(map: MapI) {
     if (map !== undefined) {
       this.map = map;
@@ -526,6 +575,7 @@ export default class GamePlayground extends BaseTask {
       width: gridSize,
       height: gridSize,
       fill: "gray",
+      opacity: 0.85,
     });
 
     if (DEBUG_MODE) {
@@ -534,7 +584,8 @@ export default class GamePlayground extends BaseTask {
     }
 
     if (type == ElementType.OpenSpace) {
-      elem.fill("white");
+      if (DEBUG_MODE) elem.fill("white");
+      else elem.fill("transparent");
     } else if (type == ElementType.Task) {
       elem.fill("yellow");
     }
@@ -621,6 +672,7 @@ export default class GamePlayground extends BaseTask {
             debugPrint("start_y: " + start_y + ", end_y: " + end_y + ", start_x: " + start_x + ", end_x: " + end_x);
             for (let i = start_y; i <= end_y; i++) {
               for (let j = start_x; j <= end_x; j++) {
+                grid[i][j].shape.destroy();
                 (grid[i][j].shape = this.drawRect(baseLayer, this.stage, j * gridSize, i * gridSize, elemType)),
                   (grid[i][j].type = elemType);
               }
