@@ -20,7 +20,9 @@ export class TextBox extends HTMLElement {
   attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
       case "label":
-        this.label.innerText = newValue;
+        if (this.label) {
+          this.label.innerText = newValue;
+        }
         break;
       default:
         break;

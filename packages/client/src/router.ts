@@ -4,13 +4,14 @@ import CreateNewGame from "./screens/createNewGame";
 import ShowTasks from "./screens/listAllTasks";
 import { Game } from "./screens/game";
 import Lobby from "./screens/lobby";
+import { ClientState } from "./masterOfDisaster";
 
 export function navigateTo(url) {
   history.pushState(null, null, url);
   router();
 }
 
-export async function router() {
+export async function router(state: ClientState) {
   console.debug("Router in action!!!!");
   const routes = [
     { path: "/", view: () => new Welcome() },
@@ -37,6 +38,6 @@ export async function router() {
     };
   }
   const screen = match.route.view();
-
-  document.querySelector("#app").innerHTML = await screen.getHtml();
+  document.querySelector("#app").innerHTML = "";
+  document.querySelector("#app").appendChild(screen);
 }

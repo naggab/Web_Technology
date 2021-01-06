@@ -1,4 +1,5 @@
 import "./components/button";
+import "./components/container";
 
 import { router, navigateTo } from "./router";
 import { MasterOfDisaster } from "./masterOfDisaster";

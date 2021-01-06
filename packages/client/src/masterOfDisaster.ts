@@ -6,7 +6,7 @@ type PlayerInGame = PlayerInGameI & {
   playgroundRef: Player;
 };
 
-type ClientState =
+export type ClientState =
   | "loading"
   | "error"
   | "welcome-start"
@@ -15,7 +15,6 @@ type ClientState =
   | "welcome-create-game"
   | "pre-game"
   | "in-game"
-  | "in-game-task"
   | "post-game";
 
 export class MasterOfDisaster {
@@ -52,7 +51,7 @@ export class MasterOfDisaster {
     return this.state_;
   }
 
-  setState(newState: ClientState) {
+  private setState(newState: ClientState) {
     this.state_ = newState;
     /** TODO:
        - change view
@@ -60,7 +59,32 @@ export class MasterOfDisaster {
        */
   }
 
-  joinGame(gameId: GameIdType, playerName: string) {}
+  userWantsToJoin(playerName: string) {
+    // TODO HELLO
+  }
 
-  createGame(gameName: string, playerName: string) {}
+  userWantsToCreate(playerName: string) {
+    // TODO HELLO
+  }
+
+  joinGame(gameId: GameIdType) {
+    // TODO JOIN_GAME
+  }
+
+  createGame(gameName: string) {
+    // TODO CREATE_GAME
+  }
+
+  startGame() {
+    // TODO START_GAME
+  }
+
+  openTask(id: string): Promise<boolean> {
+    throw new Error("not implemented");
+    // taskManger -> get task
+    // display task
+    // count time elapsed
+    // store time in StatsStorage
+    // check if all tasks finished
+  }
 }

@@ -2,7 +2,7 @@ import AbstractScreen from "../AbstractScreen";
 import templateHTML from "./template.html";
 import "../../components/gameList";
 
-export default class extends AbstractScreen {
+class JoinGameScreen extends AbstractScreen {
   constructor() {
     super();
     this.setTitle("Enter Existing Game");
@@ -11,3 +11,5 @@ export default class extends AbstractScreen {
     return templateHTML;
   }
 }
+customElements.define("join-game-screen", JoinGameScreen);
+export default JoinGameScreen;
