@@ -162,7 +162,10 @@ export class Connection {
     }
   }
 
-  sendEvent<T extends EventOp>(evt: Event<T>) {}
+  sendEvent<T extends EventOp>(evt: Event<T>) {
+    const dataStr = JSON.stringify(evt);
+    this.ws.send(dataStr);
+  }
 
   respondWith(res: (SuccessResponse<any> | ErrorResponseBody) & Respondable) {
     const dataStr = JSON.stringify(res);

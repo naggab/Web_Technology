@@ -2,7 +2,7 @@ import { Event, EventOp } from "@apirush/common";
 import _uniqueId from "lodash/uniqueId";
 import { CommandOp, CommandOpParamsMap, CommandOpResultMap } from "@apirush/common";
 
-type SubscriberCallback<T extends EventOp> = (evt: Event<T>) => void;
+export type SubscriberCallback<T extends EventOp> = (evt: Event<T>) => void;
 type SubscriberEntry<T extends EventOp> = SubscriberCallback<T>;
 
 type RpcResponseCallback<T extends CommandOp> = (resp: CommandOpResultMap[T]) => void;

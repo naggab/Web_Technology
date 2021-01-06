@@ -1,0 +1,74 @@
+
+<style type="text/css">
+    .container {
+        width: 50%;
+        height: 50vh;
+        margin-left: auto;
+        margin-right: auto;
+        border-radius: 25px;
+        background: rgba(0, 0, 0, 0.4);
+        padding: 20px;
+    }
+    .container > * {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .game-list {
+        color: white;
+        font-size: 18px;
+    }
+    .game-list-entry {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 8px;
+        margin: 8px;
+        transition: all 100ms;
+
+    }
+    .game-list-entry:hover {
+        cursor: pointer;
+        background: rgba(0, 0, 0, 1);
+    }
+    .game-list-entry:after {
+        top: 0px;
+        left: 0px;
+        right: 0px;
+        bottom: 0px;
+        content: '';
+        position: absolute;
+        z-index: -1;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        border-radius: 5px;
+        transition: opacity 150ms ease-in-out;
+        box-shadow: 2px 2px 5px 2px rgba(239,239,239,0.51), -2px -2px 5px 2px rgba(239,239,239,0.51);
+    }
+    .game-list-entry:hover::after {
+        opacity: 1;
+    }
+    .game-list-entry .name {
+
+    }
+    .game-list-entry .playerCount {
+        font-weight: bold;
+    }
+</style>
+
+<template id="game-list-entry-template">
+    <li class="game-list-entry">
+        <div class="name">
+            {GAME_NAME}
+        </div>
+        <div class="playerCount">
+            {COUNT}
+        </div>
+    </li>
+</template>
+
+<ul class="game-list container">
+
+</ul>

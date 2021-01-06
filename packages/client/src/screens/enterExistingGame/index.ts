@@ -1,5 +1,6 @@
 import AbstractScreen from "../AbstractScreen";
 import templateHTML from "./template.html";
+import "../../components/gameList";
 
 export default class extends AbstractScreen {
   constructor() {

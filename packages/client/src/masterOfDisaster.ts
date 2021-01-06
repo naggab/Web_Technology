@@ -19,22 +19,32 @@ type ClientState =
   | "post-game";
 
 export class MasterOfDisaster {
-  private state_: ClientState = "loading";
+  private static instance_: MasterOfDisaster;
+  private state_: ClientState = "welcome-start";
   activeGame: GameDetails | null = null;
   myPlayer: PlayerInGame | null = null;
   foreignPlayers: Map<number, PlayerInGame>;
   readonly serverSession: ServerSession;
 
-  constructor() {
-    this.serverSession = new ServerSession();
-    this.serverSession
+  constructor(sess: ServerSession) {
+    this.serverSession = sess;
+  }
+
+  static getInstance() {
+    return this.instance_;
+  }
+
+  static async setup() {
+    const conn = new ServerSession();
+    return conn
       .connect()
       .then(() => {
-        this.setState("welcome-start");
+        MasterOfDisaster.instance_ = new MasterOfDisaster(conn);
+        return true;
       })
       .catch((e) => {
         console.error("unable to connect to server");
-        this.setState("error");
+        throw new Error("unable to connect");
       });
   }
 
@@ -54,5 +64,3 @@ export class MasterOfDisaster {
 
   createGame(gameName: string, playerName: string) {}
 }
-
-(<any>window).MOD = new MasterOfDisaster();

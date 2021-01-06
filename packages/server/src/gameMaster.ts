@@ -15,6 +15,12 @@ export class GameMaster implements GameMasterI {
 
   constructor() {
     this.games = new Map<GameIdType, GameI>();
+
+    const game1 = new GameMaster.GameConstructor("game_1", "Game1", this);
+    this.games.set("game_1", game1);
+    const game2 = new GameMaster.GameConstructor("game_2", "Game2", this);
+    this.games.set("game_2", game2);
+
     this.unassignedPlayers = new Map<PlayerIdType, PlayerInLobby>();
   }
 

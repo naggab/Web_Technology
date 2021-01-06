@@ -1,6 +1,7 @@
 import "./components/button";
 
 import { router, navigateTo } from "./router";
+import { MasterOfDisaster } from "./masterOfDisaster";
 
 function main() {
   document.body.style.backgroundImage = "/assets/img/bg.png";
@@ -19,7 +20,10 @@ document.addEventListener("DOMContentLoaded", () => {
       navigateTo(target.href);
     }
   });
-  router();
+  MasterOfDisaster.setup().then(() => {
+    (<any>window).MOD = MasterOfDisaster.getInstance();
+    router();
+  });
 });
 
 window.addEventListener("popstate", router);
