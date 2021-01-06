@@ -3,6 +3,9 @@ import { Player } from "./screens/game/game-playground";
 import { ServerSession } from "./serverSession";
 import { CommandOp } from "@apirush/common/src";
 import { router } from "./router";
+import { TaskIdentifier } from "./taskManager";
+import { MapStorage } from "@apirush/common/src/maps";
+import { StatsStorage } from "./statsStorage";
 
 export type ClientState =
   | "loading"
@@ -22,7 +25,7 @@ export class MasterOfDisaster {
   myPlayerId: number | null = null;
   myPlayer: PlayerInGameI | null = null;
   readonly serverSession: ServerSession;
-
+  readonly statsStorage: StatsStorage = new StatsStorage();
   constructor(sess: ServerSession) {
     this.serverSession = sess;
   }
@@ -144,14 +147,44 @@ export class MasterOfDisaster {
     this.setState("error");
   }
 
+  onTaskNeedsToBeOpened?: (taskId: TaskIdentifier) => Promise<{ time: number; success: boolean }>;
+
+  taskState: Map<string, boolean> = new Map<string, boolean>();
+
+  get allTasksCompleted() {
+    return Array.from(this.taskState.values()).every((finished) => finished === true);
+  }
+
+  async openTaskByIdentifier(id: TaskIdentifier) {
+    if (!this.onTaskNeedsToBeOpened) {
+      throw new Error("TaskOpener did not register itself");
+    }
+    return this.onTaskNeedsToBeOpened(id);
+  }
+
   async openTask(id: string): Promise<boolean> {
     this.ensureHelloSent();
     this.ensureInGame();
-    throw new Error("not implemented");
-    // taskManger -> get task
-    // display task
-    // count time elapsed
-    // store time in StatsStorage
-    // check if all tasks finished
+
+    const taskId = "drag-and-drop-task";
+
+    const result = await this.openTaskByIdentifier(taskId);
+    if (!result.success) {
+      return false;
+    }
+
+    this.statsStorage.taskCompleted(taskId, result.time);
+    this.taskState.set(id, true);
+
+    if (this.allTasksCompleted) {
+      try {
+        await this.serverSession.sendRPC(CommandOp.DECLARE_WIN, {});
+      } catch (e) {
+        console.error(e);
+        this.setState("error");
+        return;
+      }
+    }
+    return true;
   }
 }

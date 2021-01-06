@@ -1,5 +1,7 @@
-class StatsStorage {
-  taskCompleted(taskName: string, timeInMS: number) {
+import { TaskIdentifier } from "./taskManager";
+
+export class StatsStorage {
+  taskCompleted(taskName: TaskIdentifier, timeInMS: number) {
     // TODO
   }
 

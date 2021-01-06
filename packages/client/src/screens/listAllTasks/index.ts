@@ -1,12 +1,13 @@
 import AbstractScreen from "../AbstractScreen";
 import templateHTML from "./template.html";
 
-import { TaskManger, TaskModule } from "../../taskManager";
+import { TaskManger } from "../../taskManager";
+import { MasterOfDisaster } from "../../masterOfDisaster";
 
 const linkCollection = document.createElement("div");
 const taskWrapper = document.createElement("div");
 
-export default class extends AbstractScreen {
+class ListAllTasksScreen extends AbstractScreen {
   constructor() {
     super();
     this.setTitle("Welcome");
@@ -35,43 +36,25 @@ export default class extends AbstractScreen {
     document.body.appendChild(linkCollection);
     document.body.appendChild(taskWrapper);
 
-    const tasks = TaskManger.getTasks();
-
-    /**
-     * unmounts any previous task before creating and mounting a new task
-     **/
-    function mountTask(module: TaskModule) {
-      const instance = TaskManger.createTaskInstance(module, (duration, success) => {
-        if (success) {
-          alert(`task ${module.name} finished in ${duration}ms. Success: ${success}`);
-        }
-        taskWrapper.innerHTML = "";
-      });
-      taskWrapper.innerHTML = "";
-
-      taskWrapper.appendChild(instance);
-    }
+    const taskIds = TaskManger.getTaskIds();
 
     linkCollection.innerHTML = "";
     // create links in the 'LinkCollection' for every found task
-    for (let task of tasks) {
+    for (let taskId of taskIds) {
       const link = document.createElement("a");
-      link.onclick = () => {
-        mountTask(task);
+      link.onclick = (e) => {
+        e.preventDefault();
+        MasterOfDisaster.getInstance().openTaskByIdentifier(taskId);
       };
-      link.href = `#${task.name}`;
-      link.innerText = task.name;
+      link.href = "";
+      link.innerText = taskId;
       linkCollection.appendChild(link);
     }
 
-    // check if task is already selected by hash in url
-    if (window.location.hash) {
-      const taskName = window.location.hash.substring(1);
-      const task = TaskManger.findTask(taskName);
-      if (task) {
-        mountTask(task);
-      }
-    }
     return taskWrapper;
   }
 }
+
+customElements.define("list-all-tasks-screen", ListAllTasksScreen);
+
+export default ListAllTasksScreen;

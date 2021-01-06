@@ -2,61 +2,35 @@
  * defines name and importPath of one Task
  */
 import { Task, TaskFinishCallback } from "./task";
+import DragAndDropTask from "./tasks/drag-and-drop-task";
+import FillShapeTask from "./tasks/fill-shape-task";
 
-export interface TaskModule {
-  name: string;
-  importPath: string;
-}
+const TASK_LIST = {
+  "drag-and-drop-task": DragAndDropTask,
+  "fill-shape-task": FillShapeTask,
+} as const;
+
+export type TaskIdentifier = keyof typeof TASK_LIST;
 
 class TaskManagerClass {
-  private readonly taskResolverContext: __WebpackModuleApi.RequireContext;
+  constructor() {}
 
-  private readonly availableTasks: TaskModule[];
-
-  constructor() {
-    this.taskResolverContext = require.context("./tasks/", true, /\.\/[^\/]+\/index.ts$/);
-    this.availableTasks = this.resolveTasks();
+  getTaskIds(): TaskIdentifier[] {
+    return Object.keys(TASK_LIST) as any;
   }
 
-  /**
-   * Resolves all importable tasks by looking for folders inside ./tasks containing a index.ts file
-   */
-  private resolveTasks(): TaskModule[] {
-    const importPaths = this.taskResolverContext.keys();
-    return importPaths.map((importPath) => ({
-      importPath,
-      name: importPath.substring(2, importPath.length - "/index.ts".length),
-    }));
+  findTask(name: TaskIdentifier): typeof TASK_LIST[keyof typeof TASK_LIST] | null {
+    return TASK_LIST[name];
   }
 
-  getTasks() {
-    return [...this.availableTasks];
-  }
-
-  /**
-   * looks for a task inside a Array<TaskModule> by name
-   */
-  findTask(name: string): TaskModule | null {
-    for (let task of this.availableTasks) {
-      if (task.name === name) {
-        return task;
-      }
-    }
-    return null;
-  }
-
-  /**
-   * loads task by importPath and creates its custom Web Component
-   */
-  createTaskInstance(module: TaskModule, finishCb?: TaskFinishCallback): Task {
-    const { default: TaskConstructor } = this.taskResolverContext(module.importPath) as { default: typeof Task };
-
+  createTaskInstance(taskId: TaskIdentifier, finishCb?: TaskFinishCallback): Task {
+    const taskConstr = this.findTask(taskId);
     if (!finishCb) {
       finishCb = (time, success) => {
-        console.log(`TaskManager: task ${module.name} finished`, { time, success });
+        console.log(`TaskManager: task ${taskId} finished`, { time, success });
       };
     }
-    return new TaskConstructor({ finishCb });
+    return new taskConstr({ finishCb });
   }
 }
 
