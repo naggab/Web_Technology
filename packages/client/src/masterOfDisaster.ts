@@ -1,10 +1,8 @@
 import { GameDetails, PlayerInGameI, GameIdType } from "@apirush/common";
 import { Player } from "./screens/game/game-playground";
 import { ServerSession } from "./serverSession";
-
-type PlayerInGame = PlayerInGameI & {
-  playgroundRef: Player;
-};
+import { CommandOp } from "@apirush/common/src";
+import { router } from "./router";
 
 export type ClientState =
   | "loading"
@@ -21,8 +19,8 @@ export class MasterOfDisaster {
   private static instance_: MasterOfDisaster;
   private state_: ClientState = "welcome-start";
   activeGame: GameDetails | null = null;
-  myPlayer: PlayerInGame | null = null;
-  foreignPlayers: Map<number, PlayerInGame>;
+  myPlayerId: number | null = null;
+  myPlayer: PlayerInGameI | null = null;
   readonly serverSession: ServerSession;
 
   constructor(sess: ServerSession) {
@@ -53,33 +51,102 @@ export class MasterOfDisaster {
 
   private setState(newState: ClientState) {
     this.state_ = newState;
-    /** TODO:
-       - change view
-       - server rpc calls
-       */
+    router(this.state_);
   }
 
-  userWantsToJoin(playerName: string) {
-    // TODO HELLO
+  get helloSent() {
+    return this.myPlayerId != null;
   }
 
-  userWantsToCreate(playerName: string) {
-    // TODO HELLO
+  private ensureHelloSent(v: boolean = true) {
+    if (this.helloSent !== v) {
+      throw new Error("ensureHelloSent state not as expected");
+    }
   }
 
-  joinGame(gameId: GameIdType) {
-    // TODO JOIN_GAME
+  get playerIsInGame() {
+    return this.activeGame != null;
   }
 
-  createGame(gameName: string) {
-    // TODO CREATE_GAME
+  private ensureInGame(v: boolean = true) {
+    if (!this.playerIsInGame !== v) {
+      throw new Error("ensureInGame state not as expected");
+    }
   }
 
-  startGame() {
-    // TODO START_GAME
+  private async sendHello(playerName: string) {
+    this.ensureHelloSent(false);
+    const { id } = await this.serverSession.sendRPC(CommandOp.HELLO, { name: playerName });
+    this.myPlayerId = id;
   }
 
-  openTask(id: string): Promise<boolean> {
+  async userWantsToJoin(playerName: string) {
+    this.setState("loading");
+    try {
+      await this.sendHello(playerName);
+      this.setState("welcome-join-game");
+    } catch (e) {
+      console.error(e);
+    }
+    this.setState("error");
+  }
+
+  async userWantsToCreate(playerName: string) {
+    this.setState("loading");
+    try {
+      await this.sendHello(playerName);
+      this.setState("welcome-create-game");
+    } catch (e) {
+      console.error(e);
+    }
+    this.setState("error");
+  }
+
+  async joinGame(gameId: GameIdType) {
+    this.ensureHelloSent();
+    this.setState("loading");
+    try {
+      const { player, game } = await this.serverSession.sendRPC(CommandOp.JOIN_GAME, { id: gameId });
+      this.myPlayer = player;
+      this.activeGame = game;
+
+      this.setState("pre-game");
+    } catch (e) {
+      console.error(e);
+    }
+    this.setState("error");
+  }
+
+  async createGame(gameName: string) {
+    this.ensureHelloSent();
+    this.setState("loading");
+    try {
+      const { player, game } = await this.serverSession.sendRPC(CommandOp.CREATE_GAME, { name: gameName });
+      this.myPlayer = player;
+      this.activeGame = game;
+      this.setState("pre-game");
+    } catch (e) {
+      console.error(e);
+    }
+    this.setState("error");
+  }
+
+  async startGame() {
+    this.ensureHelloSent();
+    this.ensureInGame();
+    this.setState("loading");
+    try {
+      await this.serverSession.sendRPC(CommandOp.START_GAME, {});
+      this.setState("in-game");
+    } catch (e) {
+      console.error(e);
+    }
+    this.setState("error");
+  }
+
+  async openTask(id: string): Promise<boolean> {
+    this.ensureHelloSent();
+    this.ensureInGame();
     throw new Error("not implemented");
     // taskManger -> get task
     // display task

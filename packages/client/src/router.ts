@@ -8,7 +8,7 @@ import { ClientState } from "./masterOfDisaster";
 
 export function navigateTo(url) {
   history.pushState(null, null, url);
-  router();
+  //router();
 }
 
 export async function router(state: ClientState) {

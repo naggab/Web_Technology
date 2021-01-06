@@ -120,8 +120,14 @@ export class Connection {
         this.player = this.gm.addPlayerToGame(id, this.player.id);
         return {
           player: this.player,
+          game: this.gm.getGame(id).details,
         };
       }
+      case CommandOp.LIST_PLAYERS:
+        this.ensureGreeted();
+        this.ensureJoinedGame();
+        const players = this.gm.getGame(this.game!.id).getAllPlayers();
+        return { players };
       case CommandOp.MOVE: {
         this.ensureGreeted();
         this.ensureJoinedGame();

@@ -8,6 +8,7 @@ import {
   GameIdType,
   GameState,
   PlayerIdType,
+  PlayerInGameI,
 } from "@apirush/common";
 import { GameMaster } from "./gameMaster";
 import { ERR_PLAYER_NOT_EXISTENT, PLAYER_COLORS } from "./constants";
@@ -38,6 +39,10 @@ export class Game implements GameI {
     this.players = new Map<PlayerIdType, PlayerInGame>();
     const availableMaps = Object.keys(MapStorage);
     this.map = availableMaps[this.seed % availableMaps.length] as any;
+  }
+
+  getAllPlayers(): PlayerInGameI[] {
+    return Array.from(this.players.values());
   }
 
   forEachPlayer(cb: (player: any) => void): void {

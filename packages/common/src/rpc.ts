@@ -5,6 +5,8 @@ export enum CommandOp {
   LIST_GAMES = "LIST_GAMES",
   CREATE_GAME = "CREATE_GAME",
   JOIN_GAME = "JOIN_GAME",
+
+  LIST_PLAYERS = "LIST_PLAYERS",
   MOVE = "MOVE",
   START_GAME = "START_GAME",
   ABORT_GAME = "ABORT_GAME",
@@ -17,6 +19,7 @@ export interface CommandOpParamsMap {
   [CommandOp.CREATE_GAME]: { name: string };
   [CommandOp.JOIN_GAME]: { id: GameIdType };
 
+  [CommandOp.LIST_PLAYERS]: {};
   [CommandOp.MOVE]: { position: Coordinate };
   [CommandOp.START_GAME]: {};
   [CommandOp.ABORT_GAME]: {};
@@ -27,8 +30,9 @@ export interface CommandOpResultMap {
   [CommandOp.HELLO]: { id: number };
   [CommandOp.LIST_GAMES]: { games: GameDetails[] };
   [CommandOp.CREATE_GAME]: { game: GameDetails; player: PlayerInGameI };
-  [CommandOp.JOIN_GAME]: { player: PlayerInGameI };
+  [CommandOp.JOIN_GAME]: { game: GameDetails; player: PlayerInGameI };
 
+  [CommandOp.LIST_PLAYERS]: { players: PlayerInGameI[] };
   [CommandOp.MOVE]: {};
   [CommandOp.START_GAME]: {};
   [CommandOp.ABORT_GAME]: {};

@@ -1,5 +1,6 @@
 import { PlayerInGame, PlayerInLobby } from "./types";
 import { PlayerIdType, Coordinate, GameDetails, GameState, GameIdType } from "@apirush/common";
+import { PlayerInGameI } from "@apirush/common/src";
 
 export interface GameI {
   readonly id: GameIdType;
@@ -15,6 +16,8 @@ export interface GameI {
   hasPlayer(id: PlayerIdType): boolean;
 
   getPlayer(id: PlayerIdType): PlayerInGame;
+
+  getAllPlayers(): PlayerInGameI[];
 
   hasNoPlayers(): boolean;
 

@@ -23,8 +23,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   MasterOfDisaster.setup().then(() => {
     (<any>window).MOD = MasterOfDisaster.getInstance();
-    router();
+    router("welcome-start");
   });
 });
 
-window.addEventListener("popstate", router);
+// window.addEventListener("popstate", router);
