@@ -1,90 +1,82 @@
 <style>
+  body {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: sans-serif;
+    font-size: 16px;
+  }
 
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
 
-body {
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  font-family: sans-serif;
-  font-size: 16px;
-}
+  .custom-field {
+    position: relative;
+    font-size: 14px;
+    padding-top: 20px;
+    margin-bottom: 5px;
+  }
 
-*, *::before, *::after {
-  box-sizing: border-box;
-}
+  .custom-field input {
+    border: none;
+    appearance: none;
+    background: #f2f2f2;
+    padding: 12px;
+    border-radius: 3px;
+    width: 250px;
+    outline: none;
+    font-size: 14px;
+    color: white;
+  }
 
-.custom-field {
-  position: relative;
-  font-size: 14px;
-  padding-top: 20px;
-  margin-bottom: 5px;
-}
+  .custom-field .placeholder {
+    position: absolute;
+    left: 12px;
+    top: calc(50% + 10px);
+    transform: translateY(-50%);
+    color: rgb(233, 233, 233);
+    transition: top 0.3s ease, color 0.3s ease, font-size 0.3s ease;
+  }
 
-.custom-field input {
-  border: none;
-  appearance: none;
-  background: #f2f2f2;
-  padding: 12px;
-  border-radius: 3px;
-  width: 250px;
-  outline: none;
-  font-size: 14px;
-  color: white;
+  .custom-field.one input {
+    background: none;
+    margin-top: 15px;
+    margin-bottom: 15px;
 
-}
+    border: 2px solid rgb(233, 233, 233);
+    border-radius: 25px;
+    transition: border-color 0.3s ease;
+  }
 
-.custom-field .placeholder {
-  position: absolute;
-  left: 12px;
-  top: calc(50% + 10px);
-  transform: translateY(-50%);
-  color: rgb(233, 233, 233);
-  transition: 
-    top 0.3s ease,
-    color 0.3s ease,
-    font-size 0.3s ease;
-}
+  .custom-field.one input + .placeholder {
+    left: 8px;
+    padding: 0 5px;
+  }
 
+  .custom-field.one input.dirty,
+  .custom-field.one input:valid,
+  .custom-field.one input:focus {
+    border-color: white;
+    transition-delay: 0.1s;
+  }
 
-.custom-field.one input {
-  background: none;
-  margin-top: 15px;
-  margin-bottom: 15px;
+  .custom-field.one input.dirty + .placeholder,
+  .custom-field.one input:valid + .placeholder,
+  .custom-field.one input:focus + .placeholder {
+    top: 0px;
+    font-size: 10px;
+    color: white;
+    background: transparent;
+  }
+</style>
 
-  border: 2px solid rgb(233, 233, 233);
-  border-radius: 25px;
-  transition: border-color 0.3s ease;
-}
-
-.custom-field.one input + .placeholder {
-  left: 8px;
-  padding: 0 5px;
-}
-
-.custom-field.one input.dirty,
-.custom-field.one input:valid,
-.custom-field.one input:focus {
-  border-color: white;
-  transition-delay: 0.1s
-}
-
-.custom-field.one input.dirty + .placeholder,
-.custom-field.one input:valid + .placeholder,
-.custom-field.one input:focus + .placeholder {
-  top: 0px;
-  font-size: 10px;
-  color: white;
-  background: transparent;
-}
-
-
-  </style>
-  
- 
-  <label class="custom-field one">
-    <input type="text" required/>
-    <span class="placeholder">Test Label</span>
-  </label>
+<label class="custom-field one">
+  <input type="text" required />
+  <span class="placeholder">Test Label</span>
+</label>

@@ -3,6 +3,7 @@ import EnterExistingGame from "./screens/enterExistingGame";
 import CreateNewGame from "./screens/createNewGame";
 import ShowTasks from "./screens/listAllTasks";
 import { Game } from "./screens/game";
+import Lobby from "./screens/lobby";
 
 export function navigateTo(url) {
   history.pushState(null, null, url);
@@ -17,6 +18,7 @@ export async function router() {
     { path: "/newGame", view: () => new CreateNewGame() },
     { path: "/showTasks", view: () => new ShowTasks() },
     { path: "/game", view: () => new Game() },
+    { path: "/lobby", view: () => new Lobby() },
   ];
 
   const potentialMatches = routes.map((route) => {

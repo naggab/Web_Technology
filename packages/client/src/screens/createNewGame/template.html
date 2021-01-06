@@ -13,45 +13,66 @@
   }
 
   h1 {
-    margin-top: 5%;
     font-size: 400%;
     font-weight: bold;
     margin-bottom: 5%;
+    margin-top: 5%;
   }
 
   h2 {
     font-size: 300%;
     font-weight: normal;
-    margin-bottom: 5%;
+    margin-bottom: 2%;
   }
+
+  h3 {
+    font-size: 200%;
+    font-weight: normal;
+    margin-top: 5%;
+    margin-bottom: 1%;
+  }
+
   .container {
-    width: 50%;
-    height: 50vh;
+    width: 30%;
+    height: 40vh;
     margin-left: auto;
     margin-right: auto;
     border-radius: 25px;
     background: rgba(0, 0, 0, 0.4);
-    padding: 20px;
+    padding: 5%;
   }
+
   .container > * {
     display: block;
     margin-left: auto;
     margin-right: auto;
     width: 40%;
   }
-  .drop_down {
-    background-color: transparent;
-    color: white;
-    padding: 5px;
+
+  #code {
+    margin-top: 10%;
+    margin-bottom: 5%;
+    border: 1px solid white;
+    border-radius: 100px;
+    width: 40%;
+    height: 8%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  input {
-    background-color: transparent;
-    color: white;
+  #code > h3 {
+    line-height: 100%;
+    text-align: center;
   }
 
-  #max_players {
-    width: 10%;
+  #game_name,
+  #player_number,
+  #create_game {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 </style>
 
@@ -63,26 +84,27 @@
     <h2>TEXTINPUT</h2>
   </div>
   <div class="container">
-    <h3>ENTER NAME</h3>
-    <input type="text" content="CHOOSE NAME" />
-    <h3>LANGUAGE</h3>
-    <select class="drop_down">
-      <option label="Deutsch"></option>
-      <option label="Englisch"></option>
-    </select>
+    <h3>CHOOSE NAME</h3>
+    <div id="game_name">
+      <text-box id="test" label="ENTER GAME NAME"></text-box>
+      <script src="../../components/button/index.ts"></script>
+    </div>
 
     <h3>NUMBER OF MAX PLAYERS</h3>
-    <select id="max_players" class="drop_down">
-      <option label="5"></option>
-      <option label="10"></option>
-    </select>
-
-    <h3>CODE: ??????</h3>
-    <apirush-button
-      id="enter-existing-game-button"
-      label="CREATE GAME"
-      styletype="green"
-      onclick="/joinLobby"
-    ></apirush-button>
+    <div id="player_number">
+      <text-box id="test" label="ENTER NUMBER OF PLAYERS"></text-box>
+      <script src="../../components/button/index.ts"></script>
+    </div>
+    <div id="code">
+      <h3>CODE: ??????</h3>
+    </div>
+    <div id="create_game">
+      <apirush-button
+        id="enter-existing-game-button"
+        label="CREATE GAME"
+        styletype="green"
+        onclick="/lobby"
+      ></apirush-button>
+    </div>
   </div>
 </div>

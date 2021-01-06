@@ -6,7 +6,7 @@ export class Button extends HTMLElement {
   _a: HTMLAnchorElement;
 
   static get observedAttributes() {
-    return ["styletype","label"];
+    return ["styletype", "label"];
   }
 
   constructor() {
@@ -52,7 +52,7 @@ export class Button extends HTMLElement {
   connectedCallback() {
     this._a.innerHTML = this.label;
     this._a.classList.add(...this.styletype);
-    if(this.onClick) {
+    if (this.onClick) {
       this._a.href = this.onClick;
     }
   }
