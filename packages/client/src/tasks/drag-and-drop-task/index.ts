@@ -1,6 +1,7 @@
 import viewHtml from "./view.html";
 import { Task } from "../../task";
 import { Button } from "../../components/button";
+import { eventOptions } from "lit-element";
 
 const filesArray: Array<[string, string]> = [];
 var randomSeed: number;
@@ -9,7 +10,8 @@ export default class DragAndDropTask extends Task {
   backButton: Button;
   serverResponseSpan: HTMLSpanElement;
   dropZone: HTMLDivElement;
-  result: any;
+  taskContainer: HTMLDivElement;
+  result: any = [false,""];
   selectedFile: any;
   firstClickFlag: boolean = false;
 
@@ -24,6 +26,7 @@ export default class DragAndDropTask extends Task {
     this.backButton = this.shadowRoot.getElementById("back-button") as Button;
     this.serverResponseSpan = this.shadowRoot.getElementById("test") as HTMLSpanElement;
     this.dropZone = this.shadowRoot.getElementById("drop-zone") as HTMLDivElement;
+    this.taskContainer = this.shadowRoot.getElementById("root-drag-and-drop") as HTMLDivElement;
 
     //for later using random seed to determine how many files will be picked!
     //add data
@@ -38,8 +41,10 @@ export default class DragAndDropTask extends Task {
     this.selectedFile = filesArray[randomSeed % filesArray.length];
 
     this.dropZone.innerHTML = "Drag and Drop file '" + this.selectedFile[0] + "' from Downloads";
-    //this.backButton.hidden = true;
-    this.backButton.setAttribute("label", "Download");
+   
+    this.taskContainer.addEventListener("drop",(e)=>{e.preventDefault(); }) //disable browser default drop, outside drop zone
+    this.taskContainer.addEventListener("dragover",(e)=>{e.preventDefault(); }) //disable browser default drop, outside drop zone
+    this.taskContainer.addEventListener("dragleave",(e)=>{e.preventDefault();}) //disable browser default drop, outside drop zone
 
     this.dropZone.addEventListener("dragover", (e) => {
       e.preventDefault(); //disable automatic browser preview
@@ -56,7 +61,6 @@ export default class DragAndDropTask extends Task {
     this.dropZone.addEventListener("drop", this.onDrop);
 
     this.backButton.addEventListener("click", (e) => {
-      console.log("Here in button");
       if (!this.firstClickFlag) {
         download(this.selectedFile);
         this.firstClickFlag = true;
@@ -68,12 +72,15 @@ export default class DragAndDropTask extends Task {
     });
   }
   async onDrop(e: DragEvent) {
-    e.preventDefault(); //disable automatic browser preview
+    e.preventDefault(); //disable automatic browser preview 
     console.log("dropped");
     var files = e.dataTransfer.files;
     this.result = await checkUpload(files, this.selectedFile);
     this.dropZone.style.background = this.result[0] ? "green" : "red";
     this.dropZone.innerHTML = this.result[1].toString();
+    this.dropZone.removeEventListener("drop",this.onDrop);
+    this.backButton.setAttribute("label", "Back");
+    this.firstClickFlag=true;
   }
 
   onUnmounting(): void | Promise<void> {}
