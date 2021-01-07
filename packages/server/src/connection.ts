@@ -47,9 +47,7 @@ export class Connection {
     }
     let responseBody: CommandOpResultMap[T];
     try {
-      console.log("EX");
       responseBody = this.executeRPC<T>(req.op, req.params);
-      console.log("END_EX");
     } catch (e) {
       console.log("CATCH_EX");
       this.respondWith({
