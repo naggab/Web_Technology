@@ -34,6 +34,13 @@ export class MasterOfDisaster {
     return this.instance_;
   }
 
+  getGameSeed() {
+    if (!this.activeGame) {
+      return 0;
+    }
+    return this.activeGame.seed;
+  }
+
   static async setup() {
     const conn = new ServerSession();
     return conn

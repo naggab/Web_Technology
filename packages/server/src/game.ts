@@ -35,7 +35,7 @@ export class Game implements GameI {
     this.id = id;
     this.name = name;
     this.gm = gm;
-    this.seed = getRandomInt(1, 5000);
+    this.seed = getRandomInt(0, 5000);
     this.players = new Map<PlayerIdType, PlayerInGame>();
     const availableMaps = Object.keys(MapStorage);
     this.map = availableMaps[this.seed % availableMaps.length] as any;
