@@ -1,32 +1,31 @@
-import { min } from "lodash";
+import { numbers } from "@material/textfield";
+import { isNull, min } from "lodash";
+import { TaskIdentifier } from "./taskManager";
 
-export type taskName = "fill-shape-task" | "drag-and-drop-task";
 export class StatsStorage {
-  private tasks: Array<[taskName, number]> = [];
   private localStorageKey = "stats";
+  private tasks: {[key in TaskIdentifier]? : number};
 
-  taskCompleted(taskName: taskName, timeInMS: number) {
-    //check if task already in array:
-    var index = 0;
+  taskCompleted(taskName: TaskIdentifier, timeInMS: number) {
+    //load stats
+    this.tasks = this.getStats();
     var flagFound = false;
-    for (index = 0; index < this.tasks.length; index++) {
-      if (this.tasks[index][0] == taskName) {
-        flagFound = true;
-        break;
-      }
+    //check if task already in array:
+    if(Object.keys(this.tasks).includes(taskName)){
+      this.tasks[taskName] = min([timeInMS, this.tasks[taskName]]);
     }
-    if (flagFound) {
-      this.tasks[index][1] = min([timeInMS, this.tasks[index][1]]);
-    } else {
-      this.tasks.push([taskName, timeInMS]);
+    else
+    {     
+      this.tasks[taskName]=timeInMS;
     }
     this.store(this.tasks);
   }
-  private store(tasks: Array<[taskName, number]>) {
+  private store(tasks: {[key in TaskIdentifier]? : number}) {
     localStorage.setItem(this.localStorageKey, JSON.stringify(tasks));
   }
-  getStats(): Array<[taskName, number]> {
-    return JSON.parse(localStorage.getItem(this.localStorageKey));
+  getStats(): {[key in TaskIdentifier]? : number} {
+    var parse = JSON.parse(localStorage.getItem(this.localStorageKey));
+    return isNull(parse) ? {} : parse;
   }
   deleteStats() {
     localStorage.removeItem(this.localStorageKey);

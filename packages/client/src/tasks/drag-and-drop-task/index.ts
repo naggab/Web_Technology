@@ -1,10 +1,7 @@
 import viewHtml from "./view.html";
 import { Task } from "../../task";
 import { Button } from "../../components/button";
-import { eventOptions } from "lit-element";
-
-const filesArray: Array<[string, string]> = [];
-var randomSeed: number;
+import { MasterOfDisaster } from "../../masterOfDisaster";
 
 export default class DragAndDropTask extends Task {
   backButton: Button;
@@ -14,7 +11,7 @@ export default class DragAndDropTask extends Task {
   result: any = [false,""];
   selectedFile: any;
   firstClickFlag: boolean = false;
-
+  filesArray: Array<[string, string]> = [];
   constructor(props) {
     super(props);
     this.onDrop = this.onDrop.bind(this);
@@ -30,15 +27,16 @@ export default class DragAndDropTask extends Task {
 
     //for later using random seed to determine how many files will be picked!
     //add data
-    filesArray.push(
-      ["hello.txt", "Yes you downloaded the correct file! " + new Date().getTime()],
-      ["bye.txt", "The file says goodbye! " + new Date().getTime()],
-      ["ciao.txt", "File is correct " + new Date().getTime()],
-      ["adios.txt", "File es correcto " + new Date().getTime()],
+    var dateTime = new Date().getTime();
+    this.filesArray.push(
+      ["hello.txt", "Yes you downloaded the correct file! " + dateTime],
+      ["bye.txt", "The file says goodbye! " + dateTime],
+      ["ciao.txt", "File is correct " + dateTime],
+      ["adios.txt", "File es correcto " + dateTime],
     );
-    randomSeed = Math.floor(Math.random() * 1000);
-    console.log("random", randomSeed, randomSeed % filesArray.length);
-    this.selectedFile = filesArray[randomSeed % filesArray.length];
+    var randomSeed = MasterOfDisaster.getInstance().getGameSeed();
+    console.log("random", randomSeed, randomSeed % this.filesArray.length);
+    this.selectedFile = this.filesArray[randomSeed % this.filesArray.length];
 
     this.dropZone.innerHTML = "Drag and Drop file '" + this.selectedFile[0] + "' from Downloads";
    
@@ -66,9 +64,8 @@ export default class DragAndDropTask extends Task {
         this.firstClickFlag = true;
         this.backButton.setAttribute("label", "Back");
       }
-      if (this.result[0]) {
+     else
         this.finish(this.result[0]);
-      }
     });
   }
   async onDrop(e: DragEvent) {
@@ -105,13 +102,13 @@ async function checkUpload(files: FileList, download: [string, string]) {
     try {
       fileContents = await readUploadedFileAsText(file);
     } catch (e) {}
-    if (fileContents == download[1] && name == download[0]) {
+    if (fileContents == download[1]) {//&& name == download[0]) {
       return [true, "Congrats, you did it!"];
-    } else if (fileContents != download[1] && name == download[0]) {
+    }/* else if (fileContents != download[1] && name == download[0]) {
       return [false, "Nope, correct file name. Wrong content."];
     } else if (name != download[0] && fileContents == download[1]) {
       return [false, "Nope, wrong file name. Correct content."];
-    }
+    }*/
     return [false, "Nope, wrong file."];
   }
 }

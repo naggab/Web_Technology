@@ -3,6 +3,7 @@ import { Task } from "../../task";
 import { Button } from "../../components/button";
 import { concat, times } from "lodash";
 import { Collection } from "konva/types/Util";
+import { MasterOfDisaster } from "../../masterOfDisaster";
 
 interface ShapeI {
   checkOutside(relativeMousePos: any);
@@ -48,11 +49,7 @@ export default class FillShapeTask extends Task {
     const ctx = this.ctx;
     const canvasPanel = this.canvasElement.getBoundingClientRect(); //get size according to html spec
 
-    //center canvas drawing panel
-    //cannot ceneter, otherwise calc inside/outside would be to expensive
-    //ctx.translate(canvasPanel.width / 2, canvasPanel.height / 2);
-
-    var seed = Math.floor(Math.random() * 1000);
+    var seed = MasterOfDisaster.getInstance().getGameSeed();
     this.infoButton.setAttribute("label", "Fill: " + fillArry[seed % fillArry.length] + "%");
 
     shapes.push(Smiley, Pyramid, Tree, Cactus);
