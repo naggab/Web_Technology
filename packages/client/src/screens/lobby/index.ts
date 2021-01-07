@@ -1,6 +1,6 @@
 import AbstractScreen from "../AbstractScreen";
 import templateHTML from "./template.html";
-
+import "../../components/playerList";
 export default class Lobby extends AbstractScreen {
   constructor() {
     super();
@@ -10,3 +10,5 @@ export default class Lobby extends AbstractScreen {
     return templateHTML;
   }
 }
+
+customElements.define("game-lobby", Lobby);

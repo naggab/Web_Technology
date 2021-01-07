@@ -49,7 +49,6 @@ export class Connection {
     try {
       responseBody = this.executeRPC<T>(req.op, req.params);
     } catch (e) {
-      console.log("CATCH_EX");
       this.respondWith({
         id: req.id,
         error: e.toString(),

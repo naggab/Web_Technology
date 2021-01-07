@@ -60,15 +60,12 @@ export class GameList extends List<GameEntryDetails> {
   }
 
   onGameAdded({ payload }: Event<ServerEventOp.GAME_ADDED>) {
-    console.log("list: onGameAdded");
     this.addEntry(payload);
   }
   onGameRemoved({ payload }: Event<ServerEventOp.GAME_REMOVED>) {
-    console.log("list: onGameRemoved");
     this.removeEntry(payload.id);
   }
   onGameUpdated({ payload }: Event<ServerEventOp.GAME_STATE_UPDATED>) {
-    console.log("list: onGameUpdated");
     this.updateEntry(payload);
   }
 
@@ -76,7 +73,6 @@ export class GameList extends List<GameEntryDetails> {
     this.container_.innerHTML = "";
     const { games } = await this.mod.serverSession.sendRPC(CommandOp.LIST_GAMES, {});
     games.forEach((game) => {
-      console.log("game-list: adding", game);
       this.addEntry(game);
     });
   }

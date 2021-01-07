@@ -1,7 +1,7 @@
 import templateHTML from "./template.html";
 
 interface MinimumEntryDetails {
-  id: string;
+  id: string | number;
 }
 
 export abstract class List<EntryData extends MinimumEntryDetails> extends HTMLElement {
@@ -18,7 +18,7 @@ export abstract class List<EntryData extends MinimumEntryDetails> extends HTMLEl
 
   abstract getEntryContentTemplate(): HTMLTemplateElement;
   abstract applyEntryData(el: HTMLElement, data: EntryData);
-  onEntryClicked?(id: string);
+  onEntryClicked?(id: EntryData["id"]);
 
   connectedCallback() {}
   disconnectedCallback() {}
@@ -31,23 +31,24 @@ export abstract class List<EntryData extends MinimumEntryDetails> extends HTMLEl
     newHtml.appendChild(entryContentTemplate.content.cloneNode(true));
     if (this.onEntryClicked) {
       newHtml.onclick = () => this.onEntryClicked(data.id);
+      newHtml.classList.add("list-entry-clickable");
     }
-    newHtml.setAttribute("gameid", data.id);
+    newHtml.setAttribute("gameid", `${data.id}`);
     this.applyEntryData(newHtml, data);
     this.container_.appendChild(newHtml);
   }
 
-  private findEntry(id: string): HTMLElement {
+  private findEntry(id: EntryData["id"]): HTMLElement {
     const gameEntries = this.container_.children;
     for (let gameEntry of gameEntries) {
-      if (gameEntry.getAttribute("gameid") === id) {
+      if (gameEntry.getAttribute("gameid") === `${id}`) {
         return gameEntry as HTMLElement;
       }
     }
     throw new Error("unable to find GameEntry with id: " + id);
   }
 
-  removeEntry(id: string) {
+  removeEntry(id: EntryData["id"]) {
     this.findEntry(id).remove();
   }
 
