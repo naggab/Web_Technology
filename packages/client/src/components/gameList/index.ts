@@ -1,7 +1,7 @@
 import { MasterOfDisaster } from "../../masterOfDisaster";
 
 import templateHTML from "./template.html";
-import { CommandOp, Event, ServerEventOp } from "@apirush/common/src";
+import { CommandOp, Event, GameIdType, ServerEventOp } from "@apirush/common/src";
 
 type GameEntryDetails = {
   id: string;
@@ -70,8 +70,13 @@ export class GameList extends HTMLElement {
   addGameEntry(data: GameEntryDetails) {
     const newHtmlFrag = this.listEntryTemplate_.content.cloneNode(true) as HTMLElement;
     const newHtml = newHtmlFrag.querySelector(".game-list-entry") as HTMLElement;
+    newHtml.onclick = () => this.onEntryClicked(data.id);
     this.updateGameEntryFields(newHtml, data);
     this.container_.appendChild(newHtml);
+  }
+
+  onEntryClicked(id: GameIdType) {
+    this.mod.joinGame(id);
   }
 
   findGameEntry(id: string): HTMLElement {
