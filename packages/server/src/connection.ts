@@ -18,6 +18,7 @@ import { SuccessResponse } from "@apirush/common/src";
 export interface WebSocketI {
   send(data: any, cb?: (err?: Error) => void): void;
   close();
+  ping();
 }
 
 export class Connection {
@@ -37,7 +38,6 @@ export class Connection {
   }
 
   onMessage<T extends CommandOp>(msg: WebSocket.Data) {
-    console.log(`broker: onMessage`);
     let req: Request<any>;
     try {
       req = JSON.parse(msg.toString());
@@ -47,8 +47,11 @@ export class Connection {
     }
     let responseBody: CommandOpResultMap[T];
     try {
+      console.log("EX");
       responseBody = this.executeRPC<T>(req.op, req.params);
+      console.log("END_EX");
     } catch (e) {
+      console.log("CATCH_EX");
       this.respondWith({
         id: req.id,
         error: e.toString(),
@@ -68,7 +71,7 @@ export class Connection {
 
   ensureGreeted() {
     if (!this.hasGreeted) {
-      throw ERR_PLAYER_DID_NOT_GREET;
+      throw ERR_PLAYER_DID_NOT_GREET();
     }
   }
 
@@ -78,7 +81,7 @@ export class Connection {
 
   ensureJoinedGame() {
     if (!this.hasJoinedGame) {
-      throw ERR_PLAYER_DID_NOT_JOIN_GAME;
+      throw ERR_PLAYER_DID_NOT_JOIN_GAME();
     }
   }
 
@@ -88,7 +91,7 @@ export class Connection {
       case CommandOp.HELLO: {
         const params = untypedParams as CommandOpParamsMap[CommandOp.HELLO];
         if (this.hasGreeted) {
-          throw ERR_PLAYER_ALREADY_GREETED;
+          throw ERR_PLAYER_ALREADY_GREETED();
         }
         this.player = this.gm.createPlayer(params.name, this.sendEvent.bind(this));
         return {
@@ -118,9 +121,10 @@ export class Connection {
         const params = untypedParams as CommandOpParamsMap[CommandOp.JOIN_GAME];
         const { id } = params;
         this.player = this.gm.addPlayerToGame(id, this.player.id);
+        this.game = this.gm.getGame(id);
         return {
           player: this.player,
-          game: this.gm.getGame(id).details,
+          game: this.game.details,
         };
       }
       case CommandOp.LIST_PLAYERS:

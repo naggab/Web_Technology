@@ -1,5 +1,5 @@
 import { ERR_GAME_NOT_EXISTENT, ERR_PLAYER_NOT_EXISTENT } from "./constants";
-import { PlayerInLobby, PlayersMap, ServerEventNotifyCb } from "./types";
+import { PlayerInGame, PlayerInLobby, PlayersMap, ServerEventNotifyCb } from "./types";
 import { GameIdType, PlayerIdType } from "@apirush/common/src/types";
 import { Event, EventOp, ServerEventOp } from "@apirush/common/src/events";
 import { GameI } from "./gameI";
@@ -30,7 +30,7 @@ export class GameMaster implements GameMasterI {
 
   getGame(id: GameIdType): GameI {
     if (!this.games.has(id)) {
-      throw ERR_GAME_NOT_EXISTENT;
+      throw ERR_GAME_NOT_EXISTENT();
     }
     return this.games.get(id);
   }
@@ -38,15 +38,15 @@ export class GameMaster implements GameMasterI {
   createGameAndJoin(name: string, creator: PlayerInLobby) {
     const creatorPlayer = this.unassignedPlayers.get(creator.id);
     if (!creatorPlayer) {
-      throw ERR_PLAYER_NOT_EXISTENT;
+      throw ERR_PLAYER_NOT_EXISTENT();
     }
     this.unassignedPlayers.delete(creatorPlayer.id);
 
     const id = findNextId(this.games, "game_");
     const game = new GameMaster.GameConstructor(id, name, this);
     this.games.set(game.id, game);
+    const player = game.addPlayer(creatorPlayer, false);
     this.emitOnGameAdded(game);
-    const player = game.addPlayer(creatorPlayer);
     return { game, player };
   }
 
@@ -77,16 +77,16 @@ export class GameMaster implements GameMasterI {
   removePlayer(id: PlayerIdType) {
     const player = this.unassignedPlayers.get(id);
     if (!player) {
-      throw ERR_PLAYER_NOT_EXISTENT;
+      throw ERR_PLAYER_NOT_EXISTENT();
     }
     this.unassignedPlayers.delete(player.id);
   }
 
-  addPlayerToGame(gameId: GameIdType, playerId: PlayerIdType) {
+  addPlayerToGame(gameId: GameIdType, playerId: PlayerIdType): PlayerInGame {
     const game = this.getGame(gameId);
     const player = this.unassignedPlayers.get(playerId);
     if (!player) {
-      throw ERR_PLAYER_NOT_EXISTENT;
+      throw ERR_PLAYER_NOT_EXISTENT();
     }
     this.unassignedPlayers.delete(playerId);
     return game.addPlayer(player);
@@ -95,7 +95,7 @@ export class GameMaster implements GameMasterI {
   removePlayerFromGame(gameId: GameIdType, playerId: PlayerIdType) {
     const game = this.getGame(gameId);
     if (!game.hasPlayer(playerId)) {
-      throw ERR_PLAYER_NOT_EXISTENT;
+      throw ERR_PLAYER_NOT_EXISTENT();
     }
     const player = game.getPlayer(playerId);
     game.removePlayer(playerId);

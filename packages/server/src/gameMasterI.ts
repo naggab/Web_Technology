@@ -13,7 +13,7 @@ export interface GameMasterI {
 
   removePlayer(id: PlayerIdType): void;
 
-  addPlayerToGame(gameId: GameIdType, playerId: PlayerIdType): any;
+  addPlayerToGame(gameId: GameIdType, playerId: PlayerIdType): PlayerInGame;
 
   removePlayerFromGame(gameId: GameIdType, playerId: PlayerIdType): void;
 

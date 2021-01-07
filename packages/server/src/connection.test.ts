@@ -55,24 +55,14 @@ describe("Connection", () => {
 
   it("can handle HELLO twice", () => {
     expect(() => {
-      const response = conn.executeRPC({
-        id: "1",
-        op: CommandOp.HELLO,
-        params: { name: DummyLobbyPlayer.name },
-      });
-    }).toThrow(ERR_PLAYER_ALREADY_GREETED);
+      const response = conn.executeRPC(CommandOp.HELLO, { name: DummyLobbyPlayer.name });
+    }).toThrow(ERR_PLAYER_ALREADY_GREETED());
   });
 
   it("can handle LIST_GAMES", () => {
-    const response = conn.executeRPC({
-      id: "1",
-      op: CommandOp.LIST_GAMES,
-      params: {},
-    });
+    const response = conn.executeRPC(CommandOp.LIST_GAMES, {});
 
     expect(response).toBeDefined();
-    expect(response.result).toBeDefined();
-    expect(response.op).toEqual(CommandOp.LIST_GAMES);
-    expect(response.result.games).toEqual([Game1, Game2]);
+    expect(response.games).toEqual([Game1, Game2]);
   });
 });

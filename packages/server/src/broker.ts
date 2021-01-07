@@ -12,6 +12,7 @@ export class Broker {
   constructor(gm: GameMasterI) {
     this.gm = gm;
     this.connections = new Map<string, Connection>();
+    this.scheduledCleanup();
   }
 
   /**
@@ -23,7 +24,15 @@ export class Broker {
    */
   private scheduledCleanup() {
     this.cleanupTimer = null;
-    this.cleanupTimer = setTimeout(this.scheduledCleanup, CLEANUP_SCHEDULE);
+    this.connections.forEach((conn) => {
+      if (!conn.ok) {
+        conn.leave();
+        return;
+      }
+      conn.ok = false;
+      conn.ws.ping();
+    });
+    this.cleanupTimer = setTimeout(this.scheduledCleanup.bind(this), CLEANUP_SCHEDULE);
   }
 
   public onConnected(ws: WebSocket) {

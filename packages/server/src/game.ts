@@ -122,7 +122,7 @@ export class Game implements GameI {
     }
   }
 
-  addPlayer(details: PlayerInLobby): PlayerInGame {
+  addPlayer(details: PlayerInLobby, sendUpdate: boolean = true): PlayerInGame {
     const bibNumber = this.findNextBibNumber();
     const position = MapStorage[this.map].spawns[bibNumber];
     const player: PlayerInGame = {
@@ -133,8 +133,11 @@ export class Game implements GameI {
     };
 
     this.players.set(details.id, player);
-    this.emitOnPlayerJoined(player);
-    this.gm.onGameStateUpdate(this);
+    if (sendUpdate) {
+      this.emitOnPlayerJoined(player);
+      this.gm.onGameStateUpdate(this);
+    }
+
     return player;
   }
 
@@ -147,7 +150,7 @@ export class Game implements GameI {
   movePlayer(id: PlayerIdType, p: Coordinate) {
     const player = this.players.get(id);
     if (!player) {
-      throw ERR_PLAYER_NOT_EXISTENT;
+      throw ERR_PLAYER_NOT_EXISTENT();
     }
     player.position = p;
     this.emitOnPlayerMoved(id, p);

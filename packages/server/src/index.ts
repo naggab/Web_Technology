@@ -29,14 +29,14 @@ app.get("/*", (req, res) => {
 
 //Gabriel end
 
-const cleanup = async () => {
-  console.log("cleanup");
+const cleanup = async (eventType) => {
+  console.log("cleanup", eventType);
   await broker.terminate();
   console.log("exit");
   process.exit(0);
 };
 
-[`SIGINT`, `SIGUSR1`, `SIGUSR2`, `uncaughtException`, `SIGTERM`].forEach((eventType) => {
+[`SIGINT`, `SIGUSR1`, `SIGUSR2`, `SIGTERM`].forEach((eventType) => {
   process.on(eventType, cleanup.bind(this, eventType));
 });
 
