@@ -2,6 +2,7 @@ import { MasterOfDisaster } from "../../masterOfDisaster";
 
 import templateHTML from "./template.html";
 import { CommandOp, Event, GameIdType, ServerEventOp } from "@apirush/common/src";
+import { List } from "../list";
 
 type GameEntryDetails = {
   id: string;
@@ -10,22 +11,18 @@ type GameEntryDetails = {
   maxPlayersCount: number;
 };
 
-export class GameList extends HTMLElement {
-  container_: HTMLDivElement;
-  listEntryTemplate_: HTMLTemplateElement;
-
+export class GameList extends List<GameEntryDetails> {
   mod: MasterOfDisaster;
+
+  entryContentTemplate_: HTMLTemplateElement;
 
   constructor() {
     super();
     this.onGameAdded = this.onGameAdded.bind(this);
     this.onGameUpdated = this.onGameUpdated.bind(this);
     this.onGameRemoved = this.onGameRemoved.bind(this);
-
-    const shadowRoot = this.attachShadow({ mode: "open" });
-    shadowRoot.innerHTML = templateHTML;
-    this.container_ = shadowRoot.querySelector(".game-list") as any;
-    this.listEntryTemplate_ = shadowRoot.getElementById("game-list-entry-template") as any;
+    this.entryContentTemplate_ = document.createElement("template");
+    this.entryContentTemplate_.innerHTML = templateHTML;
   }
 
   connectedCallback() {
@@ -35,8 +32,8 @@ export class GameList extends HTMLElement {
     }
     this.refreshGamesEntries();
     this.mod.serverSession.subscribe(ServerEventOp.GAME_ADDED, this.onGameAdded);
-    this.mod.serverSession.subscribe(ServerEventOp.GAME_REMOVED, this.onGameUpdated);
-    this.mod.serverSession.subscribe(ServerEventOp.GAME_STATE_UPDATED, this.onGameRemoved);
+    this.mod.serverSession.subscribe(ServerEventOp.GAME_REMOVED, this.onGameRemoved);
+    this.mod.serverSession.subscribe(ServerEventOp.GAME_STATE_UPDATED, this.onGameUpdated);
   }
   disconnectedCallback() {
     this.mod = (<any>window).MOD;
@@ -44,63 +41,14 @@ export class GameList extends HTMLElement {
       throw new Error("unable to find MOD?!");
     }
     this.mod.serverSession.unsubscribe(ServerEventOp.GAME_ADDED, this.onGameAdded);
-    this.mod.serverSession.unsubscribe(ServerEventOp.GAME_REMOVED, this.onGameUpdated);
-    this.mod.serverSession.unsubscribe(ServerEventOp.GAME_STATE_UPDATED, this.onGameRemoved);
+    this.mod.serverSession.unsubscribe(ServerEventOp.GAME_REMOVED, this.onGameRemoved);
+    this.mod.serverSession.unsubscribe(ServerEventOp.GAME_STATE_UPDATED, this.onGameUpdated);
   }
 
-  onGameAdded({ payload }: Event<ServerEventOp.GAME_ADDED>) {
-    this.addGameEntry(payload);
+  getEntryContentTemplate(): HTMLTemplateElement {
+    return this.entryContentTemplate_;
   }
-  onGameRemoved({ payload }: Event<ServerEventOp.GAME_REMOVED>) {
-    this.removeGameEntry(payload.id);
-  }
-  onGameUpdated({ payload }: Event<ServerEventOp.GAME_STATE_UPDATED>) {
-    this.updateGameEntry(payload);
-  }
-
-  async refreshGamesEntries() {
-    this.container_.innerHTML = "";
-    const { games } = await this.mod.serverSession.sendRPC(CommandOp.LIST_GAMES, {});
-    games.forEach((game) => {
-      console.log("game-list: adding", game);
-      this.addGameEntry(game);
-    });
-  }
-
-  addGameEntry(data: GameEntryDetails) {
-    const newHtmlFrag = this.listEntryTemplate_.content.cloneNode(true) as HTMLElement;
-    const newHtml = newHtmlFrag.querySelector(".game-list-entry") as HTMLElement;
-    newHtml.onclick = () => this.onEntryClicked(data.id);
-    this.updateGameEntryFields(newHtml, data);
-    this.container_.appendChild(newHtml);
-  }
-
-  onEntryClicked(id: GameIdType) {
-    this.mod.joinGame(id);
-  }
-
-  findGameEntry(id: string): HTMLElement {
-    const gameEntries = this.container_.children;
-    for (let gameEntry of gameEntries) {
-      if (gameEntry.getAttribute("gameid") === id) {
-        return gameEntry as HTMLElement;
-      }
-    }
-    throw new Error("unable to find GameEntry with id: " + id);
-  }
-
-  removeGameEntry(id: string) {
-    this.findGameEntry(id).remove();
-  }
-
-  updateGameEntry(data: GameEntryDetails) {
-    const gameEntry = this.findGameEntry(data.id);
-    this.updateGameEntryFields(gameEntry, data);
-  }
-
-  updateGameEntryFields(entryEl: HTMLElement, data: GameEntryDetails) {
-    console.log(entryEl);
-    entryEl.setAttribute("gameid", data.id);
+  applyEntryData(entryEl: HTMLElement, data: GameEntryDetails) {
     entryEl.querySelector(".name").textContent = data.name;
     const playerCountField = entryEl.querySelector(".playerCount") as HTMLElement;
     if (data.playersCount >= data.maxPlayersCount) {
@@ -109,6 +57,32 @@ export class GameList extends HTMLElement {
       playerCountField.style.color = "green";
     }
     playerCountField.textContent = `${data.playersCount}/${data.maxPlayersCount}`;
+  }
+
+  onGameAdded({ payload }: Event<ServerEventOp.GAME_ADDED>) {
+    console.log("list: onGameAdded");
+    this.addEntry(payload);
+  }
+  onGameRemoved({ payload }: Event<ServerEventOp.GAME_REMOVED>) {
+    console.log("list: onGameRemoved");
+    this.removeEntry(payload.id);
+  }
+  onGameUpdated({ payload }: Event<ServerEventOp.GAME_STATE_UPDATED>) {
+    console.log("list: onGameUpdated");
+    this.updateEntry(payload);
+  }
+
+  async refreshGamesEntries() {
+    this.container_.innerHTML = "";
+    const { games } = await this.mod.serverSession.sendRPC(CommandOp.LIST_GAMES, {});
+    games.forEach((game) => {
+      console.log("game-list: adding", game);
+      this.addEntry(game);
+    });
+  }
+
+  onEntryClicked(id: GameIdType) {
+    this.mod.joinGame(id);
   }
 }
 
