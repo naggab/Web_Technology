@@ -53,7 +53,8 @@ export default class FillShapeTask extends Task {
     this.infoButton.setAttribute("label", "Fill: " + fillArry[seed % fillArry.length] + "%");
 
     shapes.push(Smiley, Pyramid, Tree, Cactus);
-    this.shape = new shapes[seed % shapes.length](this.ctx, 100, 5, fillArry[seed % fillArry.length], 400, 10);
+    //this.shape = new shapes[seed % shapes.length](this.ctx, 100, 5, fillArry[seed % fillArry.length], 400, 10);
+    this.shape = new shapes[3](this.ctx, 100, 5, fillArry[seed % fillArry.length], 400, 5);;
     this.shape.draw();
 
     this.flagMouseDown = false;
@@ -312,13 +313,12 @@ class Smiley implements ShapeI {
     var outRect2 = this.rect_2.calcPixelsFilled();
     var outRect3 = this.rect_3.calcPixelsFilled();
 
-    //console.log("Circle_Original",this.count_pixel,this.count_total);
+    /*
     console.log("Circle", outCircle.coloredPixel, outCircle.totalPixel);
     console.log("Rectangle_left", outRect1.coloredPixel, outRect1.totalPixel);
     console.log("Rectangle_right", outRect2.coloredPixel, outRect2.totalPixel);
     console.log("Rectangle_bottom", outRect3.coloredPixel, outRect3.totalPixel);
 
-    /*
     this.count_pixel = z.filled;
     this.count_total = z.total;*/
     var percentage_check =
@@ -398,7 +398,6 @@ class Pyramid implements ShapeI {
       this.rect_4.isDrawnInside(relativeMousePos)
     ) {
       this.flagOutside = false;
-      console.log(this.cnt_max_outside);
     } else {
       if (!this.flagOutside) {
         this.flagOutside = true;
@@ -519,7 +518,6 @@ class Tree implements ShapeI {
       this.rect_6.isDrawnInside(relativeMousePos)
     ) {
       this.flagOutside = false;
-      console.log(this.cnt_max_outside);
     } else {
       if (!this.flagOutside) {
         this.flagOutside = true;
@@ -694,7 +692,6 @@ class Cactus implements ShapeI {
       this.root.isDrawnInside(relativeMousePos)
     ) {
       this.flagOutside = false;
-      console.log(this.cnt_max_outside);
     } else {
       if (!this.flagOutside) {
         this.flagOutside = true;
