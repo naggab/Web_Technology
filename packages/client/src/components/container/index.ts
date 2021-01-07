@@ -8,6 +8,9 @@ class Container extends HTMLElement {
   connectedCallback() {
     const tempInnerHTML = this.innerHTML;
     this.innerHTML = viewHtml;
+    if (this.hasAttribute("class")) {
+      this.querySelector(".container").classList.add(...this.getAttribute("classname").split(" "));
+    }
     this.querySelector(".container").innerHTML = tempInnerHTML;
   }
 

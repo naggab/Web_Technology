@@ -2,7 +2,7 @@ import Welcome from "./screens/welcome";
 import EnterExistingGame from "./screens/enterExistingGame";
 import CreateNewGame from "./screens/createNewGame";
 import ShowTasks from "./screens/listAllTasks";
-import { Game } from "./screens/game";
+import { GameScreen } from "./screens/game";
 import Lobby from "./screens/lobby";
 import { ClientState } from "./masterOfDisaster";
 
@@ -18,7 +18,7 @@ export async function router(state: ClientState) {
     { path: "/joinGame", view: () => new EnterExistingGame() },
     { path: "/newGame", view: () => new CreateNewGame() },
     { path: "/showTasks", view: () => new ShowTasks() },
-    { path: "/game", view: () => new Game() },
+    { path: "/game", view: () => new GameScreen() },
     { path: "/lobby", view: () => new Lobby() },
   ];
 
