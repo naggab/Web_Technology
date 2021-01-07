@@ -66,7 +66,7 @@ export default class DragAndDropTask extends Task {
         this.firstClickFlag = true;
         this.backButton.setAttribute("label", "Back");
       }
-      if (this.result) {
+      if (this.result[0]) {
         this.finish(this.result[0]);
       }
     });
