@@ -5,6 +5,7 @@ import { router, navigateTo } from "./router";
 import { MasterOfDisaster } from "./masterOfDisaster";
 import "./components/taskOpener";
 import { TaskOpener } from "./components/taskOpener";
+import "./components/slider_switch/index"
 
 function main() {
   document.body.style.backgroundImage = "/assets/img/bg.png";

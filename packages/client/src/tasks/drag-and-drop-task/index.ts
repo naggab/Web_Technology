@@ -8,7 +8,7 @@ export default class DragAndDropTask extends Task {
   serverResponseSpan: HTMLSpanElement;
   dropZone: HTMLDivElement;
   taskContainer: HTMLDivElement;
-  result: any = [false,""];
+  result: any = [false, ""];
   selectedFile: any;
   firstClickFlag: boolean = false;
   filesArray: Array<[string, string]> = [];
@@ -39,10 +39,16 @@ export default class DragAndDropTask extends Task {
     this.selectedFile = this.filesArray[randomSeed % this.filesArray.length];
 
     this.dropZone.innerHTML = "Drag and Drop file '" + this.selectedFile[0] + "' from Downloads";
-   
-    this.taskContainer.addEventListener("drop",(e)=>{e.preventDefault(); }) //disable browser default drop, outside drop zone
-    this.taskContainer.addEventListener("dragover",(e)=>{e.preventDefault(); }) //disable browser default drop, outside drop zone
-    this.taskContainer.addEventListener("dragleave",(e)=>{e.preventDefault();}) //disable browser default drop, outside drop zone
+
+    this.taskContainer.addEventListener("drop", (e) => {
+      e.preventDefault();
+    }); //disable browser default drop, outside drop zone
+    this.taskContainer.addEventListener("dragover", (e) => {
+      e.preventDefault();
+    }); //disable browser default drop, outside drop zone
+    this.taskContainer.addEventListener("dragleave", (e) => {
+      e.preventDefault();
+    }); //disable browser default drop, outside drop zone
 
     this.dropZone.addEventListener("dragover", (e) => {
       e.preventDefault(); //disable automatic browser preview
@@ -69,15 +75,15 @@ export default class DragAndDropTask extends Task {
     });
   }
   async onDrop(e: DragEvent) {
-    e.preventDefault(); //disable automatic browser preview 
+    e.preventDefault(); //disable automatic browser preview
     console.log("dropped");
     var files = e.dataTransfer.files;
     this.result = await checkUpload(files, this.selectedFile);
     this.dropZone.style.background = this.result[0] ? "green" : "red";
     this.dropZone.innerHTML = this.result[1].toString();
-    this.dropZone.removeEventListener("drop",this.onDrop);
+    this.dropZone.removeEventListener("drop", this.onDrop);
     this.backButton.setAttribute("label", "Back");
-    this.firstClickFlag=true;
+    this.firstClickFlag = true;
   }
 
   onUnmounting(): void | Promise<void> {}
