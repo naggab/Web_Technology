@@ -9,11 +9,9 @@ export class TaskOpener extends HTMLElement {
 
   constructor() {
     super();
-    console.log("constr");
   }
 
   connectedCallback() {
-    console.log("connectedCallback");
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = templateHTML;
 
@@ -27,7 +25,6 @@ export class TaskOpener extends HTMLElement {
   }
 
   private animateFadeIn() {
-    console.log("animateFadeIn");
     document.body.style.overflow = "hidden";
     this.wrapper_.classList.add("open");
     setTimeout(() => {
