@@ -1,8 +1,8 @@
 import AbstractScreen from "../AbstractScreen";
 import templateHTML from "./template.html";
 import "../../components/playerList";
-import {Button} from "../../components/button";
-import {MasterOfDisaster} from "../../masterOfDisaster";
+import { Button } from "../../components/button";
+import { MasterOfDisaster } from "../../masterOfDisaster";
 class PreGameScreen extends AbstractScreen {
   startButton_: Button;
   startInfo_: HTMLParagraphElement;

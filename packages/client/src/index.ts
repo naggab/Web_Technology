@@ -10,12 +10,8 @@ import { Button } from "./components/button";
 
 function main() {
   document.body.style.backgroundImage = "/assets/img/bg.png";
-  let _showAllTasks: Button = document.querySelector("#show-all-tasks");
-  _showAllTasks.onclick = showAllTasks;
 }
-async function showAllTasks() {
-  router("all-tasks");
-}
+
 window.addEventListener("load", () => {
   main();
 });
