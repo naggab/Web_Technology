@@ -13,6 +13,7 @@ export type PlayerInGameI = {
   color: string;
   position: Coordinate;
   bibNumber: number;
+  isAdmin?: boolean;
 };
 
 export type PlayerInLobbyI = Omit<PlayerInGameI, "color" | "position" | "bibNumber">;

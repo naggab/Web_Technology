@@ -1,7 +1,7 @@
 import { GameDetails, PlayerInGameI, GameIdType } from "@apirush/common";
 import { Player } from "./screens/game/game-playground";
 import { ServerSession } from "./serverSession";
-import { CommandOp } from "@apirush/common/src";
+import { CommandOp, Event, GameEventOp } from "@apirush/common/src";
 import { router } from "./router";
 import { TaskIdentifier } from "./taskManager";
 import { MapStorage } from "@apirush/common/src/maps";
@@ -19,15 +19,21 @@ export type ClientState =
   | "post-game";
 
 export class MasterOfDisaster {
+  private watchingForGameStart: boolean = false;
+  private watchingForGameEnd: boolean = false;
   private static instance_: MasterOfDisaster;
   private state_: ClientState = "welcome-start";
   activeGame: GameDetails | null = null;
   myPlayerId: number | null = null;
   myPlayer: PlayerInGameI | null = null;
+  gameWinner: PlayerInGameI | null = null;
   readonly serverSession: ServerSession;
   readonly statsStorage: StatsStorage = new StatsStorage();
   constructor(sess: ServerSession) {
     this.serverSession = sess;
+    this.onGameDidStart = this.onGameDidStart.bind(this);
+    this.onGameAborted = this.onGameAborted.bind(this);
+    this.onGameDidFinish = this.onGameDidFinish.bind(this);
   }
 
   static getInstance() {
@@ -62,10 +68,52 @@ export class MasterOfDisaster {
   private setState(newState: ClientState) {
     this.state_ = newState;
     router(this.state_);
+
+    if (newState === "pre-game" && !this.watchingForGameStart) {
+      this.watchForGameStart();
+    }
+    if (newState === "in-game" && !this.watchingForGameEnd) {
+      this.watchForGameEnd();
+    }
   }
 
   get helloSent() {
     return this.myPlayerId != null;
+  }
+
+  private watchForGameStart() {
+    this.serverSession.subscribe(GameEventOp.GAME_STARTED, this.onGameDidStart);
+  }
+
+  private onGameDidStart() {
+    this.setState("in-game");
+    this.serverSession.unsubscribe(GameEventOp.GAME_STARTED, this.onGameDidStart);
+  }
+
+  private watchForGameEnd() {
+    this.watchingForGameEnd = true;
+    this.serverSession.subscribe(GameEventOp.GAME_FINISHED, this.onGameDidFinish);
+    this.serverSession.subscribe(GameEventOp.GAME_ABORTED, this.onGameAborted);
+  }
+
+  private stopWatchingForGameEnd() {
+    this.watchingForGameEnd = false;
+    this.serverSession.unsubscribe(GameEventOp.GAME_FINISHED, this.onGameDidFinish);
+    this.serverSession.unsubscribe(GameEventOp.GAME_ABORTED, this.onGameAborted);
+  }
+
+  private onGameAborted() {
+    this.setState("post-game");
+    console.log("Game was aborted");
+    this.stopWatchingForGameEnd();
+  }
+
+  private onGameDidFinish(ev: Event<GameEventOp.GAME_FINISHED>) {
+    console.log("Game did finish, winner is:", ev.payload.winner);
+    this.gameWinner = ev.payload.winner;
+    this.setState("post-game");
+
+    this.stopWatchingForGameEnd();
   }
 
   private ensureHelloSent(v: boolean = true) {
@@ -79,7 +127,7 @@ export class MasterOfDisaster {
   }
 
   private ensureInGame(v: boolean = true) {
-    if (!this.playerIsInGame !== v) {
+    if (this.playerIsInGame !== v) {
       throw new Error("ensureInGame state not as expected");
     }
   }

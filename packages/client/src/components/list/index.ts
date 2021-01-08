@@ -4,6 +4,8 @@ interface MinimumEntryDetails {
   id: string | number;
 }
 
+const ID_ATTRIBUTE_NAME = "_id_";
+
 export abstract class List<EntryData extends MinimumEntryDetails> extends HTMLElement {
   container_: HTMLDivElement;
   entryTemplate_: HTMLTemplateElement;
@@ -33,7 +35,7 @@ export abstract class List<EntryData extends MinimumEntryDetails> extends HTMLEl
       newHtml.onclick = () => this.onEntryClicked(data.id);
       newHtml.classList.add("list-entry-clickable");
     }
-    newHtml.setAttribute("gameid", `${data.id}`);
+    newHtml.setAttribute(ID_ATTRIBUTE_NAME, `${data.id}`);
     this.applyEntryData(newHtml, data);
     this.container_.appendChild(newHtml);
   }
@@ -41,7 +43,7 @@ export abstract class List<EntryData extends MinimumEntryDetails> extends HTMLEl
   private findEntry(id: EntryData["id"]): HTMLElement {
     const gameEntries = this.container_.children;
     for (let gameEntry of gameEntries) {
-      if (gameEntry.getAttribute("gameid") === `${id}`) {
+      if (gameEntry.getAttribute(ID_ATTRIBUTE_NAME) === `${id}`) {
         return gameEntry as HTMLElement;
       }
     }
