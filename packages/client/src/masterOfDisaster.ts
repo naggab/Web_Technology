@@ -1,7 +1,7 @@
 import { GameDetails, PlayerInGameI, GameIdType } from "@apirush/common";
 import { Player } from "./screens/game/game-playground";
 import { ServerSession } from "./serverSession";
-import { CommandOp } from "@apirush/common/src";
+import { CommandOp, GameEventOp } from "@apirush/common/src";
 import { router } from "./router";
 import { TaskIdentifier } from "./taskManager";
 import { MapStorage } from "@apirush/common/src/maps";
@@ -19,6 +19,7 @@ export type ClientState =
   | "post-game";
 
 export class MasterOfDisaster {
+  private watchingForGameStart: boolean = false;
   private static instance_: MasterOfDisaster;
   private state_: ClientState = "welcome-start";
   activeGame: GameDetails | null = null;
@@ -28,6 +29,7 @@ export class MasterOfDisaster {
   readonly statsStorage: StatsStorage = new StatsStorage();
   constructor(sess: ServerSession) {
     this.serverSession = sess;
+    this.onGameDidStart = this.onGameDidStart.bind(this);
   }
 
   static getInstance() {
@@ -62,10 +64,23 @@ export class MasterOfDisaster {
   private setState(newState: ClientState) {
     this.state_ = newState;
     router(this.state_);
+
+    if (newState === "pre-game" && !this.watchingForGameStart) {
+      this.watchForGameStart();
+    }
   }
 
   get helloSent() {
     return this.myPlayerId != null;
+  }
+
+  watchForGameStart() {
+    this.serverSession.subscribe(GameEventOp.GAME_STARTED, this.onGameDidStart);
+  }
+
+  private onGameDidStart() {
+    this.setState("in-game");
+    this.serverSession.unsubscribe(GameEventOp.GAME_STARTED, this.onGameDidStart);
   }
 
   private ensureHelloSent(v: boolean = true) {
