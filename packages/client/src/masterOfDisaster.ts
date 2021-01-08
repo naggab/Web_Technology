@@ -79,7 +79,7 @@ export class MasterOfDisaster {
   }
 
   private ensureInGame(v: boolean = true) {
-    if (!this.playerIsInGame !== v) {
+    if (this.playerIsInGame !== v) {
       throw new Error("ensureInGame state not as expected");
     }
   }

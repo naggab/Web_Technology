@@ -107,7 +107,7 @@ export class Game implements GameI {
   }
 
   findNextBibNumber() {
-    let bibNumber = 0;
+    let bibNumber = 1;
     while (true) {
       let isUnused = true;
       for (let [_, player] of this.players) {
@@ -123,14 +123,17 @@ export class Game implements GameI {
   }
 
   addPlayer(details: PlayerInLobby, sendUpdate: boolean = true): PlayerInGame {
-    const bibNumber = this.findNextBibNumber();
-    const position = MapStorage[this.map].spawns[bibNumber];
+    const bibNumber = this.findNextBibNumber(); // minVal: 1
+    const position = MapStorage[this.map].spawns[bibNumber - 1];
     const player: PlayerInGame = {
       ...details,
       color: this.findFreeColor(),
       bibNumber,
       position,
     };
+    if (this.players.size == 0) {
+      player.isAdmin = true;
+    }
 
     this.players.set(details.id, player);
     if (sendUpdate) {

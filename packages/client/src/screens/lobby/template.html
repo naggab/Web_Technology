@@ -24,30 +24,23 @@
     font-weight: normal;
     margin-bottom: 5%;
   }
-  .container {
-    width: 50%;
-    height: 50vh;
-    margin-left: auto;
-    margin-right: auto;
-    border-radius: 25px;
-    background: rgba(0, 0, 0, 0.4);
-    padding: 20px;
-  }
-  .container > * {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    width: 40%;
-  }
-  #list {
-    overflow: auto;
 
-    height: 90%;
-    width: 100%;
-  }
   #start_game {
     width: 100%;
-    align-content: center;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .start_info {
+    color: white;
+    font-size: 18px;
+    font-weight: bolder;
+  }
+
+  .hidden {
+    display: none;
+    visibility: hidden;
   }
 </style>
 
@@ -55,12 +48,12 @@
   <div>
     <h1>OTHER PLAYEERS ARE JOINING</h1>
   </div>
-  <div class="container">
-    <div id="list">
-      <player-list/>
-    </div>
+  <apirush-container>
+    <player-list></player-list>
+
     <div id="start_game">
-      <apirush-button id="start_now_button" label="START NOW" styletype="black" onclick="/game"></apirush-button>
+      <apirush-button class="hidden" id="start_now_button" label="START NOW" styletype="black"></apirush-button>
+      <p class="start_info">Please wait, Admin will start the game</p>
     </div>
-  </div>
+  </apirush-container>
 </div>
