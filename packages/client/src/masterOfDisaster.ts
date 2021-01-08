@@ -17,7 +17,7 @@ export type ClientState =
   | "pre-game"
   | "in-game"
   | "post-game"
-    | "all-tasks";
+  | "all-tasks";
 
 export class MasterOfDisaster {
   private watchingForGameStart: boolean = false;
@@ -175,6 +175,7 @@ export class MasterOfDisaster {
       this.activeGame = game;
 
       this.setState("pre-game");
+      return;
     } catch (e) {
       console.error(e);
     }
@@ -189,6 +190,7 @@ export class MasterOfDisaster {
       this.myPlayer = player;
       this.activeGame = game;
       this.setState("pre-game");
+      return;
     } catch (e) {
       console.error(e);
     }
@@ -202,6 +204,7 @@ export class MasterOfDisaster {
     try {
       await this.serverSession.sendRPC(CommandOp.START_GAME, {});
       this.setState("in-game");
+      return;
     } catch (e) {
       console.error(e);
     }
