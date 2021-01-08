@@ -8,6 +8,7 @@ import { Game } from "./game";
 import { GameMasterI } from "./gameMasterI";
 
 export class GameMaster implements GameMasterI {
+  private lastAssignedId = 0;
   static GameConstructor = Game;
 
   games: Map<string, GameI>;
@@ -53,19 +54,7 @@ export class GameMaster implements GameMasterI {
   }
 
   createPlayer(name: string, notifyCb: ServerEventNotifyCb) {
-    let newId = 0;
-    while (true) {
-      if (this.unassignedPlayers.has(newId)) {
-        newId++;
-        continue;
-      }
-      for (var [_, game] of this.games) {
-        if (game.hasPlayer(newId)) {
-          newId++;
-        }
-      }
-      break;
-    }
+    const newId = this.lastAssignedId++;
 
     const player = {
       name,
