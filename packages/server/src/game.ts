@@ -200,7 +200,8 @@ export class Game implements GameI {
 
     this.emitEvent(evt);
   }
-  emitOnGameFinished(winner: PlayerIdType) {
+  emitOnGameFinished(winnerId: PlayerIdType) {
+    const winner = this.players.get(winnerId);
     const evt: Event<GameEventOp.GAME_FINISHED> = {
       op: GameEventOp.GAME_FINISHED,
       payload: { winner },

@@ -25,7 +25,9 @@ export class GameMaster implements GameMasterI {
   }
 
   getGameList() {
-    return Array.from(this.games.values()).map((game) => game.details);
+    return Array.from(this.games.values())
+      .filter((game) => game.state !== "post-game")
+      .map((game) => game.details);
   }
 
   getGame(id: GameIdType): GameI {

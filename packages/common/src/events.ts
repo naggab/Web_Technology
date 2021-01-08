@@ -30,7 +30,7 @@ export type ServerEventOpPayloadMap = {
 export type GameEventOpPayloadMap = {
   [GameEventOp.GAME_STARTED]: {};
   [GameEventOp.GAME_ABORTED]: {};
-  [GameEventOp.GAME_FINISHED]: { winner: PlayerIdType };
+  [GameEventOp.GAME_FINISHED]: { winner: PlayerInGameI };
 
   [GameEventOp.PLAYER_JOINED]: PlayerInGameI;
   [GameEventOp.PLAYER_LEFT]: { id: PlayerIdType };
