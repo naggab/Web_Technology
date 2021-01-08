@@ -1,0 +1,54 @@
+<style>
+
+    * {
+        box-sizing: border-box;
+        user-select: none;
+    }
+
+    html, body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+        background-color: #333333;
+        color: #ffffff;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    #video-container {
+        width: 640px;
+        height: 480px;
+        position: relative;
+    }
+
+    .layer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    #pose-video {
+        transform: scaleX(-1);
+    }
+
+    #pose-result {
+        font-size: 100px;
+        text-align: right;
+        padding: 20px 30px 0 0;
+    }
+</style>
+<body>
+
+<div id="video-container">
+    <video id="pose-video" class="layer" playsinline></video>
+    <canvas id="pose-canvas" class="layer"></canvas>
+    <div id="pose-result" class="layer"></div>
+</div>
+
+</body>

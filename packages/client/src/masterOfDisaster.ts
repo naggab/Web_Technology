@@ -31,6 +31,9 @@ export class MasterOfDisaster {
   gameWinner: PlayerInGameI | null = null;
   readonly serverSession: ServerSession;
   readonly statsStorage: StatsStorage = new StatsStorage();
+
+  readonly debugMode: boolean = true;
+
   constructor(sess: ServerSession) {
     this.serverSession = sess;
     this.onGameDidStart = this.onGameDidStart.bind(this);

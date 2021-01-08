@@ -4,10 +4,12 @@
 import { Task, TaskFinishCallback } from "./task";
 import DragAndDropTask from "./tasks/drag-and-drop-task";
 import FillShapeTask from "./tasks/fill-shape-task";
+import GestureRecognitionTask from "./tasks/gesture-recognition-task";
 
 const TASK_LIST = {
   "drag-and-drop-task": DragAndDropTask,
   "fill-shape-task": FillShapeTask,
+  "gesture-recognition-task": GestureRecognitionTask,
 } as const;
 
 export type TaskIdentifier = keyof typeof TASK_LIST;
