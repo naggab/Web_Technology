@@ -44,6 +44,7 @@ export class TaskOpener extends HTMLElement {
         this.wrapper_.classList.remove("open");
         document.body.style.overflow = "";
         this.backdrop_.onclick = undefined;
+        this.container_.innerHTML = "";
       },
       { once: true },
     );
