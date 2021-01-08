@@ -90,6 +90,8 @@ var foreignPlayerLayer: Konva.Layer;
 var foreignPlayers: Player[];
 
 var sprites: HTMLImageElement[];
+var questionMarkSprite: HTMLImageElement;
+var questionMarkDone: HTMLImageElement;
 
 /**
  * Defines the player and stores the associated layer we used to draw him.
@@ -159,26 +161,26 @@ export class Player {
     */
     var spriteNbr = (this.bibNumber - 1) % sprites.length;
     this.model = new Konva.Sprite({
-      height: 16,
-      width: 16,
+      height: 64,
+      width: 64,
       x: (this.x - 1) * gridSize,
       y: (this.y - 1) * gridSize,
       image: sprites[spriteNbr],
       animation: "idleRight",
-      scaleX: (gridSize / 16.0) * 3,
-      scaleY: (gridSize / 16.0) * 3,
+      scaleX: (gridSize / 64.0) * 3,
+      scaleY: (gridSize / 64.0) * 3,
       animations: {
         // x, y, width, height
         // prettier-ignore
         idleRight: [
-          0, 0, 15, 16,
-          17, 0, 15, 16,
-          33, 0, 15, 16],
+          0, 0, 64, 64,
+          64, 0, 64, 64,
+          128, 0, 64, 64],
         // prettier-ignore
         idleLeft: [
-          48, 0, 15, 16,
-          65, 0, 15, 16,
-          81, 0, 15, 16],
+          192, 0, 64, 64,
+          256, 0, 64, 64,
+          320, 0, 64, 64],
       },
       frameRate: 2,
       frameIndex: 0,
@@ -275,8 +277,20 @@ export class Player {
                   if (completed) {
                     // Get new grid object in case we had to redraw while doing the task
                     taskPos = grid[ty][tx];
+                    var tpx = taskPos.shape.x();
+                    var tpy = taskPos.shape.y();
+                    taskPos.shape.remove();
                     if (taskPos) {
-                      taskPos.shape.fill("green");
+                      taskPos.shape = new Konva.Image({
+                        x: tpx,
+                        y: tpy,
+                        image: questionMarkDone,
+                        width: 16,
+                        height: 16,
+                        scaleX: gridSize / 16.0,
+                        scaleY: gridSize / 16.0,
+                      });
+                      baseLayer.add(taskPos.shape);
                       baseLayer.batchDraw();
                     }
                   }
@@ -520,6 +534,13 @@ export default class GamePlayground extends HTMLElement {
     imageObj4.src = "/assets/img/sprite4.png";
     await imageObj4.decode();
     sprites.push(imageObj4);
+
+    questionMarkSprite = new Image();
+    questionMarkSprite.src = "/assets/img/questionMarkSprite.png";
+    await questionMarkSprite.decode();
+
+    questionMarkDone = new Image();
+    questionMarkDone.src = "/assets/img/questionMarkDone.png";
 
     modInstance = MasterOfDisaster.getInstance();
     if (!modInstance) throw console.error("no mod instance");
@@ -824,12 +845,38 @@ export default class GamePlayground extends HTMLElement {
       );
       var newPos = grid[this.map.taskPositions[key].y][this.map.taskPositions[key].x];
       if (newPos !== undefined) {
-        newPos.shape.fill("purple");
+        //newPos.shape.fill("purple");
+        var npx = newPos.shape.x();
+        var npy = newPos.shape.y();
+        console.log(npx, npy);
+        newPos.shape.destroy();
+        var spr: Konva.Sprite;
+        spr = new Konva.Sprite({
+          x: npx,
+          y: npy,
+          image: questionMarkSprite,
+          animation: "idle",
+          scaleX: gridSize / 16.0,
+          scaleY: gridSize / 16.0,
+          animations: {
+            // prettier-ignore
+            idle: [
+              0, 0, 16, 16,
+              16, 0, 16, 16],
+          },
+          frameRate: 4,
+          frameIndex: 0,
+        });
+        baseLayer.add(spr);
+        spr.start();
+        newPos.shape = spr;
+
         newPos.type = ElementType.Task;
         newPos.task = key;
         if (tasks === undefined) tasks = new Array();
         tasks.push(new Task(key, cord(this.map.taskPositions[key].x, this.map.taskPositions[key].y), false));
       }
+      baseLayer.batchDraw();
     }
 
     /* DEMO IMPLEMENTATION BLOCK
