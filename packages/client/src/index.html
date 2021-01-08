@@ -40,16 +40,19 @@
         margin-top: 50px;
         background-color: white;
       }
-
+      #dark_light_mode {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
     </style>
   </head>
   <body>
+    <div id="dark_light_mode">
+      <toggle-switch></toggle-switch>
+    </div>
     <div id="app"></div>
-    <nav class="nav">
-      <a href="/" class="nav_link" style="display: none" data-link>Welcome</a>
-      <a href="/joinGame" class="nav_link" data-link>ENTER EXISTING GAME</a>
-      <a href="/newGame" class="nav_link" data-link>CREATE A NEW GAME</a>
-      <a href="/showTasks" class="nav_link">SHOW ALL TASKS</a>
-    </nav>
+    <apirush-button id="show-all-tasks" label="SHOW ALL TASKS" styletype="transparent,xlarge"></apirush-button>
+
   </body>
 </html>

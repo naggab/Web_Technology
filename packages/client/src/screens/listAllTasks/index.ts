@@ -4,54 +4,25 @@ import templateHTML from "./template.html";
 import { TaskManger } from "../../taskManager";
 import { MasterOfDisaster } from "../../masterOfDisaster";
 
-const linkCollection = document.createElement("div");
-const taskWrapper = document.createElement("div");
+import "../../components/taskList";
 
 class ListAllTasksScreen extends AbstractScreen {
   constructor() {
     super();
-    this.setTitle("Welcome");
-    this._getTaskList();
+    this.setTitle("Task Debugger");
   }
 
-  _getTaskList() {
-    linkCollection.setAttribute(
-      "style",
-      `height: 44px; 
-                    display: flex; 
-                    justify-content: space-around;
-                    align-items: center;
-                      background-color: #D3D3D3;
-                      margin: 3px;
-                    
-                  `,
-    );
-    taskWrapper.setAttribute(
-      "style",
-      `
-                  width: 100%; 
-                  border: 1px solid #EFEFEF;
-                `,
-    );
-    document.body.appendChild(linkCollection);
-    document.body.appendChild(taskWrapper);
-
-    const taskIds = TaskManger.getTaskIds();
-
-    linkCollection.innerHTML = "";
-    // create links in the 'LinkCollection' for every found task
-    for (let taskId of taskIds) {
-      const link = document.createElement("a");
-      link.onclick = (e) => {
-        e.preventDefault();
-        MasterOfDisaster.getInstance().openTaskByIdentifier(taskId);
-      };
-      link.href = "";
-      link.innerText = taskId;
-      linkCollection.appendChild(link);
+  async onMounted() {
+    const hash = window.location.hash.replace("#", "");
+    if (!hash || TaskManger.getTaskIds().indexOf(hash as any) === -1) {
+      return;
     }
+    await MasterOfDisaster.getInstance().openTaskByIdentifier(hash as any);
+    window.location.hash = "";
+  }
 
-    return taskWrapper;
+  async getHtml(): Promise<string> {
+    return templateHTML;
   }
 }
 

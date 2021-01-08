@@ -8,7 +8,7 @@ export default class DragAndDropTask extends Task {
   serverResponseSpan: HTMLSpanElement;
   dropZone: HTMLDivElement;
   taskContainer: HTMLDivElement;
-  result: any = [false,""];
+  result: any = [false, ""];
   selectedFile: any;
   firstClickFlag: boolean = false;
   filesArray: Array<[string, string]> = [];
@@ -39,10 +39,16 @@ export default class DragAndDropTask extends Task {
     this.selectedFile = this.filesArray[randomSeed % this.filesArray.length];
 
     this.dropZone.innerHTML = "Drag and Drop file '" + this.selectedFile[0] + "' from Downloads";
-   
-    this.taskContainer.addEventListener("drop",(e)=>{e.preventDefault(); }) //disable browser default drop, outside drop zone
-    this.taskContainer.addEventListener("dragover",(e)=>{e.preventDefault(); }) //disable browser default drop, outside drop zone
-    this.taskContainer.addEventListener("dragleave",(e)=>{e.preventDefault();}) //disable browser default drop, outside drop zone
+
+    this.taskContainer.addEventListener("drop", (e) => {
+      e.preventDefault();
+    }); //disable browser default drop, outside drop zone
+    this.taskContainer.addEventListener("dragover", (e) => {
+      e.preventDefault();
+    }); //disable browser default drop, outside drop zone
+    this.taskContainer.addEventListener("dragleave", (e) => {
+      e.preventDefault();
+    }); //disable browser default drop, outside drop zone
 
     this.dropZone.addEventListener("dragover", (e) => {
       e.preventDefault(); //disable automatic browser preview
@@ -63,21 +69,19 @@ export default class DragAndDropTask extends Task {
         download(this.selectedFile);
         this.firstClickFlag = true;
         this.backButton.setAttribute("label", "Back");
-      }
-     else
-        this.finish(this.result[0]);
+      } else this.finish(this.result[0]);
     });
   }
   async onDrop(e: DragEvent) {
-    e.preventDefault(); //disable automatic browser preview 
+    e.preventDefault(); //disable automatic browser preview
     console.log("dropped");
     var files = e.dataTransfer.files;
     this.result = await checkUpload(files, this.selectedFile);
     this.dropZone.style.background = this.result[0] ? "green" : "red";
     this.dropZone.innerHTML = this.result[1].toString();
-    this.dropZone.removeEventListener("drop",this.onDrop);
+    this.dropZone.removeEventListener("drop", this.onDrop);
     this.backButton.setAttribute("label", "Back");
-    this.firstClickFlag=true;
+    this.firstClickFlag = true;
   }
 
   onUnmounting(): void | Promise<void> {}
@@ -102,9 +106,10 @@ async function checkUpload(files: FileList, download: [string, string]) {
     try {
       fileContents = await readUploadedFileAsText(file);
     } catch (e) {}
-    if (fileContents == download[1]) {//&& name == download[0]) {
+    if (fileContents == download[1]) {
+      //&& name == download[0]) {
       return [true, "Congrats, you did it!"];
-    }/* else if (fileContents != download[1] && name == download[0]) {
+    } /* else if (fileContents != download[1] && name == download[0]) {
       return [false, "Nope, correct file name. Wrong content."];
     } else if (name != download[0] && fileContents == download[1]) {
       return [false, "Nope, wrong file name. Correct content."];

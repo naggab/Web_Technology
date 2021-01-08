@@ -1,9 +1,9 @@
 import AbstractScreen from "../AbstractScreen";
 import templateHTML from "./template.html";
 import "../../components/playerList";
-import { Button } from "../../components/button";
-import { MasterOfDisaster } from "../../masterOfDisaster";
-export default class Lobby extends AbstractScreen {
+import {Button} from "../../components/button";
+import {MasterOfDisaster} from "../../masterOfDisaster";
+class PreGameScreen extends AbstractScreen {
   startButton_: Button;
   startInfo_: HTMLParagraphElement;
 
@@ -30,4 +30,6 @@ export default class Lobby extends AbstractScreen {
   }
 }
 
-customElements.define("game-lobby", Lobby);
+customElements.define("pre-game-screen", PreGameScreen);
+
+export default PreGameScreen;

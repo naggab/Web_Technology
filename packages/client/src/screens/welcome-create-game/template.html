@@ -61,11 +61,6 @@
     justify-content: center;
   }
 
-  #code > h3 {
-    line-height: 100%;
-    text-align: center;
-  }
-
   #game_name,
   #player_number,
   #create_game {
@@ -87,23 +82,15 @@
     <h3>CHOOSE NAME</h3>
     <div id="game_name">
       <text-box id="test" label="ENTER GAME NAME"></text-box>
-
     </div>
 
     <h3>NUMBER OF MAX PLAYERS</h3>
     <div id="player_number">
       <text-box id="test" label="ENTER NUMBER OF PLAYERS"></text-box>
+    </div>
 
-    </div>
-    <div id="code">
-      <h3>CODE: ??????</h3>
-    </div>
     <div id="create_game">
-      <apirush-button
-        id="enter-existing-game-button"
-        label="CREATE GAME"
-        styletype="green"
-      ></apirush-button>
+      <apirush-button id="create-game-button" label="CREATE GAME" styletype="green"></apirush-button>
     </div>
   </div>
 </div>

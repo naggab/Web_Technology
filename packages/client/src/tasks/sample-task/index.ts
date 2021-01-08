@@ -17,9 +17,6 @@ export default class SampleTask extends Task {
     this.loadButton = this.shadowRoot.getElementById("load-button") as Button;
     this.serverResponseSpan = this.shadowRoot.getElementById("sample-task-server-response") as HTMLSpanElement;
     this.loadButton.onclick = this.loadFromServer.bind(this);
-    
-
-
   }
 
   onUnmounting(): void | Promise<void> {}
@@ -31,19 +28,13 @@ export default class SampleTask extends Task {
     }
     this.loadButton.setAttribute("label", "loading...");
 
-
     try {
       const response = await fetch("/api/test");
       this.serverResponseSpan.innerText = await response.text();
       this.loadButton.setAttribute("label", "Reload");
-
-
     } catch (e) {
       this.serverResponseSpan.innerText = "<Error>";
       this.loadButton.setAttribute("label", "Retry");
-      
-
-
     }
   }
 }

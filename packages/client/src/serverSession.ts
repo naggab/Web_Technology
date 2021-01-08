@@ -39,7 +39,7 @@ export class ServerSession {
     try {
       msg = JSON.parse(ev.data);
     } catch (e) {
-      console.error("received game event which is not a valid json, someone messed up ._.");
+      console.error("received in-game event which is not a valid json, someone messed up ._.");
       return;
     }
     if (msg.id) {
