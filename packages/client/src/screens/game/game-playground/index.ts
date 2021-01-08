@@ -7,6 +7,9 @@ import { container, debug } from "webpack";
 import { MapI, MapStorage } from "@apirush/common/src/maps";
 import { Coordinate as Coord } from "@apirush/common/src/types";
 import { PlayerInGameI } from "@apirush/common/src/types";
+import { MasterOfDisaster } from "../../../masterOfDisaster";
+import { CommandOp, Event, GameEventOp } from "@apirush/common";
+import { Game } from "@apirush/server/src/game";
 
 const cord = (x: number, y: number) => ({ x, y });
 
@@ -71,6 +74,8 @@ var gridSizeHeight: number = 10;
 var gridRows: number = 30;
 var player: Player;
 
+var modInstance: MasterOfDisaster;
+
 /**
  * Define the base layer & its grid.
  */
@@ -103,10 +108,19 @@ export class Player {
   tooltipShape: Konva.Rect;
   radius: number;
   playerID: number;
+  bibNumber: number;
   public playerMovedCB: IPlayerMovedCB;
   public onTaskOpenCB: IOnTaskOpenCB;
 
-  constructor(x: number, y: number, col: string, layer: Konva.Layer, stage: Konva.Stage, playerID?: number) {
+  constructor(
+    x: number,
+    y: number,
+    col: string,
+    layer: Konva.Layer,
+    stage: Konva.Stage,
+    playerID?: number,
+    bibNumber?: number,
+  ) {
     this.x = x;
     this.y = y;
     this.layer = layer;
@@ -117,14 +131,27 @@ export class Player {
     if (playerID !== undefined) this.playerID = playerID;
     else this.playerID = -1;
 
+    this.bibNumber = bibNumber;
+
+    this.drawPlayer();
+  }
+
+  drawPlayer(clearAll?: boolean) {
+    this.radius = (gridSize / 2) * 3;
+    if (clearAll) {
+      var children = this.layer.getChildren();
+      children.toArray().forEach((child) => {
+        child.remove();
+      });
+    }
     this.model = new Konva.Circle({
-      x: (x + 1) * gridSize - gridSize / 2,
-      y: (y + 1) * gridSize - gridSize / 2,
+      x: (this.x + 1) * gridSize - gridSize / 2,
+      y: (this.y + 1) * gridSize - gridSize / 2,
       radius: this.radius,
-      fill: col,
+      fill: this.col,
       stroke: "black",
       strokeWidth: 2,
-      name: playerID.toString(),
+      name: this.playerID.toString(),
     });
 
     this.layer.add(this.model);
@@ -133,16 +160,16 @@ export class Player {
     /* We do this first because we need the text size in order */
     /* to figure out how large the background needs to be. */
     this.tooltip = new Konva.Text({
-      x: x * gridSize,
-      y: y * gridSize,
-      text: x + "," + y,
+      x: this.x * gridSize,
+      y: this.y * gridSize,
+      text: this.x + "," + this.y,
       fontFamily: "Arial",
       fontSize: 12,
       padding: 5,
       fill: "white",
       alpha: 0.75,
       visible: true,
-      name: playerID.toString(),
+      name: this.playerID.toString(),
     });
     this.tooltip.x(this.tooltip.x() + gridSize / 2 - this.tooltip.width() / 2);
     this.tooltip.y(this.tooltip.y() + gridSize / 2 - this.tooltip.height() / 2);
@@ -156,7 +183,7 @@ export class Player {
       fill: "black",
       cornerRadius: 5,
       opacity: 0.6,
-      name: playerID.toString(),
+      name: this.playerID.toString(),
     });
 
     this.layer.add(this.tooltipShape);
@@ -174,7 +201,7 @@ export class Player {
     if (text !== undefined) {
       this.tooltip.text(text);
     } else if (this.playerID != -1) {
-      this.tooltip.text("P" + this.playerID);
+      this.tooltip.text("P" + this.bibNumber);
     } else {
       this.tooltip.text(this.x + "," + this.y);
     }
@@ -205,9 +232,21 @@ export class Player {
           } else if (newPos.type == ElementType.Task) {
             if (openTask !== undefined) {
               if (openTask) {
-                this.onTaskOpenCB(newPos.task);
-                newPos.shape.fill("red");
-                baseLayer.batchDraw();
+                //this.onTaskOpenCB(newPos.task);
+                var taskPos = newPos;
+                var ty = newPosY + i;
+                var tx = newPosX + j;
+                modInstance.openTask(taskPos.task).then((completed) => {
+                  console.log("task done", completed);
+                  if (completed) {
+                    // Get new grid object in case we had to redraw while doing the task
+                    taskPos = grid[ty][tx];
+                    if (taskPos) {
+                      taskPos.shape.fill("green");
+                      baseLayer.batchDraw();
+                    }
+                  }
+                });
               }
             }
             if (col != CollisionType.Wall) col = CollisionType.Task;
@@ -229,7 +268,6 @@ export class Player {
   moveUp(amount: number) {
     var newPos = grid[this.y - amount][this.x];
     var foundCollision = this.checkCollision(this.y - amount, this.x);
-    debugPrint(foundCollision);
     if (newPos !== undefined && foundCollision != CollisionType.Wall) {
       if (newPos.type != ElementType.Wall) {
         this.model.y(this.model.y() - amount * gridSize);
@@ -328,22 +366,103 @@ export default class GamePlayground extends BaseTask {
     super(opts);
   }
 
-  onMounted() {
+  async onMounted() {
     console.log(GamePlayground.name, "connected to DOM");
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = viewHtml;
 
     window.addEventListener("resize", (event) => {
+      debugPrint("RESIZING");
+      this.stage.clear();
       this.setupGrid();
+      baseLayer.moveToBottom();
+      this.getCurrentPlayer()
+        .layer.getChildren()
+        .toArray()
+        .forEach((node) => {
+          node.moveToTop();
+        });
+
+      this.getCurrentPlayer().drawPlayer(true);
+
+      if (foreignPlayerLayer) {
+        foreignPlayerLayer.setZIndex(1);
+        foreignPlayerLayer
+          .getChildren()
+          .toArray()
+          .forEach((child) => {
+            child.remove();
+          });
+        foreignPlayers.forEach((fp) => {
+          fp.drawPlayer();
+        });
+        this.stage.add(foreignPlayerLayer);
+      }
+
+      this.stage.add(this.getCurrentPlayer().layer);
     });
     //this.setupGrid();
 
-    /* DEMO */
-    this.setMap(MapStorage.map1);
+    modInstance = MasterOfDisaster.getInstance();
+    if (!modInstance) throw console.error("no mod instance");
+
+    /* Uncomment for testing playground without lobby */
+    /*
+    await modInstance.userWantsToJoin("MyPlayer");
+    const listRes = await modInstance.serverSession.sendRPC(CommandOp.LIST_GAMES, {});
+    await modInstance.joinGame(listRes.games[0].id);
+    */
+
+    this.setMap(MapStorage[modInstance.activeGame.map]);
+
+    //const joinRes = await modInstance.serverSession.sendRPC(CommandOp.JOIN_GAME, { id: listRes.games[0].id });
+
+    const listPlayerRes = await modInstance.serverSession.sendRPC(CommandOp.LIST_PLAYERS, {});
+    listPlayerRes.players.forEach((p) => {
+      // TODO get ID from MOD
+      if (p.id != modInstance.myPlayerId) {
+        this.addForeignPlayer(p);
+      } else {
+        this.setMyPlayer(p, this.sendMyPlayerMoved);
+      }
+    });
+
+    this.foreignPlayerMoved = this.foreignPlayerMoved.bind(this);
+    this.foreignPlayerJoined = this.foreignPlayerJoined.bind(this);
+    this.foreignPlayerLeft = this.foreignPlayerLeft.bind(this);
+    this.sendMyPlayerMoved = this.sendMyPlayerMoved.bind(this);
+
+    modInstance.serverSession.subscribe(GameEventOp.PLAYER_MOVED, this.foreignPlayerMoved);
+    modInstance.serverSession.subscribe(GameEventOp.PLAYER_JOINED, this.foreignPlayerJoined);
+    modInstance.serverSession.subscribe(GameEventOp.PLAYER_LEFT, this.foreignPlayerLeft);
+  }
+
+  sendMyPlayerMoved(x: number, y: number) {
+    modInstance.serverSession.sendRPC(CommandOp.MOVE, { position: { x, y } });
+  }
+
+  foreignPlayerMoved(event: Event<GameEventOp.PLAYER_MOVED>) {
+    const { id, position } = event.payload;
+    foreignPlayers.forEach((fp) => {
+      if (fp.playerID == id) {
+        fp.moveTo(position.x, position.y);
+      }
+    });
+  }
+
+  foreignPlayerJoined(event: Event<GameEventOp.PLAYER_JOINED>) {
+    const foreignPlayer = event.payload;
+    this.addForeignPlayer(foreignPlayer);
+  }
+
+  foreignPlayerLeft(event: Event<GameEventOp.PLAYER_LEFT>) {
+    const { id } = event.payload;
+    this.removeForeignPlayer(id);
   }
 
   onUnmounting() {
     console.log(GamePlayground.name, "disconnected from DOM");
+    modInstance.serverSession.disconnect();
   }
 
   /**
@@ -352,12 +471,31 @@ export default class GamePlayground extends BaseTask {
    * @param fpl Player information
    */
   addForeignPlayer(fpl: PlayerInGameI): Player {
+    console.log("add foreign player", fpl);
     if (!foreignPlayerLayer || !foreignPlayers) {
       foreignPlayerLayer = new Konva.Layer();
       foreignPlayers = new Array();
     }
-    const newPlayer = new Player(fpl.position.x, fpl.position.y, fpl.color, foreignPlayerLayer, this.stage, fpl.id);
+    const newPlayer = new Player(
+      fpl.position.x,
+      fpl.position.y,
+      fpl.color,
+      foreignPlayerLayer,
+      this.stage,
+      fpl.id,
+      fpl.bibNumber,
+    );
     foreignPlayers.push(newPlayer);
+    console.log(foreignPlayers);
+    if (this.getCurrentPlayer()) {
+      this.getCurrentPlayer()
+        .layer.getChildren()
+        .toArray()
+        .forEach((node) => {
+          node.moveToTop();
+        });
+      this.getCurrentPlayer().layer.moveToTop();
+    }
     return newPlayer;
   }
 
@@ -366,15 +504,18 @@ export default class GamePlayground extends BaseTask {
    * Specifically, destroys every node in the foreignPlayerLayer whose name matches the playerID given in the
    * reference to the player object, including the shape itself and its associated tooltip.
    *
-   * @param fpl A reference to the player object that should be removed. ID and object must be identical.
+   * @param fpl A reference to the player ID that should be removed
    */
-  removeForeignPlayer(fpl: Player): boolean {
+  removeForeignPlayer(fpl: number): boolean {
+    console.log("remove ", fpl);
+    console.log(foreignPlayers);
+    console.log(foreignPlayerLayer.find("." + fpl).toArray());
     var foundElem = false;
     for (let i = 0; i < foreignPlayers.length; i++) {
-      if (foreignPlayers[i] == fpl && foreignPlayers[i].playerID == fpl.playerID) {
+      if (foreignPlayers[i].playerID == fpl) {
         foreignPlayers.splice(i, 1);
         foreignPlayerLayer
-          .find("." + fpl.playerID)
+          .find("." + fpl)
           .toArray()
           .forEach((node) => {
             node.destroy();
@@ -382,7 +523,7 @@ export default class GamePlayground extends BaseTask {
         foundElem = true;
       }
     }
-
+    foreignPlayerLayer.batchDraw();
     return foundElem;
   }
 
@@ -394,8 +535,13 @@ export default class GamePlayground extends BaseTask {
    */
   setMyPlayer(mpl: PlayerInGameI, cb: IPlayerMovedCB): Player {
     var playerLayer = new Konva.Layer();
-    player = new Player(mpl.position.x, mpl.position.y, mpl.color, playerLayer, this.stage, mpl.id);
-
+    player = new Player(mpl.position.x, mpl.position.y, mpl.color, playerLayer, this.stage, mpl.id, mpl.bibNumber);
+    playerLayer
+      .getChildren()
+      .toArray()
+      .forEach((node) => {
+        node.moveToTop();
+      });
     player.attachCallback(cb);
     return player;
   }
@@ -438,7 +584,7 @@ export default class GamePlayground extends BaseTask {
     /* Initial setup (stage) */
 
     var containerDiv: HTMLDivElement = this.shadowRoot.getElementById("container") as HTMLDivElement;
-
+    grid = [];
     containerDiv.setAttribute("style", "width: 100%");
     containerDiv.style.width = "100%";
 
@@ -471,7 +617,6 @@ export default class GamePlayground extends BaseTask {
     var x: number = 0;
     var y: number = 0;
 
-    grid = new Array();
     var gridRow: GridObject[];
 
     /**
