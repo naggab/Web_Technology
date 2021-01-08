@@ -7,7 +7,7 @@ import WebSocket from "ws";
 import { ERR_PLAYER_ALREADY_GREETED } from "./constants";
 
 jest.mock("./gameMaster");
-jest.mock("./game");
+jest.mock("./in-game");
 jest.mock("ws");
 
 const DummyLobbyPlayer: PlayerInLobby = {

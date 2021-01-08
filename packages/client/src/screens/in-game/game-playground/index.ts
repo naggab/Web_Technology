@@ -466,7 +466,7 @@ export default class GamePlayground extends BaseTask {
   }
 
   /**
-   * Add a foreign player to the game and keep a reference to the object.
+   * Add a foreign player to the in-game and keep a reference to the object.
    *
    * @param fpl Player information
    */

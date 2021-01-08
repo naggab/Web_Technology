@@ -69,9 +69,7 @@ export default class DragAndDropTask extends Task {
         download(this.selectedFile);
         this.firstClickFlag = true;
         this.backButton.setAttribute("label", "Back");
-      }
-     else
-        this.finish(this.result[0]);
+      } else this.finish(this.result[0]);
     });
   }
   async onDrop(e: DragEvent) {
@@ -108,9 +106,10 @@ async function checkUpload(files: FileList, download: [string, string]) {
     try {
       fileContents = await readUploadedFileAsText(file);
     } catch (e) {}
-    if (fileContents == download[1]) {//&& name == download[0]) {
+    if (fileContents == download[1]) {
+      //&& name == download[0]) {
       return [true, "Congrats, you did it!"];
-    }/* else if (fileContents != download[1] && name == download[0]) {
+    } /* else if (fileContents != download[1] && name == download[0]) {
       return [false, "Nope, correct file name. Wrong content."];
     } else if (name != download[0] && fileContents == download[1]) {
       return [false, "Nope, wrong file name. Correct content."];

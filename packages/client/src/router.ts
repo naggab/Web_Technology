@@ -1,43 +1,62 @@
-import Welcome from "./screens/welcome";
-import EnterExistingGame from "./screens/enterExistingGame";
-import CreateNewGame from "./screens/createNewGame";
-import ShowTasks from "./screens/listAllTasks";
-import { GameScreen } from "./screens/game";
-import Lobby from "./screens/lobby";
-import { ClientState } from "./masterOfDisaster";
-
-export function navigateTo(url) {
-  history.pushState(null, null, url);
-  //router();
-}
+import WelcomeScreen from "./screens/welcome-start";
+import JoinGameScreen from "./screens/welcome-join-game";
+import CreateNewGameScreen from "./screens/welcome-create-game";
+import { ClientState, MasterOfDisaster } from "./masterOfDisaster";
+import ErrorScreen from "./screens/error";
+import { InGameScreen } from "./screens/in-game";
+import LoadingScreen from "./screens/loading";
+import PostGameScreen from "./screens/post-game";
+import PreGameScreen from "./screens/pre-game";
+import StatsScreen from "./screens/welcome-stats";
+import ListAllTasksScreen from "./screens/listAllTasks";
 
 export async function router(state: ClientState) {
-  console.debug("Router in action!!!!");
-  const routes = [
-    { path: "/", view: () => new Welcome() },
-    { path: "/joinGame", view: () => new EnterExistingGame() },
-    { path: "/newGame", view: () => new CreateNewGame() },
-    { path: "/showTasks", view: () => new ShowTasks() },
-    { path: "/game", view: () => new GameScreen() },
-    { path: "/lobby", view: () => new Lobby() },
-  ];
+  const mod = MasterOfDisaster.getInstance();
+  let screen: Node = null;
+  console.log("STATE: ", mod.getState());
+  switch (state) {
+    case "welcome-start":
+      screen = new WelcomeScreen();
+      break;
+    case "welcome-join-game":
+      screen = new JoinGameScreen();
+      break;
+    case "welcome-create-game":
+      screen = new CreateNewGameScreen();
+      break;
+    case "in-game":
+      screen = new InGameScreen();
 
-  const potentialMatches = routes.map((route) => {
-    return {
-      route: route,
-      isMatch: location.pathname === route.path,
-    };
-  });
+      break;
+    case "loading":
+      screen = new LoadingScreen();
 
-  let match = potentialMatches.find((potentialMatch) => potentialMatch.isMatch);
+      break;
+    case "post-game":
+      screen = new PostGameScreen();
 
-  if (!match) {
-    match = {
-      route: routes[0],
-      isMatch: true,
-    };
+      break;
+    case "pre-game":
+      screen = new PreGameScreen();
+
+      break;
+    case "welcome-stats":
+      screen = new StatsScreen();
+
+      break;
+    case "error":
+      screen = new ErrorScreen();
+      break;
+    case "all-tasks":
+      screen = new ListAllTasksScreen();
+      break;
+    default:
+      screen = new WelcomeScreen();
+
+      break;
   }
-  const screen = match.route.view();
+  console.debug("SCREEN: ", screen);
+
   document.querySelector("#app").innerHTML = "";
   document.querySelector("#app").appendChild(screen);
 }

@@ -1,5 +1,5 @@
 import { GameDetails, PlayerInGameI, GameIdType } from "@apirush/common";
-import { Player } from "./screens/game/game-playground";
+import { Player } from "./screens/in-game/game-playground";
 import { ServerSession } from "./serverSession";
 import { CommandOp, Event, GameEventOp } from "@apirush/common/src";
 import { router } from "./router";
@@ -16,7 +16,8 @@ export type ClientState =
   | "welcome-create-game"
   | "pre-game"
   | "in-game"
-  | "post-game";
+  | "post-game"
+    | "all-tasks";
 
 export class MasterOfDisaster {
   private watchingForGameStart: boolean = false;
@@ -75,6 +76,9 @@ export class MasterOfDisaster {
     if (newState === "in-game" && !this.watchingForGameEnd) {
       this.watchForGameEnd();
     }
+  }
+  public getState() {
+    return this.state;
   }
 
   get helloSent() {
@@ -143,6 +147,7 @@ export class MasterOfDisaster {
     try {
       await this.sendHello(playerName);
       this.setState("welcome-join-game");
+      return;
     } catch (e) {
       console.error(e);
     }
@@ -154,6 +159,7 @@ export class MasterOfDisaster {
     try {
       await this.sendHello(playerName);
       this.setState("welcome-create-game");
+      return;
     } catch (e) {
       console.error(e);
     }

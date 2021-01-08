@@ -39,4 +39,4 @@ pids
 *.pid.lock
 packages/server/coverage/
 .idea/discord.xml
-packages/client/src/screens/game/game-playground/old_playground.ts
+packages/client/src/screens/in-game/game-playground/old_playground.ts

@@ -1,54 +1,52 @@
 <style>
-    .task-opener-wrapper {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        display: none;
-        visibility: hidden;
-        user-input: disabled;
-    }
-    .task-opener-wrapper.open {
-        display: block;
-        visibility: visible;
-        user-input: auto;
-    }
-    .task-opener-backdrop {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: black;
-        opacity: 0;
-        transition: opacity 200ms;
-    }
-    .task-opener-backdrop.open {
-        opacity: 0.4;
-
-    }
-    .task-opener-container {
-        position: absolute;
-        min-width: 400px;
-        min-height: 500px;
-        top: 50%;
-        left: 50%;
-        width: 50%;
-        height: 50%;
-        transform: translate(-50%, 100%);
-        background: rgba(255, 255, 255, 0.6);
-        border-radius: 25px;
-        padding: 20px;
-        transition: transform 200ms;
-    }
-    .task-opener-container.open {
-        transform: translate(-50%, -50%);
-
-    }
+  .task-opener-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: none;
+    visibility: hidden;
+    user-input: disabled;
+  }
+  .task-opener-wrapper.open {
+    display: block;
+    visibility: visible;
+    user-input: auto;
+  }
+  .task-opener-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: black;
+    opacity: 0;
+    transition: opacity 200ms;
+  }
+  .task-opener-backdrop.open {
+    opacity: 0.4;
+  }
+  .task-opener-container {
+    position: absolute;
+    min-width: 400px;
+    min-height: 500px;
+    top: 50%;
+    left: 50%;
+    width: 50%;
+    height: 50%;
+    transform: translate(-50%, 100%);
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 25px;
+    padding: 20px;
+    transition: transform 200ms;
+  }
+  .task-opener-container.open {
+    transform: translate(-50%, -50%);
+  }
 </style>
 
 <div class="task-opener-wrapper">
-    <div class="task-opener-backdrop"></div>
-    <div class="task-opener-container"></div>
+  <div class="task-opener-backdrop"></div>
+  <div class="task-opener-container"></div>
 </div>

@@ -54,7 +54,7 @@ export default class FillShapeTask extends Task {
 
     shapes.push(Smiley, Pyramid, Tree, Cactus);
     //this.shape = new shapes[seed % shapes.length](this.ctx, 100, 5, fillArry[seed % fillArry.length], 400, 10);
-    this.shape = new shapes[3](this.ctx, 100, 5, fillArry[seed % fillArry.length], 400, 5);;
+    this.shape = new shapes[3](this.ctx, 100, 5, fillArry[seed % fillArry.length], 400, 5);
     this.shape.draw();
 
     this.flagMouseDown = false;
@@ -106,7 +106,7 @@ export default class FillShapeTask extends Task {
       ctx.lineTo(relativeMousePos.x, relativeMousePos.y);
       ctx.stroke();
 
-      //remove event listener in case of violation against game rules
+      //remove event listener in case of violation against in-game rules
       if (typeof this.shape.checkOutside(relativeMousePos) !== "undefined") {
         this.infoButton.setAttribute("label", this.shape.checkOutside(relativeMousePos)[1]);
         this.infoButton.setAttribute("styletype", "red");
@@ -405,7 +405,7 @@ class Pyramid implements ShapeI {
         this.cnt_max_outside--;
       }
       if (this.cnt_max_px_outside < 0) {
-        //to do break game
+        //to do break in-game
         return [true, "Woops, too many  pixels colored outside"];
       }
       if (this.cnt_max_outside < 0) {
@@ -525,7 +525,7 @@ class Tree implements ShapeI {
         this.cnt_max_outside--;
       }
       if (this.cnt_max_px_outside < 0) {
-        //to do break game
+        //to do break in-game
         return [true, "Woops, too many pixels colored outside."];
       }
       if (this.cnt_max_outside < 0) {
@@ -699,7 +699,7 @@ class Cactus implements ShapeI {
         this.cnt_max_outside--;
       }
       if (this.cnt_max_px_outside < 0) {
-        //to do break game
+        //to do break in-game
         return [true, "Woops, too many pixels colored outside."];
       }
       if (this.cnt_max_outside < 0) {
