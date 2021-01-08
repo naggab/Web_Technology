@@ -6,10 +6,11 @@ import { MasterOfDisaster } from "./masterOfDisaster";
 import "./components/taskOpener";
 import { TaskOpener } from "./components/taskOpener";
 import "./components/slider_switch/index";
-import { Button } from "./components/button";
+import { Footer } from "./components/footer";
 
 function main() {
   document.body.style.backgroundImage = "/assets/img/bg.png";
+  let _footer: Footer = document.querySelector("footer") as Footer;
 }
 
 window.addEventListener("load", () => {
@@ -17,9 +18,6 @@ window.addEventListener("load", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-  document.body.addEventListener("click", (e) => {
-    const target = e.target as HTMLAnchorElement;
-  });
   MasterOfDisaster.setup().then(() => {
     (<any>window).MOD = MasterOfDisaster.getInstance();
     document.body.appendChild(new TaskOpener());
