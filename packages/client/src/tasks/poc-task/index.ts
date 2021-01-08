@@ -16,7 +16,7 @@ export default class POCTask extends Task {
   constructor(opts: TaskOpts) {
     super(opts);
     this.otherPlayers = new Map();
-    this.gamePlayground = new GamePlayground({ finishCb: () => {} });
+    this.gamePlayground = new GamePlayground();
     this.gameSession = new ServerSession();
     this.onPlayerMoveReceived = this.onPlayerMoveReceived.bind(this);
     this.sendPlayerMove = this.sendPlayerMove.bind(this);

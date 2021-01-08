@@ -13,7 +13,7 @@ import ListAllTasksScreen from "./screens/listAllTasks";
 export async function router(state: ClientState) {
   const mod = MasterOfDisaster.getInstance();
   let screen: Node = null;
-  console.log("STATE: ", mod.getState());
+  console.log("STATE: ", state);
   switch (state) {
     case "welcome-start":
       screen = new WelcomeScreen();

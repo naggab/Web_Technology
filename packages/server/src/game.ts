@@ -29,7 +29,7 @@ export class Game implements GameI {
   players: PlayersInGameMap;
   readonly map: keyof typeof MapStorage;
 
-  private state_: GameState;
+  private state_: GameState = "pre-game";
 
   constructor(id: GameIdType, name: string, gm: GameMaster) {
     this.id = id;

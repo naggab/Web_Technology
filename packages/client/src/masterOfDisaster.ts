@@ -3,9 +3,10 @@ import { Player } from "./screens/in-game/game-playground";
 import { ServerSession } from "./serverSession";
 import { CommandOp, Event, GameEventOp } from "@apirush/common/src";
 import { router } from "./router";
-import { TaskIdentifier } from "./taskManager";
+import { TaskIdentifier, TaskManger } from "./taskManager";
 import { MapStorage } from "@apirush/common/src/maps";
 import { StatsStorage } from "./statsStorage";
+import has = Reflect.has;
 
 export type ClientState =
   | "loading"
@@ -35,6 +36,13 @@ export class MasterOfDisaster {
     this.onGameDidStart = this.onGameDidStart.bind(this);
     this.onGameAborted = this.onGameAborted.bind(this);
     this.onGameDidFinish = this.onGameDidFinish.bind(this);
+    TaskManger.getTaskIds().forEach((taskId) => this.taskState.set(taskId, false));
+
+    const hash = window.location.hash.replace("#", "");
+    if (hash && TaskManger.getTaskIds().indexOf(hash as any) !== -1) {
+      console.log("hash", hash);
+      this.setState("all-tasks");
+    }
   }
 
   static getInstance() {
@@ -174,7 +182,7 @@ export class MasterOfDisaster {
       this.myPlayer = player;
       this.activeGame = game;
 
-      this.setState("pre-game");
+      this.setState(this.activeGame.state);
       return;
     } catch (e) {
       console.error(e);
@@ -203,7 +211,6 @@ export class MasterOfDisaster {
     this.setState("loading");
     try {
       await this.serverSession.sendRPC(CommandOp.START_GAME, {});
-      this.setState("in-game");
       return;
     } catch (e) {
       console.error(e);

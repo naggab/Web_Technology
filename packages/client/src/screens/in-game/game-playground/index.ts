@@ -159,6 +159,8 @@ export class Player {
     */
     var spriteNbr = (this.bibNumber - 1) % sprites.length;
     this.model = new Konva.Sprite({
+      height: 16,
+      width: 16,
       x: (this.x - 1) * gridSize,
       y: (this.y - 1) * gridSize,
       image: sprites[spriteNbr],
@@ -399,14 +401,14 @@ class GridObject {
   }
 }
 
-export default class GamePlayground extends BaseTask {
+export default class GamePlayground extends HTMLElement {
   stage: Konva.Stage;
   map: MapI;
-  constructor(opts: TaskOpts) {
-    super(opts);
+  constructor() {
+    super();
   }
 
-  async onMounted() {
+  async connectedCallback() {
     console.log(GamePlayground.name, "connected to DOM");
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = viewHtml;
@@ -443,25 +445,27 @@ export default class GamePlayground extends BaseTask {
     });
     //this.setupGrid();
     sprites = [];
-    var imageObj = new Image();
+    const imageObj = new Image();
     imageObj.src = "/assets/img/sprite1.png";
     await imageObj.decode();
     sprites.push(imageObj);
 
-    var imageObj = new Image();
-    imageObj.src = "/assets/img/sprite2.png";
-    await imageObj.decode();
-    sprites.push(imageObj);
+    const imageObj2 = new Image();
+    imageObj2.src = "/assets/img/sprite2.png";
+    await imageObj2.decode();
+    sprites.push(imageObj2);
 
-    var imageObj = new Image();
-    imageObj.src = "/assets/img/sprite3.png";
-    await imageObj.decode();
-    sprites.push(imageObj);
+    const imageObj3 = new Image();
+    imageObj3.src = "/assets/img/sprite3.png";
+    await imageObj3.decode();
+    sprites.push(imageObj3);
 
-    var imageObj = new Image();
-    imageObj.src = "/assets/img/sprite4.png";
-    await imageObj.decode();
-    sprites.push(imageObj);
+    const imageObj4 = new Image();
+    imageObj4.src = "/assets/img/sprite4.png";
+    await imageObj4.decode();
+    sprites.push(imageObj4);
+
+    console.log(sprites);
 
     modInstance = MasterOfDisaster.getInstance();
     if (!modInstance) throw console.error("no mod instance");
@@ -520,9 +524,8 @@ export default class GamePlayground extends BaseTask {
     this.removeForeignPlayer(id);
   }
 
-  onUnmounting() {
+  disconnectedCallback() {
     console.log(GamePlayground.name, "disconnected from DOM");
-    modInstance.serverSession.disconnect();
   }
 
   /**
@@ -893,6 +896,7 @@ export default class GamePlayground extends BaseTask {
    * Hook for keyboard events.
    */
   keyDown(e) {
+    console.log(e);
     switch (e.keyCode) {
       case 87:
         player.moveUp(1);
