@@ -23,7 +23,13 @@ const map1: MapI = {
   id: "map1",
   width: 50,
   height: 30,
-  walls: [[cord(5, 17), cord(10, 17), cord(10, 22), cord(30, 22)]],
+  walls: [
+    [cord(5, 17), cord(10, 17), cord(10, 22), cord(30, 22)],
+    [cord(33, 4), cord(33, 14), cord(40, 14), cord(40, 22)],
+    [cord(19, 8), cord(32, 8)],
+    [cord(10, 1), cord(10, 8), cord(8, 8)],
+    [cord(1, 8), cord(4, 8)],
+  ],
   spawns: [cord(6, 6), cord(43, 5), cord(43, 26), cord(6, 26), cord(25, 15)],
   taskPositions: {
     "1": cord(1, 2),

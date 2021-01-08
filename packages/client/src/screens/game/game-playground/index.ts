@@ -16,7 +16,7 @@ const cord = (x: number, y: number) => ({ x, y });
 /**
  * Use this to globally enable / disable all console outputs.
  */
-var DEBUG_MODE: boolean = true;
+var DEBUG_MODE: boolean = false;
 function debugPrint(x: any) {
   if (DEBUG_MODE) {
     console.log(x);
@@ -89,6 +89,8 @@ var foreignPlayerLayer: Konva.Layer;
 // Keep a reference to all foreign players
 var foreignPlayers: Player[];
 
+var sprites: HTMLImageElement[];
+
 /**
  * Defines the player and stores the associated layer we used to draw him.
  * The player layer is different to the base layer for redrawing purposes.
@@ -103,7 +105,7 @@ export class Player {
   x: number;
   y: number;
   col: string;
-  model: Konva.Circle;
+  model: Konva.Sprite;
   tooltip: Konva.Text;
   tooltipShape: Konva.Rect;
   radius: number;
@@ -144,6 +146,7 @@ export class Player {
         child.remove();
       });
     }
+    /*
     this.model = new Konva.Circle({
       x: (this.x + 1) * gridSize - gridSize / 2,
       y: (this.y + 1) * gridSize - gridSize / 2,
@@ -153,15 +156,36 @@ export class Player {
       strokeWidth: 2,
       name: this.playerID.toString(),
     });
+    */
+    var spriteNbr = (this.bibNumber - 1) % sprites.length;
+    this.model = new Konva.Sprite({
+      x: (this.x - 1) * gridSize,
+      y: (this.y - 1) * gridSize,
+      image: sprites[spriteNbr],
+      animation: "idleRight",
+      scaleX: (gridSize / 16.0) * 3,
+      scaleY: (gridSize / 16.0) * 3,
+      animations: {
+        // x, y, width, height
+        // prettier-ignore
+        idleRight: [
+          0, 0, 15, 16,
+          17, 0, 15, 16,
+          33, 0, 15, 16],
+        // prettier-ignore
+        idleLeft: [
+          48, 0, 15, 16,
+          65, 0, 15, 16,
+          81, 0, 15, 16],
+      },
+      frameRate: 7,
+      frameIndex: 0,
+      name: this.playerID.toString(),
+    });
 
-    this.layer.add(this.model);
-
-    /* Add tooltip to the player object */
-    /* We do this first because we need the text size in order */
-    /* to figure out how large the background needs to be. */
     this.tooltip = new Konva.Text({
       x: this.x * gridSize,
-      y: this.y * gridSize,
+      y: (this.y - 2) * gridSize,
       text: this.x + "," + this.y,
       fontFamily: "Arial",
       fontSize: 12,
@@ -183,14 +207,23 @@ export class Player {
       fill: "black",
       cornerRadius: 5,
       opacity: 0.6,
+      strokeWidth: 4,
+      stroke: this.col,
       name: this.playerID.toString(),
     });
 
+    this.layer.add(this.model);
     this.layer.add(this.tooltipShape);
     this.layer.add(this.tooltip);
     this.stage.add(this.layer);
 
     this.refreshTooltip();
+
+    this.model.start();
+
+    /* Add tooltip to the player object */
+    /* We do this first because we need the text size in order */
+    /* to figure out how large the background needs to be. */
   }
 
   /**
@@ -206,7 +239,7 @@ export class Player {
       this.tooltip.text(this.x + "," + this.y);
     }
     this.tooltip.x(this.x * gridSize + gridSize / 2 - this.tooltip.width() / 2);
-    this.tooltip.y(this.y * gridSize + gridSize / 2 - this.tooltip.height() / 2);
+    this.tooltip.y((this.y - 2) * gridSize + gridSize / 2 - this.tooltip.height() / 2);
 
     this.tooltipShape.x(this.tooltip.x());
     this.tooltipShape.y(this.tooltip.y());
@@ -282,6 +315,7 @@ export class Player {
   }
 
   moveLeft(amount: number) {
+    this.model.animation("idleLeft");
     var newPos = grid[this.y][this.x - amount];
     var foundCollision = this.checkCollision(this.y, this.x - amount);
     if (newPos !== undefined && foundCollision != CollisionType.Wall) {
@@ -299,6 +333,7 @@ export class Player {
 
   moveRight(amount: number) {
     this.moveLeft(-amount);
+    this.model.animation("idleRight");
   }
 
   moveDown(amount: number) {
@@ -331,11 +366,16 @@ export class Player {
    * @param y Y coordinate (grid coordinates)
    */
   moveTo(x: number, y: number) {
+    var oldx = this.x;
+
+    if (x > oldx) this.model.animation("idleRight");
+    else this.model.animation("idleLeft");
+
     this.x = x;
     this.y = y;
 
-    this.model.x(x * gridSize + gridSize / 2);
-    this.model.y(y * gridSize + gridSize / 2);
+    this.model.x((x - 1) * gridSize);
+    this.model.y((y - 1) * gridSize);
 
     this.refreshTooltip();
     this.redraw();
@@ -402,6 +442,26 @@ export default class GamePlayground extends BaseTask {
       this.stage.add(this.getCurrentPlayer().layer);
     });
     //this.setupGrid();
+    sprites = [];
+    var imageObj = new Image();
+    imageObj.src = "/assets/img/sprite1.png";
+    await imageObj.decode();
+    sprites.push(imageObj);
+
+    var imageObj = new Image();
+    imageObj.src = "/assets/img/sprite2.png";
+    await imageObj.decode();
+    sprites.push(imageObj);
+
+    var imageObj = new Image();
+    imageObj.src = "/assets/img/sprite3.png";
+    await imageObj.decode();
+    sprites.push(imageObj);
+
+    var imageObj = new Image();
+    imageObj.src = "/assets/img/sprite4.png";
+    await imageObj.decode();
+    sprites.push(imageObj);
 
     modInstance = MasterOfDisaster.getInstance();
     if (!modInstance) throw console.error("no mod instance");
@@ -466,7 +526,7 @@ export default class GamePlayground extends BaseTask {
   }
 
   /**
-   * Add a foreign player to the game and keep a reference to the object.
+   * Add a foreign player to the in-game and keep a reference to the object.
    *
    * @param fpl Player information
    */
