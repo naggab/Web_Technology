@@ -25,7 +25,7 @@ const fillArry: Array<number> = [10, 20, 30, 40, 50, 60, 70, 80, 90];
 
 export default class FillShapeTask extends Task {
   canvasElement: HTMLCanvasElement;
-  infoButton: Button;
+  infoElement: HTMLElement;
   checkButton: Button;
   flagMouseDown: boolean;
   ctx: CanvasRenderingContext2D;
@@ -43,14 +43,14 @@ export default class FillShapeTask extends Task {
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = viewHtml;
     this.canvasElement = this.shadowRoot.getElementById("myCanvas") as HTMLCanvasElement;
-    this.infoButton = this.shadowRoot.getElementById("info-button") as Button;
+    this.infoElement = this.shadowRoot.querySelector(".info") as HTMLElement;
     this.checkButton = this.shadowRoot.getElementById("check-button") as Button;
     this.ctx = this.canvasElement.getContext("2d");
     const ctx = this.ctx;
     const canvasPanel = this.canvasElement.getBoundingClientRect(); //get size according to html spec
 
     var seed = MasterOfDisaster.getInstance().getGameSeed();
-    this.infoButton.setAttribute("label", "Fill: " + fillArry[seed % fillArry.length] + "%");
+    this.infoElement.innerHTML = "Fill: " + fillArry[seed % fillArry.length] + "%";
 
     shapes.push(Smiley, Pyramid, Tree, Cactus);
     //this.shape = new shapes[seed % shapes.length](this.ctx, 100, 5, fillArry[seed % fillArry.length], 400, 10);
@@ -84,11 +84,11 @@ export default class FillShapeTask extends Task {
       console.log("button", this.cnt_button_clicks);
       if (this.cnt_button_clicks == 0) {
         this.tupleResult = this.shape.checkFillStatus(); //returns [bool,message]
-        this.infoButton.setAttribute("label", this.tupleResult[1]);
+        this.infoElement.innerHTML = this.tupleResult[1];
       } else {
         this.finish(this.tupleResult[0]);
       }
-      this.infoButton.setAttribute("styletype", this.tupleResult[0] ? "green" : "red");
+      this.infoElement.style.color = this.tupleResult[0] ? "green" : "red";
       this.checkButton.setAttribute("label", "Back");
 
       this.cnt_button_clicks++;
@@ -108,8 +108,8 @@ export default class FillShapeTask extends Task {
 
       //remove event listener in case of violation against in-game rules
       if (typeof this.shape.checkOutside(relativeMousePos) !== "undefined") {
-        this.infoButton.setAttribute("label", this.shape.checkOutside(relativeMousePos)[1]);
-        this.infoButton.setAttribute("styletype", "red");
+        this.infoElement.innerHTML = this.shape.checkOutside(relativeMousePos)[1];
+        this.infoElement.style.color = "red";
         this.checkButton.setAttribute("label", "Back");
         this.canvasElement.removeEventListener("mousemove", this.onMouseMove);
         //to activate exit
@@ -299,10 +299,10 @@ class Smiley implements ShapeI {
         this.cnt_max_outside--;
       }
       if (this.cnt_max_px_outside < 0) {
-        return [true, "Woops, too many  pixels colored outside"];
+        return [true, "Woops, too many  pixels colored outside."];
       }
       if (this.cnt_max_outside < 0) {
-        return [true, "Woops, too many times colored outside"];
+        return [true, "Woops, too many times colored outside."];
       }
       this.cnt_max_px_outside--;
     }
@@ -406,10 +406,10 @@ class Pyramid implements ShapeI {
       }
       if (this.cnt_max_px_outside < 0) {
         //to do break in-game
-        return [true, "Woops, too many  pixels colored outside"];
+        return [true, "Woops, too many  pixels colored outside."];
       }
       if (this.cnt_max_outside < 0) {
-        return [true, "Woops, too many times colored outside"];
+        return [true, "Woops, too many times colored outside."];
       }
       this.cnt_max_px_outside--;
     }
@@ -529,7 +529,7 @@ class Tree implements ShapeI {
         return [true, "Woops, too many pixels colored outside."];
       }
       if (this.cnt_max_outside < 0) {
-        return [true, "Woops, too many times colored outside"];
+        return [true, "Woops, too many times colored outside."];
       }
       this.cnt_max_px_outside--;
     }
@@ -703,7 +703,7 @@ class Cactus implements ShapeI {
         return [true, "Woops, too many pixels colored outside."];
       }
       if (this.cnt_max_outside < 0) {
-        return [true, "Woops, too many times colored outside"];
+        return [true, "Woops, too many times colored outside."];
       }
       this.cnt_max_px_outside--;
     }
