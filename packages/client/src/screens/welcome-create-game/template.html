@@ -29,44 +29,17 @@
     font-size: 200%;
     font-weight: normal;
     margin-top: 5%;
-    margin-bottom: 1%;
+    margin-bottom: 2%;
   }
 
-  .container {
-    width: 30%;
-    height: 40vh;
-    margin-left: auto;
-    margin-right: auto;
-    border-radius: 25px;
-    background: rgba(0, 0, 0, 0.4);
-    padding: 5%;
+  #game_name {
+    width: 100%;
+    margin-bottom: 20px;
   }
-
-  .container > * {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    width: 40%;
-  }
-
-  #code {
-    margin-top: 10%;
-    margin-bottom: 5%;
-    border: 1px solid white;
-    border-radius: 100px;
-    width: 40%;
-    height: 8%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  #game_name,
-  #player_number,
   #create_game {
     width: 100%;
     display: flex;
-    align-items: center;
+    align-content: center;
     justify-content: center;
   }
 </style>
@@ -75,22 +48,14 @@
   <div>
     <h1>CREATE HERE NEW GAME</h1>
   </div>
-  <div>
-    <h2>TEXTINPUT</h2>
-  </div>
-  <div class="container">
+  <apirush-container>
     <h3>CHOOSE NAME</h3>
     <div id="game_name">
-      <text-box id="test" label="ENTER GAME NAME"></text-box>
-    </div>
-
-    <h3>NUMBER OF MAX PLAYERS</h3>
-    <div id="player_number">
-      <text-box id="test" label="ENTER NUMBER OF PLAYERS"></text-box>
+      <text-box id="test" styletype="black" hint="ENTER THE GAME NAME"></text-box>
     </div>
 
     <div id="create_game">
-      <apirush-button id="create-game-button" label="CREATE GAME" styletype="green"></apirush-button>
+      <apirush-button id="create-game-button" label="START GAME" styletype="transparent, xlarge"></apirush-button>
     </div>
-  </div>
+  </apirush-container>
 </div>

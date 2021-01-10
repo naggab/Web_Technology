@@ -4,22 +4,20 @@
     margin: 0;
   }
 
-  input > * {
-    width: 100%;
-  }
   input {
-    min-width: 100%;
-    font-size: 30px;
+    width: 100%;
+    height: 100%;
+
+    font-size: 35px;
     outline: none;
     text-align: center;
-    margin-left: auto;
-    margin-right: auto;
   }
 
-  #wrapper {
-    width: 100%;
-    background-color: #8a0707;
-    box-sizing: border-box;
+  #container {
+    width: 30%;
+    height: 100%;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .transparent {
@@ -30,11 +28,16 @@
   }
 
   .black {
-  }
-
-  .white {
+    border: 1px solid white;
+    border-radius: 25px;
+    background-color: transparent;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 10px;
+    color: white;
+    font-size: 20px;
   }
 </style>
-<div id="wrapper">
-  <input class="transparent" id="input" type="text" placeholder="ENTER YOUR USERNAME" />
+<div id="container">
+  <input id="input" type="text" placeholder="ENTER YOUR USERNAME" />
 </div>

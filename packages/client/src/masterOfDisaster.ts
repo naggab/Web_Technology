@@ -148,6 +148,10 @@ export class MasterOfDisaster {
     this.myPlayerId = id;
   }
 
+  async showStats() {
+    this.setState("welcome-stats");
+  }
+
   async userWantsToJoin(playerName: string) {
     this.setState("loading");
     try {

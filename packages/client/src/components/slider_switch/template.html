@@ -1,96 +1,79 @@
 <style>
-  .text-block1 {
-    position: relative;
-    bottom: 0px;
-    right: -12px;
-    top: -11px;
-    background-color: transparent;
-    color: white;
-    z-index: 3;
+  * {
+    margin: 0;
+    padding: 0;
   }
 
-  .text-block2 {
-    position: relative;
-    bottom: 0px;
-    right: -105px;
-    top: -46px;
-    background-color: transparent;
+  #wrapper {
+    width: 250px;
+    height: 50px;
+  }
+
+  p {
+    width: 50%;
     color: white;
+    background-color: transparent;
     z-index: 2;
-  }
-
-  .switch {
-    position: relative;
-    display: inline-block;
-
-    width: 150px;
-    height: 28px;
-  }
-
-  .switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-
-  .slider {
-    position: absolute;
+    text-align: center;
+    font-family: "Roboto", sans-serif;
+    font-size: 15px;
     cursor: pointer;
-    border-radius: 25px;
-    content: "ON";
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: black;
-    -webkit-transition: 0.4s;
-    transition: 0.4s;
-    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 
-  .slider:before {
+  #switch {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    background-color: black;
+    border-radius: 25px;
+  }
+
+  input {
+    display: none;
+  }
+
+  #slider:before {
     position: absolute;
     border-radius: 25px;
-    font-family: "Roboto";
+
+    font-family: "Roboto", sans-serif;
     font-weight: bold;
     text-align: center;
+
     content: "ON";
-    height: 26px;
-    width: 90px;
-    left: 1px;
-    bottom: 1px;
-    background-color: white;
+    height: 100%;
+    width: 50%;
+    left: 0px;
+    bottom: 0px;
+    background-color: #ffffff;
     -webkit-transition: 0.4s;
     transition: 0.4s;
+    z-index: 3;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 
-  input:checked + .slider {
-    background-color: black;
-    z-index: 2;
-  }
-
-  input:checked + .slider:before {
-    -webkit-transform: translateX(58px);
-    -ms-transform: translateX(58px);
-    transform: translateX(58px);
+  input:checked + #slider:before {
+    -webkit-transform: translateX(100%);
+    -ms-transform: translateX(100%);
+    transform: translateX(100%);
     font-weight: bold;
-
-    text-align: center;
-
     content: "OFF";
   }
 </style>
-<label id="switchCmp" class="switch">
-  <div class="text-block1">
+<div id="wrapper">
+  <label id="switch">
     <p>ON</p>
-  </div>
-
-  <div class="text-block2">
     <p>OFF</p>
-  </div>
 
-  <input type="checkbox" />
-  <span id="switch" class="slider"></span>
-</label>
-
-<span id="label"></span>
+    <input type="checkbox" />
+    <span id="slider"></span>
+  </label>
+</div>

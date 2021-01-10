@@ -2,6 +2,8 @@ const template = document.createElement("template");
 
 import templateHTML from "./template.html";
 
+type InputType = "transparent";
+
 export class TextBox extends HTMLElement {
   _input: HTMLInputElement;
 
@@ -20,14 +22,27 @@ export class TextBox extends HTMLElement {
     }
   }
 
+  get hint() {
+    return this.getAttribute("hint") || "";
+  }
+
   static get observedAttributes() {
-    return ["type", "value"];
+    return ["styletype", "hint"];
+  }
+
+  get styletype(): InputType[] {
+    const styleList = this.getAttribute("styletype");
+    return styleList.split(",") as InputType[];
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
-      case "type":
-        this._input.type = newValue;
+      case "styletype":
+        this._input.className = "";
+        this._input.classList.add(...this.styletype);
+        break;
+      case "hint":
+        this._input.placeholder = newValue;
         break;
       default:
         break;
@@ -36,6 +51,8 @@ export class TextBox extends HTMLElement {
 
   connectedCallback() {
     this._input.addEventListener("change", this.getValue);
+    this._input.classList.add(...this.styletype);
+    this._input.placeholder = this.hint;
   }
 }
 
