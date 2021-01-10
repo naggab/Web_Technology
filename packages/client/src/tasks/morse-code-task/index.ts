@@ -2,10 +2,8 @@ import viewHtml from "./view.html";
 import { Task } from "../../task";
 
 import { Button } from "../../components/button";
-import "../../components/inputBox";
-import "../../components/slider_switch";
-import { TextBox } from "../../components/inputBox";
 import { MasterOfDisaster } from "../../masterOfDisaster";
+import { range } from "lodash";
 
 export default class MorseCodeTask extends Task {
   loadButton: Button;
@@ -13,6 +11,7 @@ export default class MorseCodeTask extends Task {
   ctx: CanvasRenderingContext2D;
   ctxAnimtated: CanvasRenderingContext2D;
   curPixelX: number;
+  offsetX: number;
  
   async onMounted() {
     this.attachShadow({ mode: "open" });
@@ -27,13 +26,14 @@ export default class MorseCodeTask extends Task {
     ctx.lineWidth = 3;
     this.curPixelX = 0;
     var mouseDown:boolean=false;
+    this.offsetX = 100;
 
-    var cnt = 0;
+    var cntPixel = 0;
     const pattern:Array<Array<number>> = [[1,0,1,1,1,0,0],[1,1,0,0],[0,0,1]]; //0=Space 1=. 2=-
     var seed = MasterOfDisaster.getInstance().getGameSeed();
 
-    this.drawCode(pattern[seed%pattern.length], 50, 120, 10);
-
+    var patternReshaped = this.drawCode(pattern[seed%pattern.length], this.offsetX, 130, 10);
+    var morseArray = [];
     /*
     const interval1 = setInterval((f)=> {
         this.curPixelX++;
@@ -47,26 +47,30 @@ export default class MorseCodeTask extends Task {
 
         }
     }, 15);*/
-        
+
     function moveRect(){
-        ctxAnimtated.clearRect(cnt-1,140,2,20);
-        ctxAnimtated.fillRect(cnt,140,2,20);
-        console.log(cnt)
-       
+        ctxAnimtated.clearRect(cntPixel-1,140,2,20);
+        ctxAnimtated.fillRect(cntPixel,140,2,20);
         
         var x = requestAnimationFrame(moveRect) // call requestAnimationFrame again to animate next frame
         if(mouseDown)
         { 
             ctx.beginPath();
-            ctx.moveTo(cnt-1, 150);
-            ctx.lineTo(cnt, 150);
+            ctx.moveTo(cntPixel-1, 150);
+            ctx.lineTo(cntPixel, 150);
             ctx.stroke(); 
             ctx.closePath();
+            morseArray.push(1);
         }
-        cnt+=1
-        if(cnt>canvasElement.width){
+        else{
+            morseArray.push(0);
+        }
+        cntPixel+=1
+        if(cntPixel>canvasElement.width){
             cancelAnimationFrame(x)
+            console.log(morseArray);
         }
+       
     }
     requestAnimationFrame(moveRect);
 
@@ -95,18 +99,39 @@ export default class MorseCodeTask extends Task {
   onUnmounting(): void | Promise<void> {}
 
 
-drawCode(pattern:Array<number>, offsetX: number, offsetY: number, gapPx: number){
+drawCode(pattern:Array<number>, offsetX: number, offsetY: number, gapPx: number): Array<number>{
     var lineLength = 30;
     var dotLength = 10;
+    var checkPattern:Array<number> = [];
+    const gapConst = gapPx
+    //check pattern [0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,...] //1...pixel filled, 0...not 
+    //add offsetX:
+    range(offsetX).forEach(x => checkPattern.push(0));
+    //add line, dot, gap
+    
+    console.log("pattern",checkPattern)
     pattern = pattern.map(x => x==1 ? x=lineLength: x=dotLength) //encode pattern to real pixel
     for(var element of pattern){
         this.stroke(element, gapPx+offsetX, offsetY);
         gapPx+=(lineLength+element+offsetX);
+        
         offsetX=0; //only first time
+        range(element).forEach(x => checkPattern.push(1))
+        range(gapConst).forEach(x => checkPattern.push(0))
+        console.log("pattern",checkPattern)
+        
+        
     }
+    return checkPattern;
    
 }
-stroke(lengthPx,offsetX,offsetY)
+calcCheck(checkPattern:Array<number>){
+    for(var element of checkPattern){
+
+        
+    }
+}
+stroke(lengthPx:number, offsetX:number, offsetY:number)
 {
     this.ctx.beginPath();
     this.ctx.moveTo(offsetX, offsetY);
