@@ -1,6 +1,6 @@
 import templateHTML from "./template.html";
 
-type ButtonStyleType = "red" | "green" | "transparent" | "white";
+type ButtonStyleType = "red" | "green" | "transparent" | "white" | "black";
 
 export class Button extends HTMLElement {
   _a: HTMLAnchorElement;

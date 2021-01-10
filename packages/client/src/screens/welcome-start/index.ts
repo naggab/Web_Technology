@@ -37,8 +37,8 @@ class WelcomeScreen extends AbstractScreen {
   }
 
   async joinGame() {
-    let userName = this._userName_input.value;
-    userName = "Tester";
+    const userName = this._userName_input.getValue();
+
     try {
       if (userName) {
         await this._mod.userWantsToJoin(userName);
@@ -51,9 +51,7 @@ class WelcomeScreen extends AbstractScreen {
   }
 
   async createGame() {
-    let userName = this._userName_input.value;
-    userName = "Tester";
-
+    const userName = this._userName_input.getValue();
     try {
       if (userName) {
         await this._mod.userWantsToCreate(userName);

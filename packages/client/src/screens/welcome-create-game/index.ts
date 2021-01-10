@@ -1,7 +1,7 @@
 import AbstractScreen from "../AbstractScreen";
 import templateHTML from "./template.html";
-import "../../components/inputBox";
-import { TextBox } from "../../components/inputBox";
+import "../../components/textBox";
+import { TextBox } from "../../components/textBox";
 import { Button } from "../../components/button";
 import { MasterOfDisaster } from "../../masterOfDisaster";
 import { CommandOp } from "@apirush/common/src";
