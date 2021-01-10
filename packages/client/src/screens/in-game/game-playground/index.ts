@@ -592,19 +592,19 @@ export default class GamePlayground extends HTMLElement {
       return;
     } else {
       player.model.frameRate(10);
-      if (this.keyMap.get(87)) player.moveUp(1);
-      if (this.keyMap.get(65)) player.moveLeft(1);
-      if (this.keyMap.get(83)) player.moveDown(1);
-      if (this.keyMap.get(68)) player.moveRight(1);
+      if (this.keyMap.get(87) && !this.keyMap.get(83)) player.moveUp(1);
+      if (this.keyMap.get(65) && !this.keyMap.get(68)) player.moveLeft(1);
+      if (this.keyMap.get(83) && !this.keyMap.get(87)) player.moveDown(1);
+      if (this.keyMap.get(68) && !this.keyMap.get(65)) player.moveRight(1);
       player.redraw();
     }
   }
 
   handleMove(keyCode?: number) {
-    if (keyCode == 87) player.moveUp(1);
-    if (keyCode == 65) player.moveLeft(1);
-    if (keyCode == 83) player.moveDown(1);
-    if (keyCode == 68) player.moveRight(1);
+    if (keyCode == 87 && !this.keyMap.get(83)) player.moveUp(1);
+    if (keyCode == 65 && !this.keyMap.get(68)) player.moveLeft(1);
+    if (keyCode == 83 && !this.keyMap.get(87)) player.moveDown(1);
+    if (keyCode == 68 && !this.keyMap.get(65)) player.moveRight(1);
     if (keyCode == 32) {
       if (player.checkCollision(player.y, player.x, true) == CollisionType.Task) {
         debugPrint("[SPCBR] pressed on player position: " + player.x + "," + player.y + " returns TASK in proximity");
