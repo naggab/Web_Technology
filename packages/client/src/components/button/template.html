@@ -52,6 +52,11 @@
     background-color: var(--green);
     border-width: 0;
   }
+  a.black {
+    color: white;
+    background-color: var(--black);
+    border-width: 0;
+  }
 
   a.borderless {
     border-width: 0;
@@ -59,13 +64,15 @@
 
   a.xlarge {
     width: 75%;
-    height: 50px;
+    height: 100%;
     border-radius: 100px;
     display: flex;
-    line-height: 50px;
+
     align-content: center;
     justify-content: center;
-    margin: 50px auto;
+    flex-direction: column;
+    margin: auto;
+    font-size: 200%;
   }
 </style>
 <a></a>

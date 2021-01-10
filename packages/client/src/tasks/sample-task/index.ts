@@ -2,7 +2,7 @@ import viewHtml from "./view.html";
 import { Task } from "../../task";
 
 import { Button } from "../../components/button";
-import "../../components/inputBox";
+import "../../components/textBox";
 import "../../components/slider_switch";
 
 export default class SampleTask extends Task {

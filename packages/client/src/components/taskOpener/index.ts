@@ -14,14 +14,11 @@ export class TaskOpener extends HTMLElement {
   connectedCallback() {
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = templateHTML;
-
-    const mod = MasterOfDisaster.getInstance();
+    this.openTask = this.openTask.bind(this);
 
     this.wrapper_ = this.shadowRoot.querySelector(".task-opener-wrapper");
     this.backdrop_ = this.shadowRoot.querySelector(".task-opener-backdrop");
     this.container_ = this.shadowRoot.querySelector(".task-opener-container");
-
-    mod.onTaskNeedsToBeOpened = this.openTask.bind(this);
   }
 
   private animateFadeIn() {

@@ -1,6 +1,6 @@
 import templateHTML from "./template.html";
 
-type ButtonStyleType = "red" | "green" | "transparent" | "white";
+type ButtonStyleType = "red" | "green" | "transparent" | "white" | "black";
 
 export class Button extends HTMLElement {
   _a: HTMLAnchorElement;
@@ -28,14 +28,6 @@ export class Button extends HTMLElement {
     return (styleList.split(",") as ButtonStyleType[]) || ["white"];
   }
 
-  /*
-    get onClick() {
-      const href = this.getAttribute("onClick");
-      if (href != null) {
-        return href;
-      }
-    }
-  */
   attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
       case "label":
@@ -53,9 +45,6 @@ export class Button extends HTMLElement {
   connectedCallback() {
     this._a.innerHTML = this.label;
     this._a.classList.add(...this.styletype);
-    /*if (this.onClick) {
-            this._a.href = this.onClick;
-        }*/
   }
 }
 

@@ -20,7 +20,9 @@ window.addEventListener("load", () => {
 document.addEventListener("DOMContentLoaded", () => {
   MasterOfDisaster.setup().then(() => {
     (<any>window).MOD = MasterOfDisaster.getInstance();
-    document.body.appendChild(new TaskOpener());
+    const taskOpener = new TaskOpener();
+    document.body.appendChild(taskOpener);
     router("welcome-start");
+    MasterOfDisaster.getInstance().registerTaskOpener(taskOpener);
   });
 });

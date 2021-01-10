@@ -90,6 +90,8 @@ var foreignPlayerLayer: Konva.Layer;
 var foreignPlayers: Player[];
 
 var sprites: HTMLImageElement[];
+var questionMarkSprite: HTMLImageElement;
+var questionMarkDone: HTMLImageElement;
 
 /**
  * Defines the player and stores the associated layer we used to draw him.
@@ -159,28 +161,28 @@ export class Player {
     */
     var spriteNbr = (this.bibNumber - 1) % sprites.length;
     this.model = new Konva.Sprite({
-      height: 16,
-      width: 16,
+      height: 64,
+      width: 64,
       x: (this.x - 1) * gridSize,
       y: (this.y - 1) * gridSize,
       image: sprites[spriteNbr],
       animation: "idleRight",
-      scaleX: (gridSize / 16.0) * 3,
-      scaleY: (gridSize / 16.0) * 3,
+      scaleX: (gridSize / 64.0) * 3,
+      scaleY: (gridSize / 64.0) * 3,
       animations: {
         // x, y, width, height
         // prettier-ignore
         idleRight: [
-          0, 0, 15, 16,
-          17, 0, 15, 16,
-          33, 0, 15, 16],
+          0, 0, 64, 64,
+          64, 0, 64, 64,
+          128, 0, 64, 64],
         // prettier-ignore
         idleLeft: [
-          48, 0, 15, 16,
-          65, 0, 15, 16,
-          81, 0, 15, 16],
+          192, 0, 64, 64,
+          256, 0, 64, 64,
+          320, 0, 64, 64],
       },
-      frameRate: 7,
+      frameRate: 2,
       frameIndex: 0,
       name: this.playerID.toString(),
     });
@@ -232,7 +234,7 @@ export class Player {
    * Redraw the tooltip with new movement information.
    * Automatically centers the text inside the background object
    */
-  refreshTooltip(text?: string) {
+  refreshTooltip(text?: string, x?: boolean, y?: boolean) {
     if (text !== undefined) {
       this.tooltip.text(text);
     } else if (this.playerID != -1) {
@@ -240,8 +242,8 @@ export class Player {
     } else {
       this.tooltip.text(this.x + "," + this.y);
     }
-    this.tooltip.x(this.x * gridSize + gridSize / 2 - this.tooltip.width() / 2);
-    this.tooltip.y((this.y - 2) * gridSize + gridSize / 2 - this.tooltip.height() / 2);
+    if (x == undefined || x == true) this.tooltip.x(this.x * gridSize + gridSize / 2 - this.tooltip.width() / 2);
+    if (y == undefined || y == true) this.tooltip.y((this.y - 2) * gridSize + gridSize / 2 - this.tooltip.height() / 2);
 
     this.tooltipShape.x(this.tooltip.x());
     this.tooltipShape.y(this.tooltip.y());
@@ -272,12 +274,23 @@ export class Player {
                 var ty = newPosY + i;
                 var tx = newPosX + j;
                 modInstance.openTask(taskPos.task).then((completed) => {
-                  console.log("task done", completed);
                   if (completed) {
                     // Get new grid object in case we had to redraw while doing the task
                     taskPos = grid[ty][tx];
+                    var tpx = taskPos.shape.x();
+                    var tpy = taskPos.shape.y();
+                    taskPos.shape.remove();
                     if (taskPos) {
-                      taskPos.shape.fill("green");
+                      taskPos.shape = new Konva.Image({
+                        x: tpx,
+                        y: tpy,
+                        image: questionMarkDone,
+                        width: 16,
+                        height: 16,
+                        scaleX: gridSize / 16.0,
+                        scaleY: gridSize / 16.0,
+                      });
+                      baseLayer.add(taskPos.shape);
                       baseLayer.batchDraw();
                     }
                   }
@@ -301,13 +314,34 @@ export class Player {
    * @param amount The amount of grid elements the player should move.
    */
   moveUp(amount: number) {
+    this.model.y((this.y - 1) * gridSize);
+    this.refreshTooltip(undefined, false, true);
     var newPos = grid[this.y - amount][this.x];
     var foundCollision = this.checkCollision(this.y - amount, this.x);
     if (newPos !== undefined && foundCollision != CollisionType.Wall) {
       if (newPos.type != ElementType.Wall) {
-        this.model.y(this.model.y() - amount * gridSize);
         this.y -= amount;
-        this.refreshTooltip();
+
+        var iter = (gridSize / 7) * amount;
+        var stop = this.model.y() - amount * gridSize;
+
+        var anim = new Konva.Animation(
+          function (frame) {
+            this.model.y(this.model.y() - iter);
+            this.tooltip.y(this.tooltip.y() - iter);
+            this.tooltipShape.y(this.tooltipShape.y() - iter);
+            if (amount > 0 && this.model.y() <= stop) {
+              anim.stop();
+              this.model.y(stop);
+            } else if (amount < 0 && this.model.y() >= stop) {
+              anim.stop();
+              this.model.y(stop);
+            }
+          }.bind(this),
+          this.layer,
+        );
+        anim.start();
+        /*this.model.y(this.model.y() - amount * gridSize); */
 
         if (this.playerMovedCB !== undefined) {
           this.playerMovedCB(this.x, this.y);
@@ -317,14 +351,35 @@ export class Player {
   }
 
   moveLeft(amount: number) {
+    this.model.x((this.x - 1) * gridSize);
+    this.refreshTooltip(undefined, true, false);
     this.model.animation("idleLeft");
     var newPos = grid[this.y][this.x - amount];
     var foundCollision = this.checkCollision(this.y, this.x - amount);
     if (newPos !== undefined && foundCollision != CollisionType.Wall) {
       if (newPos.type != ElementType.Wall) {
-        this.model.x(this.model.x() - amount * gridSize);
+        //this.model.x(this.model.x() - amount * gridSize);
         this.x -= amount;
-        this.refreshTooltip();
+
+        var iter = (gridSize / 7) * amount;
+        var stop = this.model.x() - amount * gridSize;
+
+        var anim = new Konva.Animation(
+          function (frame) {
+            this.model.x(this.model.x() - iter);
+            this.tooltip.x(this.tooltip.x() - iter);
+            this.tooltipShape.x(this.tooltipShape.x() - iter);
+            if (amount > 0 && this.model.x() <= stop) {
+              anim.stop();
+              this.model.x(stop);
+            } else if (amount < 0 && this.model.x() >= stop) {
+              anim.stop();
+              this.model.x(stop);
+            }
+          }.bind(this),
+          this.layer,
+        );
+        anim.start();
 
         if (this.playerMovedCB !== undefined) {
           this.playerMovedCB(this.x, this.y);
@@ -371,7 +426,7 @@ export class Player {
     var oldx = this.x;
 
     if (x > oldx) this.model.animation("idleRight");
-    else this.model.animation("idleLeft");
+    else if (x < oldx) this.model.animation("idleLeft");
 
     this.x = x;
     this.y = y;
@@ -404,12 +459,27 @@ class GridObject {
 export default class GamePlayground extends HTMLElement {
   stage: Konva.Stage;
   map: MapI;
+  timerFunction: any;
+  keyMap: Map<number, boolean>;
   constructor() {
     super();
+    this.keyMap = new Map();
+    document.onkeydown = document.onkeyup = function (e) {
+      if (this.keyMap.get(e.keyCode) != true && e.type == "keydown") {
+        this.keyMap.set(e.keyCode, e.type == "keydown");
+        this.handleMove(e.keyCode);
+        clearInterval(this.timerFunction);
+        this.timerFunction = false;
+      } else {
+        this.keyMap.set(e.keyCode, e.type == "keydown");
+      }
+      if (!this.timerFunction) {
+        this.timerFunction = setInterval(this.keyDownCheck.bind(this), 150);
+      }
+    }.bind(this);
   }
 
   async connectedCallback() {
-    console.log(GamePlayground.name, "connected to DOM");
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = viewHtml;
 
@@ -465,7 +535,12 @@ export default class GamePlayground extends HTMLElement {
     await imageObj4.decode();
     sprites.push(imageObj4);
 
-    console.log(sprites);
+    questionMarkSprite = new Image();
+    questionMarkSprite.src = "/assets/img/questionMarkSprite.png";
+    await questionMarkSprite.decode();
+
+    questionMarkDone = new Image();
+    questionMarkDone.src = "/assets/img/questionMarkDone.png";
 
     modInstance = MasterOfDisaster.getInstance();
     if (!modInstance) throw console.error("no mod instance");
@@ -501,6 +576,45 @@ export default class GamePlayground extends HTMLElement {
     modInstance.serverSession.subscribe(GameEventOp.PLAYER_LEFT, this.foreignPlayerLeft);
   }
 
+  keyDownCheck() {
+    if (this.keyMap == undefined || player == undefined) return;
+    if (
+      !this.keyMap.get(87) &&
+      !this.keyMap.get(65) &&
+      !this.keyMap.get(83) &&
+      !this.keyMap.get(68) &&
+      !this.keyMap.get(32)
+    ) {
+      clearInterval(this.timerFunction);
+      this.timerFunction = false;
+      player.model.frameRate(2);
+      player.refreshTooltip();
+      return;
+    } else {
+      player.model.frameRate(10);
+      if (this.keyMap.get(87) && !this.keyMap.get(83)) player.moveUp(1);
+      if (this.keyMap.get(65) && !this.keyMap.get(68)) player.moveLeft(1);
+      if (this.keyMap.get(83) && !this.keyMap.get(87)) player.moveDown(1);
+      if (this.keyMap.get(68) && !this.keyMap.get(65)) player.moveRight(1);
+      player.redraw();
+    }
+  }
+
+  handleMove(keyCode?: number) {
+    if (keyCode == 87 && !this.keyMap.get(83)) player.moveUp(1);
+    if (keyCode == 65 && !this.keyMap.get(68)) player.moveLeft(1);
+    if (keyCode == 83 && !this.keyMap.get(87)) player.moveDown(1);
+    if (keyCode == 68 && !this.keyMap.get(65)) player.moveRight(1);
+    if (keyCode == 32) {
+      if (player.checkCollision(player.y, player.x, true) == CollisionType.Task) {
+        debugPrint("[SPCBR] pressed on player position: " + player.x + "," + player.y + " returns TASK in proximity");
+      } else {
+        debugPrint("[SPCBR] pressed on player position: " + player.x + "," + player.y + " ... no task in prox");
+      }
+    }
+    player.redraw();
+  }
+
   sendMyPlayerMoved(x: number, y: number) {
     modInstance.serverSession.sendRPC(CommandOp.MOVE, { position: { x, y } });
   }
@@ -524,9 +638,7 @@ export default class GamePlayground extends HTMLElement {
     this.removeForeignPlayer(id);
   }
 
-  disconnectedCallback() {
-    console.log(GamePlayground.name, "disconnected from DOM");
-  }
+  disconnectedCallback() {}
 
   /**
    * Add a foreign player to the in-game and keep a reference to the object.
@@ -534,7 +646,6 @@ export default class GamePlayground extends HTMLElement {
    * @param fpl Player information
    */
   addForeignPlayer(fpl: PlayerInGameI): Player {
-    console.log("add foreign player", fpl);
     if (!foreignPlayerLayer || !foreignPlayers) {
       foreignPlayerLayer = new Konva.Layer();
       foreignPlayers = new Array();
@@ -549,7 +660,6 @@ export default class GamePlayground extends HTMLElement {
       fpl.bibNumber,
     );
     foreignPlayers.push(newPlayer);
-    console.log(foreignPlayers);
     if (this.getCurrentPlayer()) {
       this.getCurrentPlayer()
         .layer.getChildren()
@@ -570,9 +680,6 @@ export default class GamePlayground extends HTMLElement {
    * @param fpl A reference to the player ID that should be removed
    */
   removeForeignPlayer(fpl: number): boolean {
-    console.log("remove ", fpl);
-    console.log(foreignPlayers);
-    console.log(foreignPlayerLayer.find("." + fpl).toArray());
     var foundElem = false;
     for (let i = 0; i < foreignPlayers.length; i++) {
       if (foreignPlayers[i].playerID == fpl) {
@@ -674,7 +781,7 @@ export default class GamePlayground extends HTMLElement {
     baseLayer = new Konva.Layer();
 
     /* Attach keybaord events */
-    document.onkeydown = this.keyDown;
+    //document.onkeydown = this.keyDown;
 
     /* Loop through map and draw the grid */
     var x: number = 0;
@@ -738,12 +845,38 @@ export default class GamePlayground extends HTMLElement {
       );
       var newPos = grid[this.map.taskPositions[key].y][this.map.taskPositions[key].x];
       if (newPos !== undefined) {
-        newPos.shape.fill("purple");
+        //newPos.shape.fill("purple");
+        var npx = newPos.shape.x();
+        var npy = newPos.shape.y();
+        console.log(npx, npy);
+        newPos.shape.destroy();
+        var spr: Konva.Sprite;
+        spr = new Konva.Sprite({
+          x: npx,
+          y: npy,
+          image: questionMarkSprite,
+          animation: "idle",
+          scaleX: gridSize / 16.0,
+          scaleY: gridSize / 16.0,
+          animations: {
+            // prettier-ignore
+            idle: [
+              0, 0, 16, 16,
+              16, 0, 16, 16],
+          },
+          frameRate: 4,
+          frameIndex: 0,
+        });
+        baseLayer.add(spr);
+        spr.start();
+        newPos.shape = spr;
+
         newPos.type = ElementType.Task;
         newPos.task = key;
         if (tasks === undefined) tasks = new Array();
         tasks.push(new Task(key, cord(this.map.taskPositions[key].x, this.map.taskPositions[key].y), false));
       }
+      baseLayer.batchDraw();
     }
 
     /* DEMO IMPLEMENTATION BLOCK
@@ -890,35 +1023,6 @@ export default class GamePlayground extends HTMLElement {
       }
     });
     baseLayer.batchDraw();
-  }
-
-  /**
-   * Hook for keyboard events.
-   */
-  keyDown(e) {
-    console.log(e);
-    switch (e.keyCode) {
-      case 87:
-        player.moveUp(1);
-        break; // W
-      case 65:
-        player.moveLeft(1);
-        break; // A
-      case 83:
-        player.moveDown(1);
-        break; // S
-      case 68:
-        player.moveRight(1);
-        break; // D
-      case 32:
-        if (player.checkCollision(player.y, player.x, true) == CollisionType.Task) {
-          debugPrint("[SPCBR] pressed on player position: " + player.x + "," + player.y + " returns TASK in proximity");
-        } else {
-          debugPrint("[SPCBR] pressed on player position: " + player.x + "," + player.y + " ... no task in prox");
-        }
-        break;
-    }
-    player.redraw();
   }
 
   getCurrentPlayer() {

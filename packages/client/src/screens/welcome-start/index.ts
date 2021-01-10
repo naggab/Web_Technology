@@ -1,15 +1,16 @@
 import templateHTML from "./template.html";
 import { Button } from "../../components/button";
 import AbstractScreen from "../AbstractScreen";
+import "../../components/textBox";
 import { MasterOfDisaster } from "../../masterOfDisaster";
 import { router } from "../../router";
 
 class WelcomeScreen extends AbstractScreen {
   _joinGameButton: Button;
   _createGameButton: Button;
+  _showStats_button: Button;
   _mod: MasterOfDisaster;
   _userName_input: any;
-  _debug = true;
 
   constructor() {
     super();
@@ -21,13 +22,15 @@ class WelcomeScreen extends AbstractScreen {
 
     this._joinGameButton = this.shadowRoot.querySelector("#join-game-button") as Button;
     this._createGameButton = this.shadowRoot.querySelector("#create-game-button") as Button;
+    this._showStats_button = this.shadowRoot.querySelector("#show-stats") as Button;
     this._userName_input = this.shadowRoot.querySelector("#userName");
 
     this._joinGameButton.onclick = this.joinGame.bind(this);
     this._createGameButton.onclick = this.createGame.bind(this);
+    this._showStats_button.onclick = this.showStats.bind(this);
     let _showAllTasks: Button = this.shadowRoot.querySelector("#show-all-tasks");
 
-    if (this._debug) {
+    if (this._mod.debugMode) {
       _showAllTasks.classList.remove("hidden");
       _showAllTasks.onclick = this.showAllTasks;
     }
@@ -35,10 +38,13 @@ class WelcomeScreen extends AbstractScreen {
   showAllTasks() {
     router("all-tasks");
   }
+  async showStats() {
+    await this._mod.showStats();
+  }
 
   async joinGame() {
-    let userName = this._userName_input.value;
-    userName = "Tester";
+    const userName = this._userName_input.getValue();
+
     try {
       if (userName) {
         await this._mod.userWantsToJoin(userName);
@@ -51,9 +57,7 @@ class WelcomeScreen extends AbstractScreen {
   }
 
   async createGame() {
-    let userName = this._userName_input.value;
-    userName = "Tester";
-
+    const userName = this._userName_input.getValue();
     try {
       if (userName) {
         await this._mod.userWantsToCreate(userName);

@@ -7,6 +7,7 @@ import { TaskIdentifier, TaskManger } from "./taskManager";
 import { MapStorage } from "@apirush/common/src/maps";
 import { StatsStorage } from "./statsStorage";
 import has = Reflect.has;
+import { TaskOpener } from "./components/taskOpener";
 
 export type ClientState =
   | "loading"
@@ -40,12 +41,6 @@ export class MasterOfDisaster {
     this.onGameAborted = this.onGameAborted.bind(this);
     this.onGameDidFinish = this.onGameDidFinish.bind(this);
     TaskManger.getTaskIds().forEach((taskId) => this.taskState.set(taskId, false));
-
-    const hash = window.location.hash.replace("#", "");
-    if (hash && TaskManger.getTaskIds().indexOf(hash as any) !== -1) {
-      console.log("hash", hash);
-      this.setState("all-tasks");
-    }
   }
 
   static getInstance() {
@@ -153,6 +148,10 @@ export class MasterOfDisaster {
     this.myPlayerId = id;
   }
 
+  async showStats() {
+    this.setState("welcome-stats");
+  }
+
   async userWantsToJoin(playerName: string) {
     this.setState("loading");
     try {
@@ -221,7 +220,17 @@ export class MasterOfDisaster {
     this.setState("error");
   }
 
-  onTaskNeedsToBeOpened?: (taskId: TaskIdentifier) => Promise<{ time: number; success: boolean }>;
+  registerTaskOpener(to: TaskOpener) {
+    this.onTaskNeedsToBeOpened = to.openTask;
+
+    const hash = window.location.hash.replace("#", "");
+    if (hash && TaskManger.getTaskIds().indexOf(hash as any) !== -1) {
+      console.log("hash", hash);
+      this.setState("all-tasks");
+    }
+  }
+
+  onTaskNeedsToBeOpened?: (taskId: TaskIdentifier) => Promise<{ duration: number; success: boolean }>;
 
   taskState: Map<string, boolean> = new Map<string, boolean>();
 
@@ -247,7 +256,7 @@ export class MasterOfDisaster {
       return false;
     }
 
-    this.statsStorage.taskCompleted(taskId, result.time);
+    this.statsStorage.taskCompleted(taskId, result.duration);
     this.taskState.set(id, true);
 
     if (this.allTasksCompleted) {
