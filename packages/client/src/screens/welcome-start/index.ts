@@ -4,6 +4,9 @@ import AbstractScreen from "../AbstractScreen";
 import "../../components/textBox";
 import { MasterOfDisaster } from "../../masterOfDisaster";
 import { router } from "../../router";
+import "../../components/PopUp";
+import {PopUp} from "../../components/PopUp";
+
 
 class WelcomeScreen extends AbstractScreen {
   _joinGameButton: Button;
@@ -11,6 +14,7 @@ class WelcomeScreen extends AbstractScreen {
   _showStats_button: Button;
   _mod: MasterOfDisaster;
   _userName_input: any;
+  _modal: PopUp;
 
   constructor() {
     super();
@@ -24,10 +28,12 @@ class WelcomeScreen extends AbstractScreen {
     this._createGameButton = this.shadowRoot.querySelector("#create-game-button") as Button;
     this._showStats_button = this.shadowRoot.querySelector("#show-stats") as Button;
     this._userName_input = this.shadowRoot.querySelector("#userName");
+    this._modal = this.shadowRoot.querySelector("apirush-popup");
 
     this._joinGameButton.onclick = this.joinGame.bind(this);
     this._createGameButton.onclick = this.createGame.bind(this);
     this._showStats_button.onclick = this.showStats.bind(this);
+
     let _showAllTasks: Button = this.shadowRoot.querySelector("#show-all-tasks");
 
     if (this._mod.debugMode) {
@@ -49,7 +55,7 @@ class WelcomeScreen extends AbstractScreen {
       if (userName) {
         await this._mod.userWantsToJoin(userName);
       } else {
-        alert("Username is missing!");
+        this._modal.openModal("warning", "You didn't include a username, we don't want to hide the name of the winner.");
       }
     } catch (e) {
       console.error("joinGame", e);
@@ -62,7 +68,8 @@ class WelcomeScreen extends AbstractScreen {
       if (userName) {
         await this._mod.userWantsToCreate(userName);
       } else {
-        alert("Username is missing!");
+        this._modal.openModal("warning", "You didn't include a username, we don't want to hide the name of the winner.");
+
       }
     } catch (e) {
       console.error(e);
