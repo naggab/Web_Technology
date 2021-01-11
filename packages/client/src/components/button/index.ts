@@ -15,7 +15,9 @@ export class Button extends HTMLElement {
     shadowRoot.innerHTML = templateHTML;
     this._a = shadowRoot.querySelector("a");
   }
-
+  public setLabel(text) {
+    this._a.innerHTML = text;
+  }
   get label() {
     if (this.innerHTML) {
       return this.innerHTML;

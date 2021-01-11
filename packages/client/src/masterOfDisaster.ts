@@ -8,7 +8,7 @@ import { MapStorage } from "@apirush/common/src/maps";
 import { StatsStorage } from "./statsStorage";
 import has = Reflect.has;
 import { TaskOpener } from "./components/taskOpener";
-
+import { english, german } from "../language";
 export type ClientState =
   | "loading"
   | "error"
@@ -20,7 +20,7 @@ export type ClientState =
   | "in-game"
   | "post-game"
   | "all-tasks";
-
+export type Languages = "English" | "German";
 export class MasterOfDisaster {
   private watchingForGameStart: boolean = false;
   private watchingForGameEnd: boolean = false;
@@ -32,7 +32,7 @@ export class MasterOfDisaster {
   gameWinner: PlayerInGameI | null = null;
   readonly serverSession: ServerSession;
   readonly statsStorage: StatsStorage = new StatsStorage();
-
+  private language: Languages = "English";
   readonly debugMode: boolean = true;
 
   constructor(sess: ServerSession) {
@@ -41,6 +41,25 @@ export class MasterOfDisaster {
     this.onGameAborted = this.onGameAborted.bind(this);
     this.onGameDidFinish = this.onGameDidFinish.bind(this);
     TaskManger.getTaskIds().forEach((taskId) => this.taskState.set(taskId, false));
+  }
+
+  public getLanguage() {
+    switch (this.language) {
+      case "English":
+        return english;
+
+      case "German":
+        return german;
+      default:
+        return english;
+    }
+  }
+  public setLanguage() {
+    if (this.language == "English") {
+      this.language = "German";
+    } else {
+      this.language = "English";
+    }
   }
 
   static getInstance() {

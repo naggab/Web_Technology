@@ -21,6 +21,9 @@ export class TextBox extends HTMLElement {
       return "Unknown";
     }
   }
+  public setHint(text) {
+    this._input.placeholder = text;
+  }
 
   get hint() {
     return this.getAttribute("hint") || "";

@@ -46,18 +46,17 @@
 
 <div class="root">
   <div>
-    <h1>CREATE HERE NEW GAME</h1>
+    <h1 id="title">CREATE HERE NEW GAME</h1>
   </div>
   <apirush-container>
-    <h3>CHOOSE NAME</h3>
+    <h3 id="choose-game">CHOOSE NAME</h3>
     <div id="game_name">
-      <text-box id="test" styletype="black" hint="ENTER THE GAME NAME"></text-box>
+      <text-box id="game_name" styletype="black"></text-box>
     </div>
 
     <div id="create_game">
-      <apirush-button id="create-game-button" label="START GAME" styletype="transparent, xlarge"></apirush-button>
+      <apirush-button id="create-game-button" styletype="transparent"></apirush-button>
     </div>
   </apirush-container>
   <apirush-popup></apirush-popup>
-
 </div>

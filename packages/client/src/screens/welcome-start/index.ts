@@ -5,8 +5,7 @@ import "../../components/textBox";
 import { MasterOfDisaster } from "../../masterOfDisaster";
 import { router } from "../../router";
 import "../../components/PopUp";
-import {PopUp} from "../../components/PopUp";
-
+import { PopUp } from "../../components/PopUp";
 
 class WelcomeScreen extends AbstractScreen {
   _joinGameButton: Button;
@@ -40,6 +39,13 @@ class WelcomeScreen extends AbstractScreen {
       _showAllTasks.classList.remove("hidden");
       _showAllTasks.onclick = this.showAllTasks;
     }
+
+    this._joinGameButton.setLabel(this._mod.getLanguage().welcome_start.enterGame);
+    this._createGameButton.setLabel(this._mod.getLanguage().welcome_start.createGame);
+    this._showStats_button.setLabel(this._mod.getLanguage().welcome_start.showStats);
+    this._userName_input.setHint(this._mod.getLanguage().welcome_start.userName);
+    this.shadowRoot.querySelector("#title").innerHTML = this._mod.getLanguage().welcome_start.title;
+    this.shadowRoot.querySelector("#subtitle").innerHTML = this._mod.getLanguage().welcome_start.subTitle;
   }
   showAllTasks() {
     router("all-tasks");
@@ -55,7 +61,7 @@ class WelcomeScreen extends AbstractScreen {
       if (userName) {
         await this._mod.userWantsToJoin(userName);
       } else {
-        this._modal.openModal("warning", "You didn't include a username, we don't want to hide the name of the winner.");
+        this._modal.openModal("warning", this._mod.getLanguage().welcome_start.noUserName);
       }
     } catch (e) {
       console.error("joinGame", e);
@@ -68,8 +74,7 @@ class WelcomeScreen extends AbstractScreen {
       if (userName) {
         await this._mod.userWantsToCreate(userName);
       } else {
-        this._modal.openModal("warning", "You didn't include a username, we don't want to hide the name of the winner.");
-
+        this._modal.openModal("warning", this._mod.getLanguage().welcome_start.noUserName);
       }
     } catch (e) {
       console.error(e);
