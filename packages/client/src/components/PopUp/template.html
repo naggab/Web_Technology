@@ -1,7 +1,7 @@
 <style>
-  *{
-   padding: 0;
-    margin:0;
+  * {
+    padding: 0;
+    margin: 0;
   }
   .modal {
     display: none;
@@ -24,21 +24,21 @@
     min-height: 20%;
     border-radius: 30px;
     animation-name: animatetop;
-    animation-duration: 0.4s
+    animation-duration: 0.4s;
   }
 
-  .header{
+  .header {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     border-bottom: 1px solid black;
   }
-  .title{
+  .title {
     font-size: 50px;
     font-weight: bold;
     margin: 10px;
   }
-  .text{
+  .text {
     margin-top: 30px;
     padding: 10px;
     font-size: 25px;
@@ -58,31 +58,33 @@
     text-decoration: none;
     cursor: pointer;
   }
-  #warning>.modal-content>.header>.title{
+  #warning > .modal-content > .header > .title {
     color: darkorange;
   }
-  #error>.modal-content>.header>.title{
+  #error > .modal-content > .header > .title {
     color: red;
   }
-  #debug>.modal-content>.header>.title{
+  #debug > .modal-content > .header > .title {
     color: #0038ff;
   }
 
-
   @keyframes animatetop {
-    from {top: -300px; opacity: 0}
-    to {top: 0; opacity: 1}
+    from {
+      top: -300px;
+      opacity: 0;
+    }
+    to {
+      top: 0;
+      opacity: 1;
+    }
   }
 </style>
 <div class="modal">
   <div class="modal-content">
-    <div class = "header">
+    <div class="header">
       <p class="title"></p>
       <span class="close">&times</span>
-
     </div>
-    <p class = "text">
-
-    </p>
+    <p class="text"></p>
   </div>
 </div>

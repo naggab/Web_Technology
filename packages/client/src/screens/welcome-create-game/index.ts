@@ -5,14 +5,13 @@ import { MasterOfDisaster } from "../../masterOfDisaster";
 
 import { router } from "../../router";
 import "../../components/PopUp";
-import {PopUp} from "../../components/PopUp";
+import { PopUp } from "../../components/PopUp";
 
 class WelcomeCreateGame extends AbstractScreen {
   _gameName_input: any;
   _createGameButton: Button;
   _mod: MasterOfDisaster;
   _modal: PopUp;
-
 
   constructor() {
     super();
@@ -26,6 +25,10 @@ class WelcomeCreateGame extends AbstractScreen {
     this._createGameButton.onclick = this.createGame.bind(this);
     this._modal = this.shadowRoot.querySelector("apirush-popup");
 
+    this.shadowRoot.querySelector("#title").innerHTML = this._mod.getLanguage().welcome_create.title;
+    this.shadowRoot.querySelector("#choose-game").innerHTML = this._mod.getLanguage().welcome_create.gameName;
+    this._gameName_input.setHint(this._mod.getLanguage().welcome_create.gameNameHint);
+    this._createGameButton.setLabel(this._mod.getLanguage().welcome_create.createGame);
   }
 
   async createGame() {
@@ -33,7 +36,7 @@ class WelcomeCreateGame extends AbstractScreen {
     if (gameName) {
       await this._mod.createGame(gameName);
     } else {
-      this._modal.openModal("warning", "You have not entered a game name.");
+      this._modal.openModal("warning", this._mod.getLanguage().welcome_create.noGameName);
     }
   }
 
