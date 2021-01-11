@@ -86,7 +86,7 @@ export default class FillShapeTask extends Task {
         this.tupleResult = this.shape.checkFillStatus(); //returns [bool,message]
         this.infoElement.innerHTML = this.tupleResult[1];
       } else {
-        this.finish(this.tupleResult[0]);
+        this.finish(this.tupleResult[0],1);
       }
       this.infoElement.style.color = this.tupleResult[0] ? "green" : "red";
       this.checkButton.setAttribute("label", "Back");

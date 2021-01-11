@@ -42,9 +42,9 @@ export class Task extends HTMLElement {
     }
   }
 
-  protected finish(success: boolean) {
+  protected finish(success: boolean, timeFactor: number) {
     this.endTime = new Date().getTime();
-    const diff = this.endTime - this.startTime; //milliseconds
+    const diff = (this.endTime - this.startTime)*timeFactor; //milliseconds
     this.opts.finishCb(diff, success);
   }
 }
