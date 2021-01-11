@@ -9,44 +9,60 @@ export default class MorseCodeTask extends Task {
   controlButton: Button;
   canvasElement: HTMLCanvasElement;
   info: HTMLElement;
+  audioElement: HTMLAudioElement; 
   ctx: CanvasRenderingContext2D;
   ctxAnimtated: CanvasRenderingContext2D;
   curPixelX: number;
   offsetX: number;
+  offsetY: number;
   morseGapPx: number;
   morseLinePx: number;
   morseDotPx: number;
- 
+   
   async onMounted() {
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = viewHtml;
     this.controlButton = this.shadowRoot.getElementById("control-button") as Button;
     this.canvasElement = this.shadowRoot.getElementById("myCanvas") as HTMLCanvasElement;
     this.info = this.shadowRoot.getElementById("info") as HTMLElement;
+    this.audioElement = this.shadowRoot.querySelector("audio") as HTMLAudioElement;
+    const audioElement = this.audioElement;
+    //audio
+    var audioContext = new AudioContext();
+    var o = audioContext.createOscillator();
+    o.type = "sine";
+    o.frequency.value = 0;
+    o.connect(audioContext.destination);
+
     const infoHeading = this.info;
     this.ctx = this.canvasElement.getContext("2d");
     this.ctxAnimtated = this.canvasElement.getContext("2d");
     const canvasElement = this.canvasElement;
     const ctx = this.ctx;
     const ctxAnimtated = this.ctxAnimtated;
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 10;
     this.curPixelX = 0;
     var mouseDown:boolean=false;
-    this.offsetX = 100;
-    const offsetX = this.offsetX;
     this.morseGapPx = 20;
     const morseGapPx = this.morseGapPx;
     this.morseLinePx = 40;
     this.morseDotPx = 15;
+    this.offsetY = 130;
+   
     
-
-    var pixelIndex = 0;
     const pattern:Array<Array<number>> = [[0,0,0,1,1,1,0,0,0],[0,1,1,0,0,0,1,0,1,0],[0,0,0,0,0,0]]; //0=Space 1=SOS, 2=ABC, 3=HI
     const patternDescr:Array<string> = ["SOS","ABC","HI"]; //0=Space 1=SOS, 2=ABC, 3=HI
     var index = MasterOfDisaster.getInstance().getGameSeed() % pattern.length;
 
+   
     this.info.innerHTML = "Morse:"+" '"+patternDescr[index]+"'";
-    var checkArray = this.drawCode(pattern[index], this.offsetX, 130,this.morseLinePx, this.morseDotPx, this.morseGapPx);
+    var binaryArray = this.getBinaryPattern(pattern[index], this.morseLinePx, this.morseDotPx, this.morseGapPx);
+    this.offsetX = this.canvasElement.width/2-binaryArray.length/2;
+    const offsetX = this.offsetX;
+    var pixelIndex = Math.trunc(this.offsetX*0.5); //start with the cursor between the code and the left border
+
+
+    this.drawCode(pattern[index], this.offsetX, this.offsetY, this.morseLinePx, this.morseDotPx, this.morseGapPx);    
     var morseArray = [];
     var firstClick = true;
     var animitionFinish = false;
@@ -55,32 +71,38 @@ export default class MorseCodeTask extends Task {
     const calcPrec = this.calcPrecision;
    
     function moveRect(){
-        ctxAnimtated.clearRect(pixelIndex-1,140,2,20);
-        ctxAnimtated.fillRect(pixelIndex,140,2,20);
+        ctxAnimtated.clearRect(pixelIndex-1,160,2,30);
+        ctxAnimtated.fillRect(pixelIndex,160,2,30);
         
         var x = requestAnimationFrame(moveRect) // call requestAnimationFrame again to animate next frame
-        if(mouseDown && pixelIndex> offsetX)
+        if(mouseDown && pixelIndex > offsetX && pixelIndex <= offsetX+binaryArray.length)
         { 
             ctx.beginPath();
-            ctx.moveTo(pixelIndex-1, 150);
-            ctx.lineTo(pixelIndex, 150);
+            ctx.moveTo(pixelIndex-1, 175);
+            ctx.lineTo(pixelIndex, 175);
             ctx.stroke(); 
             ctx.closePath();
             morseArray.push(1);
-            
+            o.frequency.value = 600;
         }
-        else if(pixelIndex> offsetX){
+        else if(pixelIndex > offsetX && pixelIndex <= offsetX+binaryArray.length){
+                
                 morseArray.push(0);
+                o.frequency.value = 0;
             }
-        
+        else{
+            o.frequency.value = 0;
+        }
         pixelIndex+=1
-        if(pixelIndex>offsetX+checkArray.length){
+        if(pixelIndex>offsetX*1.5+binaryArray.length){
             cancelAnimationFrame(x)
             animitionFinish=true;
-            tupleResult = calcPrec(morseArray,checkArray);
+            tupleResult = calcPrec(morseArray,binaryArray);
             infoHeading.innerHTML = tupleResult[1];
             infoHeading.style.color = tupleResult[0] ? "green" : "red";
-
+            o.stop();
+            audioElement.pause();
+           
         }  
     }
     this.canvasElement.addEventListener("mousedown", (e) => {
@@ -95,10 +117,12 @@ export default class MorseCodeTask extends Task {
 
       this.controlButton.addEventListener("click", (e) => {
         if(firstClick){
+            audioElement.play();
             requestAnimationFrame(moveRect);
             this.controlButton.setAttribute("label","Back");
             infoHeading.innerHTML = "Playing...";
             firstClick=false;
+            o.start();
         }
         else if(!firstClick && animitionFinish){
             this.finish(tupleResult[0],(1+(1-(tupleResult[2]/100))));
@@ -109,29 +133,30 @@ export default class MorseCodeTask extends Task {
 
   onUnmounting(): void | Promise<void> {}
 
-
-drawCode(pattern:Array<number>, offsetX: number, offsetY: number, linePx:number, dotPx ,gapPx: number): Array<number>{
-    var checkPattern:Array<number> = [];
+drawCode(pattern:Array<number>, offsetX: number, offsetY: number, linePx:number, dotPx ,gapPx: number){
     const gapConst = gapPx
     gapPx=0
-    //check pattern [0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,...] //1...pixel filled, 0...not 
-    //add gap before first signal:
-    //range(gapConst).forEach(x => checkPattern.push(0))
-    //add line, dot, gap
-    
     pattern = pattern.map(x => x==1 ? x=linePx: x=dotPx) //encode pattern to real pixel
     for(var element of pattern){
         this.stroke(element, gapPx+offsetX, offsetY);
         gapPx+=(gapConst+element+offsetX);
         offsetX=0; //only first time
+    }
+}
+getBinaryPattern(pattern:Array<number>, linePx:number, dotPx ,gapPx: number): Array<number>{
+    var checkPattern:Array<number> = [];
+    const gapConst = gapPx
+    //check pattern [0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,...] //1...pixel filled, 0...not 
+    //add gap before first signal:
+    //range(gapConst).forEach(x => checkPattern.push(0))
+    //add line, dot, gap
+    pattern = pattern.map(x => x==1 ? x=linePx: x=dotPx) //encode pattern to real pixel
+    for(var element of pattern){
         range(element).forEach(x => checkPattern.push(1))
         range(gapConst).forEach(x => checkPattern.push(0))
-        console.log("pattern",checkPattern)
     }
     range(gapConst).forEach(x => checkPattern.pop())
-    
     return checkPattern;
-   
 }
 stroke(lengthPx:number, offsetX:number, offsetY:number)
 {
@@ -187,8 +212,22 @@ calcPrecision(morseArray: Array<number>, checkArray: Array<number>):[boolean,str
     
     return message;
 }
-
-
+/*
+addLabel(ctx:CanvasRenderingContext2D, label: string, morsePixel: number)
+{
+    ctx.font = "30px Arial";
+    
+    
+    var labels:Array<any> = label.split('');
+    var segment = morsePixel / labels.length;
+    var offset=segment/2;
+    console.log(labels.length ,morsePixel,segment)
+    for(var elem of labels){
+        ctx.fillText(elem, this.canvasElement.width/2-morsePixel/2 + offset, this.offsetY-30); 
+        segment*=2;
+    }
+    
+}*/
 }
 
 customElements.define("morse-code-task", MorseCodeTask);
