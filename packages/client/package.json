@@ -6,13 +6,13 @@
     "@apirush/common": "^0.0.0",
     "@tensorflow-models/handpose": "^0.0.6",
     "@tensorflow/tfjs": "^2.8.3",
+    "@types/resize-observer-browser": "^0.1.5",
     "copy-webpack-plugin": "^7.0.0",
     "file-loader": "^6.2.0",
     "fingerpose": "^0.0.2",
     "image-webpack-loader": "^7.0.1",
     "konva": "^7.1.4",
     "lodash": "^4.17.20",
-    "resize-observer": "^1.0.0",
     "url-loader": "^4.1.1"
   },
   "devDependencies": {

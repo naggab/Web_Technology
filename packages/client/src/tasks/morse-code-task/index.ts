@@ -10,6 +10,7 @@ export default class MorseCodeTask extends Task {
   canvasElement: HTMLCanvasElement;
   info: HTMLElement;
   audioElement: HTMLAudioElement; 
+  panel: HTMLDivElement;
   ctx: CanvasRenderingContext2D;
   ctxAnimtated: CanvasRenderingContext2D;
   curPixelX: number;
@@ -23,10 +24,13 @@ export default class MorseCodeTask extends Task {
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = viewHtml;
     this.controlButton = this.shadowRoot.getElementById("control-button") as Button;
+    const controlButton = this.controlButton;
     this.canvasElement = this.shadowRoot.getElementById("myCanvas") as HTMLCanvasElement;
     this.info = this.shadowRoot.getElementById("info") as HTMLElement;
     this.audioElement = this.shadowRoot.querySelector("audio") as HTMLAudioElement;
     const audioElement = this.audioElement;
+    this.panel = this.shadowRoot.getElementById("panel") as HTMLDivElement;
+    const panel = this.panel;
     //audio
     var audioContext = new AudioContext();
     var o = audioContext.createOscillator();
@@ -74,7 +78,7 @@ export default class MorseCodeTask extends Task {
         ctxAnimtated.clearRect(pixelIndex-1,160,2,30);
         ctxAnimtated.fillRect(pixelIndex,160,2,30);
         
-        var x = requestAnimationFrame(moveRect) // call requestAnimationFrame again to animate next frame
+        var animation = requestAnimationFrame(moveRect) // call requestAnimationFrame again to animate next frame
         if(mouseDown && pixelIndex > offsetX && pixelIndex <= offsetX+binaryArray.length)
         { 
             ctx.beginPath();
@@ -95,34 +99,38 @@ export default class MorseCodeTask extends Task {
         }
         pixelIndex+=1
         if(pixelIndex>offsetX*1.5+binaryArray.length){
-            cancelAnimationFrame(x)
+            cancelAnimationFrame(animation)
             animitionFinish=true;
             tupleResult = calcPrec(morseArray,binaryArray);
             infoHeading.innerHTML = tupleResult[1];
             infoHeading.style.color = tupleResult[0] ? "green" : "red";
             o.stop();
             audioElement.pause();
+            controlButton.style.visibility = "visible";
            
         }  
     }
-    this.canvasElement.addEventListener("mousedown", (e) => {
+    panel.addEventListener("mousedown", (e) => {
         console.log("mousedown");
         mouseDown=true;
         
       });
-      this.canvasElement.addEventListener("mouseup", (e) => {
+    panel.addEventListener("mouseup", (e) => {
         console.log("mouseup");
         mouseDown = false;
       }); 
 
-      this.controlButton.addEventListener("click", (e) => {
+      controlButton.addEventListener("click", (e) => {
         if(firstClick){
             audioElement.play();
             requestAnimationFrame(moveRect);
-            this.controlButton.setAttribute("label","Back");
+            controlButton.setAttribute("label","Back");
             infoHeading.innerHTML = "Playing...";
             firstClick=false;
             o.start();
+            controlButton.style.visibility = "hidden";
+            //var updateData = setInterval(function, 10);
+            //clearInterval(updateData);
         }
         else if(!firstClick && animitionFinish){
             this.finish(tupleResult[0],(1+(1-(tupleResult[2]/100))));

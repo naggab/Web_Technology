@@ -1,10 +1,7 @@
 import viewHtml from "./view.html";
 import { Task } from "../../task";
 import { Button } from "../../components/button";
-import { ResizeObserver } from "resize-observer";
 import { MasterOfDisaster } from "../../masterOfDisaster";
-import { first } from "lodash";
-
 
 export default class ResizeScreenTask extends Task {
   backButton: Button;
@@ -31,7 +28,8 @@ export default class ResizeScreenTask extends Task {
     
     var firstButtonClick: boolean = true;
     var taskSuccess: boolean = true;
-
+    
+    
     const resizeObserver = new ResizeObserver(entries => {
         this.currHeight =  Math.trunc(entries[0].contentRect.height);
         this.currWidth =  Math.trunc(entries[0].contentRect.width);
