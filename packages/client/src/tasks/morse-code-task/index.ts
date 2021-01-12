@@ -122,8 +122,9 @@ export default class MorseCodeTask extends Task {
         o.stop();
         audioElement.pause();
         controlButton.style.display = "block";
-        clearInterval(updateData);
+        return;
       }
+      setTimeout(shiftIndex, 16);
     }
     panel.addEventListener("mousedown", (e) => {
       console.log("mousedown");
@@ -144,7 +145,7 @@ export default class MorseCodeTask extends Task {
         controlButton.style.display = "none";
         controlButton.setAttribute("label", "Back");
         var i = 0;
-        updateData = setInterval(shiftIndex, 5);
+        shiftIndex();
       } else if (!firstClick && animitionFinish) {
         this.finish(tupleResult[0], 1 + (1 - tupleResult[2] / 100));
       }
