@@ -87,7 +87,15 @@ export default class MorseCodeTask extends Task {
 
       animation = requestAnimationFrame(updateRectPos); // call requestAnimationFrame again to animate next frame
     }
+
+    let debugTimer: number = 0;
+
     function shiftIndex() {
+      if (debugTimer) {
+        let diff = debugTimer - performance.now();
+        console.log("ms since last shift", Math.abs(diff), "current pixel:", pixelIndex);
+      }
+      debugTimer = performance.now();
       //sometimes frame update not accurate, some cursor visible, therefore delete extra when shifting, solved the case
       ctxAnimtated.clearRect(pixelIndex - 1, 160, 2, 30);
       if (mouseDown && pixelIndex > offsetX && pixelIndex <= offsetX + binaryArray.length) {
