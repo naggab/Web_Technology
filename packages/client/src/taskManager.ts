@@ -6,12 +6,14 @@ import DragAndDropTask from "./tasks/drag-and-drop-task";
 import FillShapeTask from "./tasks/fill-shape-task";
 import GestureRecognitionTask from "./tasks/gesture-recognition-task";
 import MorseCodeTask from "./tasks/morse-code-task";
+import ResizeScreenTask from "./tasks/resize-screen-task";
 
 const TASK_LIST = {
   "drag-and-drop-task": DragAndDropTask,
   "fill-shape-task": FillShapeTask,
   "gesture-recognition-task": GestureRecognitionTask,
   "morse-code-task": MorseCodeTask,
+  "resize-screen-task": ResizeScreenTask,
 } as const;
 
 export type TaskIdentifier = keyof typeof TASK_LIST;
