@@ -72,13 +72,25 @@ export default class MorseCodeTask extends Task {
     var animitionFinish = false;
     var tupleResult:[boolean,string,number];
 
+    //variable to set interval
+    var updateData:any;
+
+    //animation:
+    var animation:any;
+
     const calcPrec = this.calcPrecision;
    
-    function moveRect(){
+    function updateRectPos(){
         ctxAnimtated.clearRect(pixelIndex-1,160,2,30);
         ctxAnimtated.fillRect(pixelIndex,160,2,30);
         
-        var animation = requestAnimationFrame(moveRect) // call requestAnimationFrame again to animate next frame
+        animation = requestAnimationFrame(updateRectPos) // call requestAnimationFrame again to animate next frame
+   
+    }
+    function shiftIndex()
+    {
+        //sometimes frame update not accurate, some cursor visible, therefore delete extra when shifting, solved the case
+        ctxAnimtated.clearRect(pixelIndex-1,160,2,30);
         if(mouseDown && pixelIndex > offsetX && pixelIndex <= offsetX+binaryArray.length)
         { 
             ctx.beginPath();
@@ -106,7 +118,8 @@ export default class MorseCodeTask extends Task {
             infoHeading.style.color = tupleResult[0] ? "green" : "red";
             o.stop();
             audioElement.pause();
-            controlButton.style.visibility = "visible";
+            controlButton.style.display = "block";
+            clearInterval(updateData);
            
         }  
     }
@@ -123,14 +136,15 @@ export default class MorseCodeTask extends Task {
       controlButton.addEventListener("click", (e) => {
         if(firstClick){
             audioElement.play();
-            requestAnimationFrame(moveRect);
-            controlButton.setAttribute("label","Back");
-            infoHeading.innerHTML = "Playing...";
+            requestAnimationFrame(updateRectPos);
             firstClick=false;
             o.start();
-            controlButton.style.visibility = "hidden";
-            //var updateData = setInterval(function, 10);
-            //clearInterval(updateData);
+        
+            controlButton.style.display = "none"
+            controlButton.setAttribute("label","Back");
+            var i=0
+            updateData = setInterval(shiftIndex, 5);
+            
         }
         else if(!firstClick && animitionFinish){
             this.finish(tupleResult[0],(1+(1-(tupleResult[2]/100))));
@@ -143,7 +157,7 @@ export default class MorseCodeTask extends Task {
 
 drawCode(pattern:Array<number>, offsetX: number, offsetY: number, linePx:number, dotPx ,gapPx: number){
     const gapConst = gapPx
-    gapPx=0
+    gapPx = 0;
     pattern = pattern.map(x => x==1 ? x=linePx: x=dotPx) //encode pattern to real pixel
     for(var element of pattern){
         this.stroke(element, gapPx+offsetX, offsetY);
