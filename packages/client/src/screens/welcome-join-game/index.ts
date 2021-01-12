@@ -13,7 +13,7 @@ class WelcomeJoinGame extends AbstractScreen {
     this._mod = MasterOfDisaster.getInstance();
     const title = this.shadowRoot.querySelector("#title");
 
-    title.innerHTML = this._mod.getLanguage().welcome_join.title;
+    title.innerHTML = this._mod.getString().welcome_join.title;
   }
 
   async getHtml() {

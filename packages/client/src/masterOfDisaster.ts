@@ -1,14 +1,13 @@
-import { GameDetails, PlayerInGameI, GameIdType } from "@apirush/common";
-import { Player } from "./screens/in-game/game-playground";
+import { GameDetails, GameIdType, PlayerInGameI } from "@apirush/common";
 import { ServerSession } from "./serverSession";
 import { CommandOp, Event, GameEventOp } from "@apirush/common/src";
 import { router } from "./router";
 import { TaskIdentifier, TaskManger } from "./taskManager";
-import { MapStorage } from "@apirush/common/src/maps";
 import { StatsStorage } from "./statsStorage";
-import has = Reflect.has;
 import { TaskOpener } from "./components/taskOpener";
-import { english, german } from "../language";
+import { english, german } from "./language";
+import { PopUp } from "./components/PopUp";
+
 export type ClientState =
   | "loading"
   | "error"
@@ -20,6 +19,7 @@ export type ClientState =
   | "in-game"
   | "post-game"
   | "all-tasks";
+export type DarkLight = "Dark" | "Light";
 export type Languages = "English" | "German";
 export class MasterOfDisaster {
   private watchingForGameStart: boolean = false;
@@ -33,6 +33,7 @@ export class MasterOfDisaster {
   readonly serverSession: ServerSession;
   readonly statsStorage: StatsStorage = new StatsStorage();
   private language: Languages = "English";
+  private mode: DarkLight = "Dark";
   readonly debugMode: boolean = true;
 
   constructor(sess: ServerSession) {
@@ -41,9 +42,11 @@ export class MasterOfDisaster {
     this.onGameAborted = this.onGameAborted.bind(this);
     this.onGameDidFinish = this.onGameDidFinish.bind(this);
     TaskManger.getTaskIds().forEach((taskId) => this.taskState.set(taskId, false));
+
+    this.language = localStorage.getItem("language") as Languages;
   }
 
-  public getLanguage() {
+  public getString() {
     switch (this.language) {
       case "English":
         return english;
@@ -54,11 +57,16 @@ export class MasterOfDisaster {
         return english;
     }
   }
-  public setLanguage() {
-    if (this.language == "English") {
-      this.language = "German";
-    } else {
-      this.language = "English";
+  public getLanguage() {
+    return this.language;
+  }
+  public setLanguage(language: Languages) {
+    if (language != (localStorage.getItem("language") as Languages)) {
+      this.language = language;
+      localStorage.setItem("language", this.language);
+      const popup = new PopUp();
+      document.body.appendChild(popup);
+      popup.openModal("info", this.getString().general.reloadPage);
     }
   }
 

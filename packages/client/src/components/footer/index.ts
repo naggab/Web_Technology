@@ -1,5 +1,5 @@
 import templateHTML from "./template.html";
-import { MasterOfDisaster } from "../../masterOfDisaster";
+import { Languages, MasterOfDisaster } from "../../masterOfDisaster";
 
 type footerType = "dark" | "light";
 
@@ -16,16 +16,11 @@ export class Footer extends HTMLElement {
 
     this._footer = this._shadowRoot.querySelector("#footer");
     this._changeLanguage = this._shadowRoot.querySelector("#change-language");
-    this._changeLanguage.onclick = this.switchLanguage();
+    this._changeLanguage.onclick = this.changeLanguage.bind(this, false);
   }
 
   static get observedAttributes() {
     return ["styletype"];
-  }
-  private switchLanguage() {
-    if (this._mod) {
-      this._mod.setLanguage();
-    }
   }
 
   get styletype(): footerType[] {
@@ -43,11 +38,17 @@ export class Footer extends HTMLElement {
         break;
     }
   }
-  public changeLanguage() {
+  public changeLanguage(firstLaunch: boolean) {
     this._mod = MasterOfDisaster.getInstance();
-    this.switchLanguage();
+    if (!firstLaunch) {
+      if (this._mod.getLanguage() == "English") {
+        this._mod.setLanguage("German");
+      } else {
+        this._mod.setLanguage("English");
+      }
+    }
 
-    this._changeLanguage.innerHTML = this._mod.getLanguage().general.changeLanguage;
+    this._changeLanguage.innerHTML = this._mod.getString().general.changeLanguage;
   }
   connectedCallback() {
     this._footer.classList.add(...this.styletype);
