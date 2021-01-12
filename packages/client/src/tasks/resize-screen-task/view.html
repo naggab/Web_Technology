@@ -27,10 +27,55 @@
       text-align: center;
       margin: 10px;
       font-size: 2vw;
+      position: relative;
+    }
+    #top-left {
+      width: 30px;
+      height: 30px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      border: ridge;
+    }
+    #top-right {
+      width: 30px;
+      height: 30px;
+      position: absolute;
+      top: 0;
+      right: 0;
+      border: ridge;
+
+    }
+    #bottom-left {
+      width: 30px;
+      height: 30px;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      border: ridge;
+
+    }
+    #bottom-right {
+      width: 30px;
+      height: 30px;
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      border: ridge;
+
     }
   </style>
   <div class="root">
-    <div id="resize-zone">Drag and Drop the downloaded txt file ...</div>
+   
+    <div id="resize-zone">
+      <div id="text">hello</div>
+      <div id="top-right"></div>
+      <div id="bottom-left"></div>
+      <div id="bottom-right"></div>
+      <div id="top-left"> </div>
+
+    </div>
+      
     <apirush-button id="back-button" label="Check" styletype="white"></apirush-button>
   </div>
 

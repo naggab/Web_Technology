@@ -1,47 +1,45 @@
 <style>
-    .root {
-      min-height: 200px;
-     
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 10px;
-    }
-    span {
-      color: gray;
-    }
-    .button {
-      justify-content: center;
-      align-items: center;
-      display: flex;
-      padding: 0px;
-    }
-    h1{
+  .root {
+    min-height: 200px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+  }
+  span {
+    color: gray;
+  }
+  .button {
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    padding: 0px;
+  }
+  h1 {
     padding: 0px;
     margin: 0px;
     justify-content: center;
-      align-items: center;
-      display: flex;
-    }
-    .elementContainer{
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-    
-  </style>
-  <div class="root" id="panel">
-    <div class="elementContainer">
-      <canvas id="myCanvas" width="800" height="400" style="border: 4px solid #000000"></canvas>
-  <div>
-    <h1 id="info" >Click start</h1>
-    <div class="button">
-      <apirush-button id="control-button" label="Start" styletype="white"></apirush-button>
+    align-items: center;
+    display: flex;
+  }
+  .elementContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+</style>
+<div class="root" id="panel">
+  <div class="elementContainer">
+    <canvas id="myCanvas" width="800" height="400" style="border: 4px solid #000000"></canvas>
+    <div>
+      <h1 id="info">Click start</h1>
+      <div class="button">
+        <apirush-button id="control-button" label="Start" styletype="white"></apirush-button>
+      </div>
+      <audio src="/assets/whiteNoise.wav"></audio>
     </div>
-    <audio src="/assets/whiteNoise.wav"></audio>
   </div>
 </div>
-  </div>
-  
