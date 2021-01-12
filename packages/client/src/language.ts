@@ -11,7 +11,7 @@ export const english = {
   welcome_start: {
     title: "WELCOME TO APIRUSH",
     subTitle: "THE BEST GAME EVER",
-    userName: "ENTER YOUR USERNAME",
+    userName: "Define your username",
 
     enterGame: "ENTER EXISTING GAME",
     createGame: "CREATE NEW GAME",
