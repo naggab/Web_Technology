@@ -15,8 +15,10 @@ const cord = (x: number, y: number) => ({ x, y });
 
 /**
  * Use this to globally enable / disable all console outputs.
+ * Pulled from MOD on startup.
  */
-var DEBUG_MODE: boolean = false;
+var DEBUG_MODE: boolean = true;
+var ANIMATIONS_ENABLED: boolean = true;
 function debugPrint(x: any) {
   if (DEBUG_MODE) {
     console.log(x);
@@ -72,26 +74,8 @@ var gridSize: number = 20; // simple default value, overwritten later
 var gridLength: number = 50; // this defines the actual gridsize based on div width
 var gridSizeHeight: number = 10;
 var gridRows: number = 30;
-var player: Player;
 
 var modInstance: MasterOfDisaster;
-
-/**
- * Define the base layer & its grid.
- */
-var baseLayer: Konva.Layer;
-var grid: GridObject[][];
-var tasks: Task[];
-
-// Layer for all other players
-var foreignPlayerLayer: Konva.Layer;
-
-// Keep a reference to all foreign players
-var foreignPlayers: Player[];
-
-var sprites: HTMLImageElement[];
-var questionMarkSprite: HTMLImageElement;
-var questionMarkDone: HTMLImageElement;
 
 /**
  * Defines the player and stores the associated layer we used to draw him.
@@ -113,6 +97,8 @@ export class Player {
   radius: number;
   playerID: number;
   bibNumber: number;
+  playground: GamePlayground;
+  playerName: string;
   public playerMovedCB: IPlayerMovedCB;
   public onTaskOpenCB: IOnTaskOpenCB;
 
@@ -122,6 +108,7 @@ export class Player {
     col: string,
     layer: Konva.Layer,
     stage: Konva.Stage,
+    playground: GamePlayground,
     playerID?: number,
     bibNumber?: number,
   ) {
@@ -131,6 +118,8 @@ export class Player {
     this.stage = stage;
     this.col = col;
     this.radius = (gridSize / 2) * 3;
+    this.playground = playground;
+    this.playerName = "";
 
     if (playerID !== undefined) this.playerID = playerID;
     else this.playerID = -1;
@@ -159,13 +148,13 @@ export class Player {
       name: this.playerID.toString(),
     });
     */
-    var spriteNbr = (this.bibNumber - 1) % sprites.length;
+    var spriteNbr = (this.bibNumber - 1) % this.playground.sprites.length;
     this.model = new Konva.Sprite({
       height: 64,
       width: 64,
       x: (this.x - 1) * gridSize,
       y: (this.y - 1) * gridSize,
-      image: sprites[spriteNbr],
+      image: this.playground.sprites[spriteNbr],
       animation: "idleRight",
       scaleX: (gridSize / 64.0) * 3,
       scaleY: (gridSize / 64.0) * 3,
@@ -185,6 +174,7 @@ export class Player {
       frameRate: 2,
       frameIndex: 0,
       name: this.playerID.toString(),
+      listening: false,
     });
 
     this.tooltip = new Konva.Text({
@@ -198,6 +188,7 @@ export class Player {
       alpha: 0.75,
       visible: true,
       name: this.playerID.toString(),
+      listening: false,
     });
     this.tooltip.x(this.tooltip.x() + gridSize / 2 - this.tooltip.width() / 2);
     this.tooltip.y(this.tooltip.y() + gridSize / 2 - this.tooltip.height() / 2);
@@ -214,6 +205,7 @@ export class Player {
       strokeWidth: 4,
       stroke: this.col,
       name: this.playerID.toString(),
+      listening: false,
     });
 
     this.layer.add(this.model);
@@ -237,6 +229,9 @@ export class Player {
   refreshTooltip(text?: string, x?: boolean, y?: boolean) {
     if (text !== undefined) {
       this.tooltip.text(text);
+      this.playerName = text;
+    } else if (this.playerName != "") {
+      this.tooltip.text(this.playerName);
     } else if (this.playerID != -1) {
       this.tooltip.text("P" + this.bibNumber);
     } else {
@@ -262,7 +257,7 @@ export class Player {
     var radiusIncr: number = (this.radius - gridSize / 2) / gridSize;
     for (let i = -radiusIncr; i <= radiusIncr; i++) {
       for (let j = -radiusIncr; j <= radiusIncr; j++) {
-        var newPos = grid[newPosY + i][newPosX + j];
+        var newPos = this.playground.grid[newPosY + i][newPosX + j];
         if (newPos !== undefined) {
           if (newPos.type == ElementType.Wall) {
             col = CollisionType.Wall;
@@ -276,7 +271,7 @@ export class Player {
                 modInstance.openTask(taskPos.task).then((completed) => {
                   if (completed) {
                     // Get new grid object in case we had to redraw while doing the task
-                    taskPos = grid[ty][tx];
+                    taskPos = this.playground.grid[ty][tx];
                     var tpx = taskPos.shape.x();
                     var tpy = taskPos.shape.y();
                     taskPos.shape.remove();
@@ -284,14 +279,14 @@ export class Player {
                       taskPos.shape = new Konva.Image({
                         x: tpx,
                         y: tpy,
-                        image: questionMarkDone,
+                        image: this.playground.questionMarkDone,
                         width: 16,
                         height: 16,
                         scaleX: gridSize / 16.0,
                         scaleY: gridSize / 16.0,
                       });
-                      baseLayer.add(taskPos.shape);
-                      baseLayer.batchDraw();
+                      this.playground.baseLayer.add(taskPos.shape);
+                      this.playground.baseLayer.batchDraw();
                     }
                   }
                 });
@@ -302,7 +297,6 @@ export class Player {
         }
       }
     }
-
     return col;
   }
 
@@ -315,33 +309,37 @@ export class Player {
    */
   moveUp(amount: number) {
     this.model.y((this.y - 1) * gridSize);
-    this.refreshTooltip(undefined, false, true);
-    var newPos = grid[this.y - amount][this.x];
+    if (ANIMATIONS_ENABLED) this.refreshTooltip(undefined, false, true);
+    var newPos = this.playground.grid[this.y - amount][this.x];
     var foundCollision = this.checkCollision(this.y - amount, this.x);
     if (newPos !== undefined && foundCollision != CollisionType.Wall) {
       if (newPos.type != ElementType.Wall) {
         this.y -= amount;
 
-        var iter = (gridSize / 7) * amount;
-        var stop = this.model.y() - amount * gridSize;
+        if (ANIMATIONS_ENABLED) {
+          var iter = (gridSize / 7) * amount;
+          var stop = this.model.y() - amount * gridSize;
 
-        var anim = new Konva.Animation(
-          function (frame) {
-            this.model.y(this.model.y() - iter);
-            this.tooltip.y(this.tooltip.y() - iter);
-            this.tooltipShape.y(this.tooltipShape.y() - iter);
-            if (amount > 0 && this.model.y() <= stop) {
-              anim.stop();
-              this.model.y(stop);
-            } else if (amount < 0 && this.model.y() >= stop) {
-              anim.stop();
-              this.model.y(stop);
-            }
-          }.bind(this),
-          this.layer,
-        );
-        anim.start();
-        /*this.model.y(this.model.y() - amount * gridSize); */
+          var anim = new Konva.Animation(
+            function (frame) {
+              this.model.y(this.model.y() - iter);
+              this.tooltip.y(this.tooltip.y() - iter);
+              this.tooltipShape.y(this.tooltipShape.y() - iter);
+              if (amount > 0 && this.model.y() <= stop) {
+                anim.stop();
+                this.model.y(stop);
+              } else if (amount < 0 && this.model.y() >= stop) {
+                anim.stop();
+                this.model.y(stop);
+              }
+            }.bind(this),
+            this.layer,
+          );
+          anim.start();
+        } else {
+          this.model.y(this.model.y() - amount * gridSize);
+          this.refreshTooltip(undefined, false, true);
+        }
 
         if (this.playerMovedCB !== undefined) {
           this.playerMovedCB(this.x, this.y);
@@ -352,34 +350,40 @@ export class Player {
 
   moveLeft(amount: number) {
     this.model.x((this.x - 1) * gridSize);
-    this.refreshTooltip(undefined, true, false);
-    this.model.animation("idleLeft");
-    var newPos = grid[this.y][this.x - amount];
+    if (ANIMATIONS_ENABLED) this.refreshTooltip(undefined, true, false);
+    if (amount < 0) this.model.animation("idleRight");
+    else this.model.animation("idleLeft");
+    var newPos = this.playground.grid[this.y][this.x - amount];
     var foundCollision = this.checkCollision(this.y, this.x - amount);
     if (newPos !== undefined && foundCollision != CollisionType.Wall) {
       if (newPos.type != ElementType.Wall) {
         //this.model.x(this.model.x() - amount * gridSize);
         this.x -= amount;
 
-        var iter = (gridSize / 7) * amount;
-        var stop = this.model.x() - amount * gridSize;
+        if (ANIMATIONS_ENABLED) {
+          var iter = (gridSize / 7) * amount;
+          var stop = this.model.x() - amount * gridSize;
 
-        var anim = new Konva.Animation(
-          function (frame) {
-            this.model.x(this.model.x() - iter);
-            this.tooltip.x(this.tooltip.x() - iter);
-            this.tooltipShape.x(this.tooltipShape.x() - iter);
-            if (amount > 0 && this.model.x() <= stop) {
-              anim.stop();
-              this.model.x(stop);
-            } else if (amount < 0 && this.model.x() >= stop) {
-              anim.stop();
-              this.model.x(stop);
-            }
-          }.bind(this),
-          this.layer,
-        );
-        anim.start();
+          var anim = new Konva.Animation(
+            function (frame) {
+              this.model.x(this.model.x() - iter);
+              this.tooltip.x(this.tooltip.x() - iter);
+              this.tooltipShape.x(this.tooltipShape.x() - iter);
+              if (amount > 0 && this.model.x() <= stop) {
+                anim.stop();
+                this.model.x(stop);
+              } else if (amount < 0 && this.model.x() >= stop) {
+                anim.stop();
+                this.model.x(stop);
+              }
+            }.bind(this),
+            this.layer,
+          );
+          anim.start();
+        } else {
+          this.model.x(this.model.x() - amount * gridSize);
+          this.refreshTooltip(undefined, true, false);
+        }
 
         if (this.playerMovedCB !== undefined) {
           this.playerMovedCB(this.x, this.y);
@@ -390,7 +394,6 @@ export class Player {
 
   moveRight(amount: number) {
     this.moveLeft(-amount);
-    this.model.animation("idleRight");
   }
 
   moveDown(amount: number) {
@@ -457,10 +460,29 @@ class GridObject {
 }
 
 export default class GamePlayground extends HTMLElement {
+  baseLayer: Konva.Layer;
   stage: Konva.Stage;
   map: MapI;
   timerFunction: any;
   keyMap: Map<number, boolean>;
+  grid: GridObject[][];
+  tasks: Task[];
+  player: Player;
+
+  popupLayer: Konva.Layer;
+  popupLayerText: Konva.Text;
+  popupLayerBackground: Konva.Rect;
+
+  // Layer for all other players
+  foreignPlayerLayer: Konva.Layer;
+
+  // Keep a reference to all foreign players
+  foreignPlayers: Player[];
+
+  sprites: HTMLImageElement[];
+  questionMarkSprite: HTMLImageElement;
+  questionMarkDone: HTMLImageElement;
+
   constructor() {
     super();
     this.keyMap = new Map();
@@ -483,11 +505,15 @@ export default class GamePlayground extends HTMLElement {
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = viewHtml;
 
+    modInstance = MasterOfDisaster.getInstance();
+    if (!modInstance) throw console.error("no mod instance");
+    DEBUG_MODE = modInstance.debugMode;
+
     window.addEventListener("resize", (event) => {
       debugPrint("RESIZING");
       this.stage.clear();
       this.setupGrid();
-      baseLayer.moveToBottom();
+      this.baseLayer.moveToBottom();
       this.getCurrentPlayer()
         .layer.getChildren()
         .toArray()
@@ -497,72 +523,34 @@ export default class GamePlayground extends HTMLElement {
 
       this.getCurrentPlayer().drawPlayer(true);
 
-      if (foreignPlayerLayer) {
-        foreignPlayerLayer.setZIndex(1);
-        foreignPlayerLayer
+      if (this.foreignPlayerLayer) {
+        this.foreignPlayerLayer.setZIndex(1);
+        this.foreignPlayerLayer
           .getChildren()
           .toArray()
           .forEach((child) => {
             child.remove();
           });
-        foreignPlayers.forEach((fp) => {
+        this.foreignPlayers.forEach((fp) => {
           fp.drawPlayer();
         });
-        this.stage.add(foreignPlayerLayer);
+        this.stage.add(this.foreignPlayerLayer);
       }
 
       this.stage.add(this.getCurrentPlayer().layer);
     });
-    //this.setupGrid();
-    sprites = [];
-    const imageObj = new Image();
-    imageObj.src = "/assets/img/sprite1.png";
-    await imageObj.decode();
-    sprites.push(imageObj);
 
-    const imageObj2 = new Image();
-    imageObj2.src = "/assets/img/sprite2.png";
-    await imageObj2.decode();
-    sprites.push(imageObj2);
-
-    const imageObj3 = new Image();
-    imageObj3.src = "/assets/img/sprite3.png";
-    await imageObj3.decode();
-    sprites.push(imageObj3);
-
-    const imageObj4 = new Image();
-    imageObj4.src = "/assets/img/sprite4.png";
-    await imageObj4.decode();
-    sprites.push(imageObj4);
-
-    questionMarkSprite = new Image();
-    questionMarkSprite.src = "/assets/img/questionMarkSprite.png";
-    await questionMarkSprite.decode();
-
-    questionMarkDone = new Image();
-    questionMarkDone.src = "/assets/img/questionMarkDone.png";
-
-    modInstance = MasterOfDisaster.getInstance();
-    if (!modInstance) throw console.error("no mod instance");
-
-    /* Uncomment for testing playground without lobby */
-    /*
-    await modInstance.userWantsToJoin("MyPlayer");
-    const listRes = await modInstance.serverSession.sendRPC(CommandOp.LIST_GAMES, {});
-    await modInstance.joinGame(listRes.games[0].id);
-    */
+    await this.loadSprites();
 
     this.setMap(MapStorage[modInstance.activeGame.map]);
 
-    //const joinRes = await modInstance.serverSession.sendRPC(CommandOp.JOIN_GAME, { id: listRes.games[0].id });
-
     const listPlayerRes = await modInstance.serverSession.sendRPC(CommandOp.LIST_PLAYERS, {});
     listPlayerRes.players.forEach((p) => {
-      // TODO get ID from MOD
       if (p.id != modInstance.myPlayerId) {
         this.addForeignPlayer(p);
       } else {
         this.setMyPlayer(p, this.sendMyPlayerMoved);
+        this.player.refreshTooltip(modInstance.myPlayer.name);
       }
     });
 
@@ -577,7 +565,7 @@ export default class GamePlayground extends HTMLElement {
   }
 
   keyDownCheck() {
-    if (this.keyMap == undefined || player == undefined) return;
+    if (this.keyMap == undefined || this.player == undefined) return;
     if (
       !this.keyMap.get(87) &&
       !this.keyMap.get(65) &&
@@ -587,32 +575,40 @@ export default class GamePlayground extends HTMLElement {
     ) {
       clearInterval(this.timerFunction);
       this.timerFunction = false;
-      player.model.frameRate(2);
-      player.refreshTooltip();
+      this.player.model.frameRate(2);
+      this.player.refreshTooltip();
       return;
     } else {
-      player.model.frameRate(10);
-      if (this.keyMap.get(87) && !this.keyMap.get(83)) player.moveUp(1);
-      if (this.keyMap.get(65) && !this.keyMap.get(68)) player.moveLeft(1);
-      if (this.keyMap.get(83) && !this.keyMap.get(87)) player.moveDown(1);
-      if (this.keyMap.get(68) && !this.keyMap.get(65)) player.moveRight(1);
-      player.redraw();
+      this.player.model.frameRate(10);
+      if (this.keyMap.get(87) && !this.keyMap.get(83)) this.player.moveUp(1);
+      if (this.keyMap.get(65) && !this.keyMap.get(68)) this.player.moveLeft(1);
+      if (this.keyMap.get(83) && !this.keyMap.get(87)) this.player.moveDown(1);
+      if (this.keyMap.get(68) && !this.keyMap.get(65)) this.player.moveRight(1);
+      this.player.redraw();
     }
   }
 
   handleMove(keyCode?: number) {
-    if (keyCode == 87 && !this.keyMap.get(83)) player.moveUp(1);
-    if (keyCode == 65 && !this.keyMap.get(68)) player.moveLeft(1);
-    if (keyCode == 83 && !this.keyMap.get(87)) player.moveDown(1);
-    if (keyCode == 68 && !this.keyMap.get(65)) player.moveRight(1);
+    if (keyCode == 87 && !this.keyMap.get(83)) this.player.moveUp(1);
+    if (keyCode == 65 && !this.keyMap.get(68)) this.player.moveLeft(1);
+    if (keyCode == 83 && !this.keyMap.get(87)) this.player.moveDown(1);
+    if (keyCode == 68 && !this.keyMap.get(65)) this.player.moveRight(1);
     if (keyCode == 32) {
-      if (player.checkCollision(player.y, player.x, true) == CollisionType.Task) {
-        debugPrint("[SPCBR] pressed on player position: " + player.x + "," + player.y + " returns TASK in proximity");
+      if (this.player.checkCollision(this.player.y, this.player.x, true) == CollisionType.Task) {
+        debugPrint(
+          "[SPCBR] pressed on player position: " + this.player.x + "," + this.player.y + " returns TASK in proximity",
+        );
       } else {
-        debugPrint("[SPCBR] pressed on player position: " + player.x + "," + player.y + " ... no task in prox");
+        debugPrint(
+          "[SPCBR] pressed on player position: " + this.player.x + "," + this.player.y + " ... no task in prox",
+        );
       }
     }
-    player.redraw();
+    if (keyCode == 84) {
+      ANIMATIONS_ENABLED = !ANIMATIONS_ENABLED;
+      this.showPopup("ANIMATIONS ENABLED: " + ANIMATIONS_ENABLED);
+    }
+    //player.redraw();
   }
 
   sendMyPlayerMoved(x: number, y: number) {
@@ -621,7 +617,7 @@ export default class GamePlayground extends HTMLElement {
 
   foreignPlayerMoved(event: Event<GameEventOp.PLAYER_MOVED>) {
     const { id, position } = event.payload;
-    foreignPlayers.forEach((fp) => {
+    this.foreignPlayers.forEach((fp) => {
       if (fp.playerID == id) {
         fp.moveTo(position.x, position.y);
       }
@@ -631,6 +627,8 @@ export default class GamePlayground extends HTMLElement {
   foreignPlayerJoined(event: Event<GameEventOp.PLAYER_JOINED>) {
     const foreignPlayer = event.payload;
     this.addForeignPlayer(foreignPlayer);
+
+    this.showPopup(foreignPlayer.name + " joined the game!");
   }
 
   foreignPlayerLeft(event: Event<GameEventOp.PLAYER_LEFT>) {
@@ -638,7 +636,10 @@ export default class GamePlayground extends HTMLElement {
     this.removeForeignPlayer(id);
   }
 
-  disconnectedCallback() {}
+  disconnectedCallback() {
+    this.stage.clear();
+    this.stage.destroy();
+  }
 
   /**
    * Add a foreign player to the in-game and keep a reference to the object.
@@ -646,20 +647,22 @@ export default class GamePlayground extends HTMLElement {
    * @param fpl Player information
    */
   addForeignPlayer(fpl: PlayerInGameI): Player {
-    if (!foreignPlayerLayer || !foreignPlayers) {
-      foreignPlayerLayer = new Konva.Layer();
-      foreignPlayers = new Array();
+    if (!this.foreignPlayerLayer || !this.foreignPlayers) {
+      this.foreignPlayerLayer = new Konva.Layer({ listening: false });
+      this.foreignPlayers = new Array();
     }
     const newPlayer = new Player(
       fpl.position.x,
       fpl.position.y,
       fpl.color,
-      foreignPlayerLayer,
+      this.foreignPlayerLayer,
       this.stage,
+      this,
       fpl.id,
       fpl.bibNumber,
     );
-    foreignPlayers.push(newPlayer);
+    newPlayer.refreshTooltip(fpl.name);
+    this.foreignPlayers.push(newPlayer);
     if (this.getCurrentPlayer()) {
       this.getCurrentPlayer()
         .layer.getChildren()
@@ -669,6 +672,7 @@ export default class GamePlayground extends HTMLElement {
         });
       this.getCurrentPlayer().layer.moveToTop();
     }
+
     return newPlayer;
   }
 
@@ -681,10 +685,11 @@ export default class GamePlayground extends HTMLElement {
    */
   removeForeignPlayer(fpl: number): boolean {
     var foundElem = false;
-    for (let i = 0; i < foreignPlayers.length; i++) {
-      if (foreignPlayers[i].playerID == fpl) {
-        foreignPlayers.splice(i, 1);
-        foreignPlayerLayer
+    for (let i = 0; i < this.foreignPlayers.length; i++) {
+      if (this.foreignPlayers[i].playerID == fpl) {
+        this.showPopup(this.foreignPlayers[i].playerName + " left the game!");
+        this.foreignPlayers.splice(i, 1);
+        this.foreignPlayerLayer
           .find("." + fpl)
           .toArray()
           .forEach((node) => {
@@ -693,7 +698,8 @@ export default class GamePlayground extends HTMLElement {
         foundElem = true;
       }
     }
-    foreignPlayerLayer.batchDraw();
+    this.foreignPlayerLayer.batchDraw();
+
     return foundElem;
   }
 
@@ -704,31 +710,25 @@ export default class GamePlayground extends HTMLElement {
    * @param cb Callback that is to be executed when the player executes a move command
    */
   setMyPlayer(mpl: PlayerInGameI, cb: IPlayerMovedCB): Player {
-    var playerLayer = new Konva.Layer();
-    player = new Player(mpl.position.x, mpl.position.y, mpl.color, playerLayer, this.stage, mpl.id, mpl.bibNumber);
+    var playerLayer = new Konva.Layer({ listening: false });
+    this.player = new Player(
+      mpl.position.x,
+      mpl.position.y,
+      mpl.color,
+      playerLayer,
+      this.stage,
+      this,
+      mpl.id,
+      mpl.bibNumber,
+    );
     playerLayer
       .getChildren()
       .toArray()
       .forEach((node) => {
         node.moveToTop();
       });
-    player.attachCallback(cb);
-    return player;
-  }
-
-  /**
-   * Mark a task as complete.
-   *
-   * @param id The task ID (string)
-   */
-  setTaskComplete(id: string) {
-    tasks.forEach((task) => {
-      if (task.id == id) {
-        var gridElement = grid[task.position.y][task.position.x];
-        gridElement.shape.fill("green");
-        task.isCompleted = true;
-      }
-    });
+    this.player.attachCallback(cb);
+    return this.player;
   }
 
   /**
@@ -745,6 +745,36 @@ export default class GamePlayground extends HTMLElement {
     }
   }
 
+  async loadSprites() {
+    this.sprites = [];
+    const imageObj = new Image();
+    imageObj.src = "/assets/img/sprite1.png";
+    await imageObj.decode();
+    this.sprites.push(imageObj);
+
+    const imageObj2 = new Image();
+    imageObj2.src = "/assets/img/sprite2.png";
+    await imageObj2.decode();
+    this.sprites.push(imageObj2);
+
+    const imageObj3 = new Image();
+    imageObj3.src = "/assets/img/sprite3.png";
+    await imageObj3.decode();
+    this.sprites.push(imageObj3);
+
+    const imageObj4 = new Image();
+    imageObj4.src = "/assets/img/sprite4.png";
+    await imageObj4.decode();
+    this.sprites.push(imageObj4);
+
+    this.questionMarkSprite = new Image();
+    this.questionMarkSprite.src = "/assets/img/questionMarkSprite.png";
+    await this.questionMarkSprite.decode();
+
+    this.questionMarkDone = new Image();
+    this.questionMarkDone.src = "/assets/img/questionMarkDone.png";
+  }
+
   /**
    * Initializes the grid by creating a new layer (baseLayer) and looping
    * through the user defined map to draw and populate the grid structure.
@@ -754,7 +784,7 @@ export default class GamePlayground extends HTMLElement {
     /* Initial setup (stage) */
 
     var containerDiv: HTMLDivElement = this.shadowRoot.getElementById("container") as HTMLDivElement;
-    grid = [];
+    this.grid = [];
     containerDiv.setAttribute("style", "width: 100%");
     containerDiv.style.width = "100%";
 
@@ -778,7 +808,7 @@ export default class GamePlayground extends HTMLElement {
       height: height,
     });
 
-    baseLayer = new Konva.Layer();
+    this.baseLayer = new Konva.Layer({ listening: false });
 
     /* Attach keybaord events */
     //document.onkeydown = this.keyDown;
@@ -800,7 +830,7 @@ export default class GamePlayground extends HTMLElement {
           gridRow.push(
             new GridObject(
               ElementType.OpenSpace,
-              this.drawRect(baseLayer, this.stage, w * gridSize, y * gridSize, ElementType.OpenSpace),
+              this.drawRect(this.baseLayer, this.stage, w * gridSize, y * gridSize, ElementType.OpenSpace),
             ),
           );
         } else {
@@ -808,23 +838,23 @@ export default class GamePlayground extends HTMLElement {
           gridRow.push(
             new GridObject(
               ElementType.Wall,
-              this.drawRect(baseLayer, this.stage, w * gridSize, y * gridSize, ElementType.Wall),
+              this.drawRect(this.baseLayer, this.stage, w * gridSize, y * gridSize, ElementType.Wall),
             ),
           );
         }
         /* Debug grid indicators */
         if (w == 0 && DEBUG_MODE)
-          this.drawText(baseLayer, this.stage, w * gridSize + 1, y * gridSize + 1, h.toString());
+          this.drawText(this.baseLayer, this.stage, w * gridSize + 1, y * gridSize + 1, h.toString());
         if (h == 0 && DEBUG_MODE)
-          this.drawText(baseLayer, this.stage, w * gridSize + 1, y * gridSize + 1, w.toString());
+          this.drawText(this.baseLayer, this.stage, w * gridSize + 1, y * gridSize + 1, w.toString());
       }
 
-      grid.push(gridRow);
+      this.grid.push(gridRow);
       y += 1;
       //this.stage.height(this.stage.height() + gridSize);
     }
 
-    this.stage.add(baseLayer);
+    this.stage.add(this.baseLayer);
 
     /* Draw all the specified walls */
     this.map.walls.forEach((wall) => {
@@ -843,18 +873,17 @@ export default class GamePlayground extends HTMLElement {
           this.map.taskPositions[key].y +
           "]",
       );
-      var newPos = grid[this.map.taskPositions[key].y][this.map.taskPositions[key].x];
+      var newPos = this.grid[this.map.taskPositions[key].y][this.map.taskPositions[key].x];
       if (newPos !== undefined) {
         //newPos.shape.fill("purple");
         var npx = newPos.shape.x();
         var npy = newPos.shape.y();
-        console.log(npx, npy);
         newPos.shape.destroy();
         var spr: Konva.Sprite;
         spr = new Konva.Sprite({
           x: npx,
           y: npy,
-          image: questionMarkSprite,
+          image: this.questionMarkSprite,
           animation: "idle",
           scaleX: gridSize / 16.0,
           scaleY: gridSize / 16.0,
@@ -867,16 +896,16 @@ export default class GamePlayground extends HTMLElement {
           frameRate: 4,
           frameIndex: 0,
         });
-        baseLayer.add(spr);
+        this.baseLayer.add(spr);
         spr.start();
         newPos.shape = spr;
 
         newPos.type = ElementType.Task;
         newPos.task = key;
-        if (tasks === undefined) tasks = new Array();
-        tasks.push(new Task(key, cord(this.map.taskPositions[key].x, this.map.taskPositions[key].y), false));
+        if (this.tasks === undefined) this.tasks = new Array();
+        this.tasks.push(new Task(key, cord(this.map.taskPositions[key].x, this.map.taskPositions[key].y), false));
       }
-      baseLayer.batchDraw();
+      this.baseLayer.batchDraw();
     }
 
     /* DEMO IMPLEMENTATION BLOCK
@@ -915,7 +944,8 @@ export default class GamePlayground extends HTMLElement {
       width: gridSize,
       height: gridSize,
       fill: "gray",
-      opacity: 0.85,
+      opacity: 1,
+      perfectDrawEnabled: false,
     });
 
     if (DEBUG_MODE) {
@@ -945,9 +975,72 @@ export default class GamePlayground extends HTMLElement {
       text: s,
       fontSize: gridSize / 2,
       fontFamily: "Arial",
+      listening: false,
+    });
+    layer.add(elem);
+  }
+
+  /* Show a popup on the screen for 3 seconds. */
+  showPopup(text: string, time?: number) {
+    if (this.popupLayer !== undefined) {
+      this.popupLayer
+        .getChildren()
+        .toArray()
+        .forEach((child) => {
+          child.remove();
+        });
+    } else {
+      this.popupLayer = new Konva.Layer({ listening: false, opacity: 0 });
+    }
+    var textObject = new Konva.Text({
+      x: 0,
+      y: 0,
+      text: text,
+      fontFamily: "Arial",
+      fontSize: 12,
+      padding: 5,
+      fill: "white",
+      visible: true,
+      name: "popup",
+      listening: false,
+      opacity: 1,
+    });
+    textObject.x(this.stage.width() / 2 - textObject.width() / 2);
+    textObject.y(this.stage.height() / 2 - textObject.height() / 2);
+
+    /* Add a shape to draw the tooltip on */
+    var backgroundObject = new Konva.Rect({
+      x: textObject.x() - 10,
+      y: textObject.y() - 10,
+      width: textObject.width() + 20,
+      height: textObject.height() + 20,
+      fill: "black",
+      cornerRadius: 5,
+      opacity: 1,
+      alpha: 0.75,
+      strokeWidth: 2,
+      name: "popup",
+      listening: false,
     });
 
-    layer.add(elem);
+    this.popupLayer.add(backgroundObject);
+    this.popupLayer.add(textObject);
+    this.popupLayerText = textObject;
+    this.popupLayerBackground = backgroundObject;
+    this.stage.add(this.popupLayer);
+
+    this.stage.batchDraw();
+
+    this.popupLayer.to({ opacity: 1 });
+
+    setTimeout(this.clearPopup.bind(this), time ? time : 2000);
+  }
+
+  async clearPopup() {
+    this.popupLayer.to({ opacity: 0 });
+
+    //this.popupLayer.destroy();
+    //this.stage.batchDraw();
   }
 
   /**
@@ -982,19 +1075,9 @@ export default class GamePlayground extends HTMLElement {
     var start_x: number;
     var end_x: number;
     coord.forEach((c) => {
-      if (grid[c.y] !== undefined) {
-        if (grid[c.y][c.x] !== undefined) {
+      if (this.grid[c.y] !== undefined) {
+        if (this.grid[c.y][c.x] !== undefined) {
           if (previousCoord !== undefined) {
-            debugPrint(
-              "Inside the thing, c.x: " +
-                c.x +
-                ", c.y: " +
-                c.y +
-                " // p.x: " +
-                previousCoord.x +
-                ", p.y: " +
-                previousCoord.y,
-            );
             if (previousCoord.y < c.y) {
               start_y = previousCoord.y;
               end_y = c.y;
@@ -1009,12 +1092,17 @@ export default class GamePlayground extends HTMLElement {
               start_x = c.x;
               end_x = previousCoord.x;
             }
-            debugPrint("start_y: " + start_y + ", end_y: " + end_y + ", start_x: " + start_x + ", end_x: " + end_x);
             for (let i = start_y; i <= end_y; i++) {
               for (let j = start_x; j <= end_x; j++) {
-                grid[i][j].shape.destroy();
-                (grid[i][j].shape = this.drawRect(baseLayer, this.stage, j * gridSize, i * gridSize, elemType)),
-                  (grid[i][j].type = elemType);
+                this.grid[i][j].shape.destroy();
+                (this.grid[i][j].shape = this.drawRect(
+                  this.baseLayer,
+                  this.stage,
+                  j * gridSize,
+                  i * gridSize,
+                  elemType,
+                )),
+                  (this.grid[i][j].type = elemType);
               }
             }
           }
@@ -1022,11 +1110,11 @@ export default class GamePlayground extends HTMLElement {
         }
       }
     });
-    baseLayer.batchDraw();
+    this.baseLayer.batchDraw();
   }
 
   getCurrentPlayer() {
-    return player;
+    return this.player;
   }
 }
 
