@@ -144,7 +144,7 @@ export default class MorseCodeTask extends Task {
         controlButton.style.display = "none";
         controlButton.setAttribute("label", "Back");
         var i = 0;
-        updateData = setInterval(shiftIndex, 5);
+        updateData = setInterval(shiftIndex, 16);
       } else if (!firstClick && animitionFinish) {
         this.finish(tupleResult[0], 1 + (1 - tupleResult[2] / 100));
       }

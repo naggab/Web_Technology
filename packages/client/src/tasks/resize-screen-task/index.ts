@@ -2,6 +2,7 @@ import viewHtml from "./view.html";
 import { Task } from "../../task";
 import { Button } from "../../components/button";
 import { MasterOfDisaster } from "../../masterOfDisaster";
+import { times } from "lodash";
 
 
 
@@ -9,10 +10,8 @@ export default class ResizeScreenTask extends Task {
   backButton: Button;
   resizeZone: HTMLDivElement;
   textElement: HTMLDivElement;
-  topLeftElement: HTMLDivElement;
-  topRightElement: HTMLDivElement;
-  bottomLeftElement: HTMLDivElement;
   bottomRightElement: HTMLDivElement;
+  rootContainer: HTMLDivElement;
   result: any = [false, ""];
   selectedFile: any;
   firstClickFlag: boolean = false;
@@ -21,10 +20,25 @@ export default class ResizeScreenTask extends Task {
   currHeight: number;
   targetWidth: number;
   targetHeight: number;
+  mouseDown: boolean=false;
+  tolerance: number;
+  maxHeight: number;
+  maxWidth: number;
+  minHeight: number;
+  minWidth: number;
+  initWidth: number;
+  initHeight: number;
+
+  //mouse:
+  currPosX: number;
+  currPosY: number;
+  staticPosX: number;
+  staticPosY: number;
+
 
   constructor(props) {
     super(props);
-   // this.onMouseMove = this.onMouseMove.bind(this);
+    this.onMouseMove = this.onMouseMove.bind(this);
   }
 
   async onMounted() {
@@ -32,55 +46,63 @@ export default class ResizeScreenTask extends Task {
     this.shadowRoot.innerHTML = viewHtml;
     this.backButton = this.shadowRoot.getElementById("back-button") as Button;
     this.textElement = this.shadowRoot.getElementById("text") as HTMLDivElement;
+    this.rootContainer = this.shadowRoot.querySelector(".root") as HTMLDivElement;
     this.resizeZone = this.shadowRoot.getElementById("resize-zone") as HTMLDivElement;
-    this.topLeftElement = this.shadowRoot.getElementById("top-left") as HTMLDivElement
-    this.topRightElement = this.shadowRoot.getElementById("top-right") as HTMLDivElement
-    this.bottomLeftElement = this.shadowRoot.getElementById("bottom-left") as HTMLDivElement
     this.bottomRightElement = this.shadowRoot.getElementById("bottom-right") as HTMLDivElement
    
-    const resizeArray: Array<[number,number]> = [[-50,-50],[-80,-100],[-65,-81],[-70,-33]] //height width tuple
+    const resizeArray: Array<[number,number]> = [[380,150],[333,222],[800,200],[900,250]] //height width tuple
     var index = MasterOfDisaster.getInstance().getGameSeed() % resizeArray.length;
     var setDimensionFlag: boolean = true;
     
     var firstButtonClick: boolean = true;
     var taskSuccess: boolean = true;
 
-    this.topLeftElement.style.color = "red"
-    
-    this.topLeftElement.addEventListener("mousedown", (f)=>{
-        console.log("topLeftElement");
+    this.tolerance = 5;
+    this.maxHeight = 360;
+    this.minHeight = 100
+    this.maxWidth = 1000;
+    this.minWidth = 320;
+    this.initHeight = 150;
+    this.initWidth = 500;
+    this.targetWidth = resizeArray[index][0];
+    this.targetHeight = resizeArray[index][1];
+
+    this.resizeZone.style.height = this.initHeight+"px";
+    this.resizeZone.style.width = this.initWidth+"px";
+
+
+    this.bottomRightElement.addEventListener("mousedown", (e)=>{
+      console.log("bottomRightElement","mousedown");
+      this.mouseDown = true;
+      this.staticPosX = this.currPosX;
+      this.staticPosY = this.currPosY;
     });
-    this.topRightElement.addEventListener("mousedown", (f)=>{
-      console.log("topRightElement");
-    });
-    this.bottomLeftElement.addEventListener("mousedown", (f)=>{
-      console.log("bottomLeftElement");
-    });
-    this.bottomRightElement.addEventListener("mousedown", (f)=>{
+    this.bottomRightElement.addEventListener("mouseup", (e)=>{
       console.log("bottomRightElement");
+      this.mouseDown = false;
     });
-    
+    this.bottomRightElement.addEventListener("mouseout", (e)=>{
+      console.log("bottomRightElement");
+      this.mouseDown = false;
+    });
+    this.rootContainer.addEventListener("mousemove", this.onMouseMove);
+
     const resizeObserver = new ResizeObserver(entries => {
         this.currHeight =  Math.trunc(entries[0].contentRect.height);
         this.currWidth =  Math.trunc(entries[0].contentRect.width);
 
         if(setDimensionFlag){
             setDimensionFlag = false;
-            this.targetHeight = Math.trunc(this.currHeight + resizeArray[index][0]);
-            this.targetWidth = Math.trunc(this.currWidth + resizeArray[index][1]);
-        }
-        this.textElement.innerHTML = "Current rectangle size: <br>" +this.currWidth+ " x " +this.currHeight+" px <br>" + "Resize to: <br>"+this.targetWidth+" x "+this.targetHeight + "px"
-      });
-      
-      resizeObserver.observe(this.resizeZone);
-      
-      this.resizeZone.addEventListener('change', () => {
-        console.log("yeah")
-      });
+            this.textElement.innerHTML = "Current size: <br>" +this.currWidth+ " x " +this.currHeight+" px <br>" + "Resize to: <br>"+this.targetWidth+" x "+this.targetHeight + "px" + " [+/-"+this.tolerance+"]"
 
+        }
+      });
+      
+      const x = resizeObserver.observe(this.resizeZone);
+     
       this.backButton.addEventListener("click", e =>{
         if(firstButtonClick){
-            if(this.currHeight == this.targetHeight && this.currWidth == this.targetWidth){
+            if(Math.abs(this.currHeight-this.targetHeight) <= this.tolerance && Math.abs(this.currWidth-this.targetWidth)<=this.tolerance){
                 this.textElement.innerHTML="Yes, you did it!!!"
                 this.resizeZone.style.background = "green";
                 taskSuccess = true;
@@ -91,6 +113,7 @@ export default class ResizeScreenTask extends Task {
                 taskSuccess = false;
     
             }
+            this.rootContainer.removeEventListener("mousemove",this.onMouseMove);
             this.backButton.setAttribute("label","Back");
             firstButtonClick = false;
         }
@@ -102,6 +125,41 @@ export default class ResizeScreenTask extends Task {
 
     }
   onUnmounting(): void | Promise<void> {}
+  onMouseMove(e: MouseEvent) {
+    
+    
+    this.currPosX = e.clientX;
+    this.currPosY = e.clientY;
+
+    if( this.currWidth <= this.minWidth)
+    {
+      this.currWidth = this.minWidth;
+    }
+    if( this.currWidth >= this.maxWidth)
+    {
+      this.currWidth = this.maxWidth;
+    }
+    if( this.currHeight <= this.minHeight)
+    {
+      this.currHeight = this.minHeight;
+    }
+    if( this.currHeight >= this.maxHeight)
+    {
+      this.currHeight = this.maxHeight;
+    }
+
+    if(this.mouseDown){
+      this.resizeZone.style.width = this.currWidth + (this.currPosX-this.staticPosX)*2+"px" //times2 due to central pos -> updates pixel and puts it into middle
+      this.resizeZone.style.height = this.currHeight + (this.currPosY-this.staticPosY)*2+"px"
+      this.staticPosX = this.currPosX;
+      this.staticPosY = this.currPosY;
+    }
+    this.textElement.innerHTML = "Current size: <br>" +this.currWidth+ " x " +this.currHeight+" px <br>" + "Resize to: <br>"+this.targetWidth+" x "+this.targetHeight + "px" + " [+/-"+this.tolerance+"]"
+
+    
+    
+    
+  }
 
 }
 
