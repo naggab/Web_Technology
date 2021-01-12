@@ -1,11 +1,12 @@
 export const english = {
   general: {
-    changeLanguage: "Change Language: ENGLISH",
+    changeLanguage: "Change Language to GERMAN",
     teamName: "TEAMNAME",
     warning: "WARNING",
     error: "ERROR",
     info: "INFO",
     debug: "DEBUG",
+    reloadPage: "You have to reload the page to change the language!",
   },
   welcome_start: {
     title: "WELCOME TO APIRUSH",
@@ -43,12 +44,13 @@ export const english = {
 };
 export const german = {
   general: {
-    changeLanguage: "Sprache ändern: DEUTSCH",
+    changeLanguage: "Sprache ändern zu ENGLISCH",
     teamName: "TEAMNAME",
     warning: "WARNUNG",
     error: "FEHLER",
     info: "INFO",
     debug: "DEBUG",
+    reloadPage: "Sie müssen die Seite neu laden um die Sprache zu ändern!",
   },
   welcome_start: {
     title: "WILLKOMMEN BEI APIRUSH",

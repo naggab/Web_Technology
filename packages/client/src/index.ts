@@ -20,7 +20,7 @@ window.addEventListener("load", () => {
 document.addEventListener("DOMContentLoaded", () => {
   MasterOfDisaster.setup().then(() => {
     const footer = document.querySelector("out-footer") as Footer;
-    footer.changeLanguage();
+    footer.changeLanguage(true);
     (<any>window).MOD = MasterOfDisaster.getInstance();
     const taskOpener = new TaskOpener();
     document.body.appendChild(taskOpener);

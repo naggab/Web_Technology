@@ -25,10 +25,10 @@ class WelcomeCreateGame extends AbstractScreen {
     this._createGameButton.onclick = this.createGame.bind(this);
     this._modal = this.shadowRoot.querySelector("apirush-popup");
 
-    this.shadowRoot.querySelector("#title").innerHTML = this._mod.getLanguage().welcome_create.title;
-    this.shadowRoot.querySelector("#choose-game").innerHTML = this._mod.getLanguage().welcome_create.gameName;
-    this._gameName_input.setHint(this._mod.getLanguage().welcome_create.gameNameHint);
-    this._createGameButton.setLabel(this._mod.getLanguage().welcome_create.createGame);
+    this.shadowRoot.querySelector("#title").innerHTML = this._mod.getString().welcome_create.title;
+    this.shadowRoot.querySelector("#choose-game").innerHTML = this._mod.getString().welcome_create.gameName;
+    this._gameName_input.setHint(this._mod.getString().welcome_create.gameNameHint);
+    this._createGameButton.setLabel(this._mod.getString().welcome_create.createGame);
   }
 
   async createGame() {
@@ -36,7 +36,7 @@ class WelcomeCreateGame extends AbstractScreen {
     if (gameName) {
       await this._mod.createGame(gameName);
     } else {
-      this._modal.openModal("warning", this._mod.getLanguage().welcome_create.noGameName);
+      this._modal.openModal("warning", this._mod.getString().welcome_create.noGameName);
     }
   }
 

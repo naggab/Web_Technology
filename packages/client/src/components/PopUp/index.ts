@@ -34,20 +34,20 @@ export class PopUp extends HTMLElement {
     this._modal.id = type;
     switch (type) {
       case "warning":
-        this._title.innerHTML = this._mod.getLanguage().general.warning;
+        this._title.innerHTML = this._mod.getString().general.warning;
         break;
       case "error":
-        this._title.innerHTML = this._mod.getLanguage().general.error;
+        this._title.innerHTML = this._mod.getString().general.error;
         break;
       case "debug":
         if (MasterOfDisaster.getInstance().debugMode) {
-          this._title.innerHTML = this._mod.getLanguage().general.debug;
+          this._title.innerHTML = this._mod.getString().general.debug;
         } else {
           this.closeModal();
         }
         break;
       default:
-        this._title.innerHTML = this._mod.getLanguage().general.info;
+        this._title.innerHTML = this._mod.getString().general.info;
         break;
     }
   }
