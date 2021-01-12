@@ -19,7 +19,7 @@ const cord = (x: number, y: number) => ({ x, y });
  */
 var DEBUG_MODE: boolean = true;
 var ANIMATIONS_ENABLED: boolean = true;
-function debugPrint(x: any) {
+export function debugPrint(x: any) {
   if (DEBUG_MODE) {
     console.log(x);
   }
