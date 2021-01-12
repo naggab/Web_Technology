@@ -6,7 +6,7 @@ import { Collection } from "konva/types/Util";
 import { MasterOfDisaster } from "../../masterOfDisaster";
 import { debugPrint } from "../../screens/in-game/game-playground";
 
-export default class TimingTask extends Task {
+export default class ReactionTask extends Task {
   canvasElement: HTMLCanvasElement;
   infoElement: HTMLElement;
   checkButton: Button;
@@ -27,19 +27,19 @@ export default class TimingTask extends Task {
   async onMounted() {
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = viewHtml;
-    this.canvasElement = this.shadowRoot.getElementById("timingCanvas") as HTMLCanvasElement;
+    this.canvasElement = this.shadowRoot.getElementById("reactionCanvas") as HTMLCanvasElement;
     this.infoElement = this.shadowRoot.querySelector(".info") as HTMLElement;
     this.checkButton = this.shadowRoot.getElementById("check-button") as Button;
     this.ctx = this.canvasElement.getContext("2d");
     const ctx = this.ctx;
-    this.tolerance = 800; // in ms
+    this.tolerance = 400; // in ms
     const canvasPanel = this.canvasElement.getBoundingClientRect(); //get size according to html spec
     this.btnEnabled = true;
     var seed = MasterOfDisaster.getInstance().getGameSeed();
 
     this.checkButton.addEventListener("click", (c) => {
       c.preventDefault();
-      if (!this.timeAtStart || !this.timeToEnd) {
+      if (!this.timeAtStart) {
         this.infoElement.innerHTML = "Timer has not started yet. Try again!";
         if (this.timerTimeout) clearTimeout(this.timerTimeout);
         this.failTimeout = setTimeout(this.taskFailed.bind(this), 1500);
@@ -47,23 +47,20 @@ export default class TimingTask extends Task {
         this.timeAtClick = performance.now();
         var dif = this.timeAtClick - this.timeAtStart;
         debugPrint("dif = " + dif);
-        var result = dif - this.timeToEnd;
+        var result = dif - this.tolerance;
         debugPrint("result = " + Math.abs(result));
-        if (Math.abs(dif - this.timeToEnd) < this.tolerance) {
+        if (result < 0) {
           this.infoElement.innerHTML =
-            "Target time: " +
-            (this.timeToEnd / 1000).toFixed(1) +
-            " - Your time: " +
-            (dif / 1000).toFixed(1) +
-            " - Success!";
+            "Target reaction: " +
+            (this.tolerance / 1000).toFixed(3) +
+            "s - Your reaction: " +
+            (dif / 1000).toFixed(3) +
+            "s - Success!";
           this.successTimeout = setTimeout(this.taskSuccess.bind(this), 1500);
           this.btnEnabled = false;
         } else {
           this.infoElement.innerHTML =
-            "You were " +
-            Math.abs(result / 1000).toFixed(1) +
-            (result > 0 ? " seconds too slow!" : " seconds too fast!") +
-            " Try again!";
+            "You were " + Math.abs(result / 1000).toFixed(1) + " seconds too slow! Try again!";
           this.drawRect();
           this.btnEnabled = false;
           this.failTimeout = setTimeout(this.taskFailed.bind(this), 1500);
@@ -74,11 +71,7 @@ export default class TimingTask extends Task {
     var timeToStart = ((seed % 3) + 2) * 1000;
     if (timeToStart > 7000 || timeToStart < 1000) timeToStart = 3000;
     debugPrint(timeToStart + " ms until the box turns green");
-    this.timeToEnd = ((((seed + 3) % 5) * Math.PI) / 2) * 1000; // Number between ~ 1 and 7
-    if (this.timeToEnd > 7000 || this.timeToEnd < 1000) this.timeToEnd = 3000;
-    debugPrint(this.timeToEnd + " ms to click after start");
-    this.infoElement.innerHTML =
-      "Press the button " + (this.timeToEnd / 1000).toFixed(1) + " seconds after the box turns green!";
+    this.infoElement.innerHTML = "Press the button immediately after the box turns green!";
     this.timerTimeout = setTimeout(this.startTimer.bind(this), timeToStart);
 
     this.drawRect();
@@ -118,4 +111,4 @@ export default class TimingTask extends Task {
   }
 }
 
-customElements.define("timing-task", TimingTask);
+customElements.define("reaction-task", ReactionTask);
