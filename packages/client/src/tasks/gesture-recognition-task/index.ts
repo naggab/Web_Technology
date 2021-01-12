@@ -7,84 +7,119 @@ import fp from "fingerpose";
 import "./gestures/victory";
 import victory from "./gestures/victory";
 import raisedFist from "./gestures/raisedFist";
-import thumbsup from "./gestures/thumbsup";
+import thumbsUp from "./gestures/thumbsUp";
 import horns from "./gestures/horns";
 import raisedHand from "./gestures/raisedHand";
-
-const landmarkColors = {
-  thumb: "red",
-  indexFinger: "blue",
-  middleFinger: "yellow",
-  ringFinger: "green",
-  pinky: "pink",
-  palmBase: "white",
-};
-
-const gestureStrings = {
-  thumbs_up: "👍",
-  victory: "✌🏻",
-  raisedfist: "✊",
-  horns: "🤘",
-  raisedhand: "✋",
-};
+import indexUp from "./gestures/indexUp";
+import Gestures, { Gesture } from "./gestures";
+import { MasterOfDisaster } from "../../masterOfDisaster";
 
 const config = {
-  video: { width: 640, height: 480, fps: 30 },
+  video: { width: 640, height: 480, fps: 10 },
 };
+
+const GestureGoals: Array<Gesture[]> = [
+  [Gesture.RaisedFist, Gesture.Victory, Gesture.ThumbsUp],
+  [Gesture.RaisedFist, Gesture.Horns, Gesture.RaisedHand],
+];
 
 export default class GestureRecognitionTask extends Task {
   stopped: boolean;
 
+  gestureGoalsContainer_: HTMLDivElement;
+  gestureGoalEntryTemplate_: HTMLTemplateElement;
+  loadingOverlay_: HTMLDivElement;
+  video_: HTMLVideoElement;
+
+  goal_: Array<{ gesture: Gesture; done: boolean; el: HTMLElement }> = [];
+
+  static checkCapabilities() {
+    // TODO check user has webcam
+    return true;
+  }
+
+  get currentGoal() {
+    const index = this.goal_.findIndex((g) => !g.done);
+    if (index === -1) {
+      return null;
+    }
+    return this.goal_[index];
+  }
+
+  nextGoal() {
+    const currentGoal = this.currentGoal;
+    currentGoal.done = true;
+    currentGoal.el.classList.add("inactive");
+    const newGoal = this.currentGoal;
+    if (newGoal) {
+      newGoal.el.classList.remove("inactive");
+    } else {
+      this.finish(true, 0);
+    }
+  }
+
   async onMounted() {
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = viewHtml;
+    const seed = MasterOfDisaster.getInstance().getGameSeed();
+
+    const gestureGoal = GestureGoals[seed % GestureGoals.length];
+
+    this.gestureGoalsContainer_ = this.shadowRoot.querySelector("#gesture-goals") as HTMLDivElement;
+    this.loadingOverlay_ = this.shadowRoot.querySelector(".loading-overlay") as HTMLDivElement;
+    this.gestureGoalEntryTemplate_ = this.shadowRoot.querySelector(
+      "#gesture-goal-entry-template",
+    ) as HTMLTemplateElement;
+
+    this.goal_ = gestureGoal.map((g) => ({ gesture: g, done: false, el: this.addGoal(g) }));
+
+    this.goal_[0].el.classList.remove("inactive");
+
+    this.video_ = this.shadowRoot.querySelector("#video-element");
 
     this.initCamera(config.video.width, config.video.height, config.video.fps).then((video) => {
-      video.play();
-      video.addEventListener("loadeddata", (event) => {
+      this.video_.play();
+      this.video_.addEventListener("loadeddata", (event) => {
         console.log("Camera is ready");
         this.startPredictions();
       });
     });
+  }
 
-    const canvas = this.shadowRoot.querySelector("#pose-canvas") as HTMLCanvasElement;
-    canvas.width = config.video.width;
-    canvas.height = config.video.height;
-    console.log("Canvas initialized");
-    console.log("Starting predictions");
+  addGoal(gesture: Gesture) {
+    const newEntryHtml = this.gestureGoalEntryTemplate_.content.cloneNode(true) as HTMLElement;
+    const entry = newEntryHtml.querySelector(".gesture-goal-entry") as HTMLElement;
+    const emojiDiv = entry.querySelector(".emoji");
+    emojiDiv.innerHTML = Gestures[gesture].emoji;
+    this.gestureGoalsContainer_.appendChild(newEntryHtml);
+    return entry;
   }
 
   async startPredictions() {
-    const video = this.shadowRoot.querySelector("#pose-video");
-    const canvas = this.shadowRoot.querySelector("#pose-canvas") as HTMLCanvasElement;
-    const ctx = canvas.getContext("2d");
-
-    const resultLayer = this.shadowRoot.querySelector("#pose-result") as HTMLDivElement;
-    const knownGestures = [victory, raisedFist, thumbsup, raisedHand, horns];
+    const knownGestures = this.goal_.map((g) => Gestures[g.gesture].description);
     const GE = new fp.GestureEstimator(knownGestures);
 
     // load handpose model
     const model = await handpose.load();
-    console.log("Handpose model loaded");
+    this.loadingOverlay_.classList.remove("open");
+
+    let lastDetected = "";
 
     // main estimation loop
     const estimateHands = async () => {
       if (this.stopped) {
         return;
       }
-      // clear canvas overlay
-      ctx.clearRect(0, 0, config.video.width, config.video.height);
-      resultLayer.innerText = "";
 
       // get hand landmarks from video
       // Note: Handpose currently only detects one hand at a time
       // Therefore the maximum number of predictions is 1
-      const predictions = await model.estimateHands(video, true);
+      const predictions = await model.estimateHands(this.video_, true);
 
       for (let i = 0; i < predictions.length; i++) {
         // now estimate gestures based on landmarks
         // using a minimum confidence of 7.5 (out of 10)
-        const est = GE.estimate(predictions[i].landmarks, 7.0);
+        const est = GE.estimate(predictions[i].landmarks, 7.5);
 
         if (est.gestures.length > 0) {
           // find gesture with highest confidence
@@ -92,7 +127,18 @@ export default class GestureRecognitionTask extends Task {
             return p.confidence > c.confidence ? p : c;
           });
 
-          resultLayer.innerText = gestureStrings[result.name];
+          if (lastDetected !== result.name) {
+            console.log("Detected", result.name);
+          }
+          if (lastDetected === result.name && this.currentGoal?.gesture === result.name) {
+            console.log("detected goal, next!");
+            this.nextGoal();
+            setTimeout(() => {
+              estimateHands();
+            }, 500);
+            return;
+          }
+          lastDetected = result.name;
         }
       }
 
@@ -114,18 +160,16 @@ export default class GestureRecognitionTask extends Task {
         frameRate: { max: fps },
       },
     };
-
-    const video = this.shadowRoot.querySelector("#pose-video") as HTMLVideoElement;
-    video.width = width;
-    video.height = height;
+    this.video_.width = width;
+    this.video_.height = height;
 
     // get video stream
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
-    video.srcObject = stream;
+    this.video_.srcObject = stream;
 
     return new Promise((resolve) => {
-      video.onloadedmetadata = () => {
-        resolve(video);
+      this.video_.onloadedmetadata = () => {
+        resolve(this.video_);
       };
     });
   }
@@ -139,8 +183,7 @@ export default class GestureRecognitionTask extends Task {
 
   onUnmounting(): void | Promise<void> {
     this.stopped = true;
-    const video = this.shadowRoot.querySelector("#pose-video") as HTMLVideoElement;
-    const src: MediaStream = video.srcObject as any;
+    const src: MediaStream = this.video_.srcObject as any;
     if (src.getTracks) {
       src.getTracks().forEach((track) => track.stop());
     }

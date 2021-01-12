@@ -9,6 +9,10 @@ export class Task extends HTMLElement {
   onMounted?(): void | Promise<void>;
   onUnmounting?(): void | Promise<void>;
 
+  static checkCapabilities(): Promise<boolean> | boolean {
+    return true;
+  }
+
   private startTime: number;
   private endTime: number;
   private opts: TaskOpts;
@@ -42,9 +46,9 @@ export class Task extends HTMLElement {
     }
   }
 
-  protected finish(success: boolean, timeFactor: number) {
+  protected finish(success: boolean, timeFactor: number = 1) {
     this.endTime = new Date().getTime();
-    const diff = (this.endTime - this.startTime)*timeFactor; //milliseconds
+    const diff = (this.endTime - this.startTime) * timeFactor; //milliseconds
     this.opts.finishCb(diff, success);
   }
 }
