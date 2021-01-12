@@ -1,54 +1,79 @@
 <style>
 
-    * {
-        box-sizing: border-box;
-        user-select: none;
-    }
 
-    html, body {
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        font-family: Arial, sans-serif;
-        background-color: #333333;
-        color: #ffffff;
-    }
 
-    body {
-        margin: 0;
-        padding: 0;
-    }
-
-    #video-container {
-        width: 640px;
-        height: 480px;
+    #container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
         position: relative;
     }
 
-    .layer {
+    .loading-overlay {
         position: absolute;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        text-transform: uppercase;
+        font-weight: bold;
+        font-size: 20px;
         top: 0;
+        right: 0;
         left: 0;
+        bottom: 0;
+        opacity: 0;
+        background-color: black;
+        transition: all 200ms;
+    }
+
+    .loading-overlay.open {
+        opacity: 0.6;
+    }
+
+    #video-element {
+        transform: scaleX(-1) scale(0.8);
+        width: 640px;
+        height: 480px;
+    }
+
+    #gesture-goals {
+        font-size: 80px;
+        min-height: 100px;
         width: 100%;
-        height: 100%;
+        display: flex;
+        justify-content: space-around;
     }
 
-    #pose-video {
-        transform: scaleX(-1);
+    .gesture-goal-entry .emoji {
+        font-size: 80px;
+        line-height: 85px;
+        padding-bottom: 10px;
+        transition: all 200ms;
+        transform: scale(1.0);
+        filter: grayscale(0);
     }
 
-    #pose-result {
-        font-size: 100px;
-        text-align: right;
-        padding: 20px 30px 0 0;
+    .gesture-goal-entry.inactive .emoji {
+        opacity: 0.5;
+        filter: grayscale(1);
+        transform: scale(0.6);
     }
+
 </style>
-<body>
-
-<div id="video-container">
-    <video id="pose-video" class="layer" playsinline></video>
-    <canvas id="pose-canvas" class="layer"></canvas>
-    <div id="pose-result" class="layer"></div>
+<div id="container">
+    <video id="video-element" playsinline></video>
+    <div id="gesture-goals"></div>
+    <div class="loading-overlay open">
+        Please wait ...
+    </div>
 </div>
 
-</body>
+<template id="gesture-goal-entry-template">
+    <div class="gesture-goal-entry inactive">
+        <div class="emoji"></div>
+        <div class="checkmark"></div>
+    </div>
+
+</template>

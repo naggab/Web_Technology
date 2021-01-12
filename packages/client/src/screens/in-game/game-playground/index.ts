@@ -99,6 +99,7 @@ export class Player {
   bibNumber: number;
   playground: GamePlayground;
   playerName: string;
+  didInteractWithTask: boolean;
   public playerMovedCB: IPlayerMovedCB;
   public onTaskOpenCB: IOnTaskOpenCB;
 
@@ -120,6 +121,7 @@ export class Player {
     this.radius = (gridSize / 2) * 3;
     this.playground = playground;
     this.playerName = "";
+    this.didInteractWithTask = false;
 
     if (playerID !== undefined) this.playerID = playerID;
     else this.playerID = -1;
@@ -262,8 +264,11 @@ export class Player {
           if (newPos.type == ElementType.Wall) {
             col = CollisionType.Wall;
           } else if (newPos.type == ElementType.Task) {
+            if (!this.didInteractWithTask)
+              this.playground.showPopup("Press the space bar to start the task!", 3000, 16);
             if (openTask !== undefined) {
               if (openTask) {
+                this.didInteractWithTask = true;
                 //this.onTaskOpenCB(newPos.task);
                 var taskPos = newPos;
                 var ty = newPosY + i;
@@ -511,33 +516,7 @@ export default class GamePlayground extends HTMLElement {
 
     window.addEventListener("resize", (event) => {
       debugPrint("RESIZING");
-      this.stage.clear();
-      this.setupGrid();
-      this.baseLayer.moveToBottom();
-      this.getCurrentPlayer()
-        .layer.getChildren()
-        .toArray()
-        .forEach((node) => {
-          node.moveToTop();
-        });
-
-      this.getCurrentPlayer().drawPlayer(true);
-
-      if (this.foreignPlayerLayer) {
-        this.foreignPlayerLayer.setZIndex(1);
-        this.foreignPlayerLayer
-          .getChildren()
-          .toArray()
-          .forEach((child) => {
-            child.remove();
-          });
-        this.foreignPlayers.forEach((fp) => {
-          fp.drawPlayer();
-        });
-        this.stage.add(this.foreignPlayerLayer);
-      }
-
-      this.stage.add(this.getCurrentPlayer().layer);
+      this.resetStage();
     });
 
     await this.loadSprites();
@@ -564,6 +543,40 @@ export default class GamePlayground extends HTMLElement {
     modInstance.serverSession.subscribe(GameEventOp.PLAYER_LEFT, this.foreignPlayerLeft);
   }
 
+  async resetStage() {
+    if (this.grid) this.grid = [];
+    this.stage.clear();
+    if (this.baseLayer) this.baseLayer.destroy();
+    if (this.foreignPlayerLayer) this.foreignPlayerLayer.destroy();
+    if (this.player.layer) this.player.layer.destroy();
+    this.setupGrid();
+    this.baseLayer.moveToBottom();
+    this.getCurrentPlayer()
+      .layer.getChildren()
+      .toArray()
+      .forEach((node) => {
+        node.moveToTop();
+      });
+
+    this.getCurrentPlayer().drawPlayer(true);
+
+    if (this.foreignPlayerLayer) {
+      this.foreignPlayerLayer.setZIndex(1);
+      this.foreignPlayerLayer
+        .getChildren()
+        .toArray()
+        .forEach((child) => {
+          child.remove();
+        });
+      this.foreignPlayers.forEach((fp) => {
+        fp.drawPlayer();
+      });
+      this.stage.add(this.foreignPlayerLayer);
+    }
+
+    this.stage.add(this.getCurrentPlayer().layer);
+  }
+
   keyDownCheck() {
     if (this.keyMap == undefined || this.player == undefined) return;
     if (
@@ -588,7 +601,7 @@ export default class GamePlayground extends HTMLElement {
     }
   }
 
-  handleMove(keyCode?: number) {
+  async handleMove(keyCode?: number) {
     if (keyCode == 87 && !this.keyMap.get(83)) this.player.moveUp(1);
     if (keyCode == 65 && !this.keyMap.get(68)) this.player.moveLeft(1);
     if (keyCode == 83 && !this.keyMap.get(87)) this.player.moveDown(1);
@@ -606,7 +619,19 @@ export default class GamePlayground extends HTMLElement {
     }
     if (keyCode == 84) {
       ANIMATIONS_ENABLED = !ANIMATIONS_ENABLED;
-      this.showPopup("ANIMATIONS ENABLED: " + ANIMATIONS_ENABLED);
+      this.showPopup("Animations " + (ANIMATIONS_ENABLED ? "enabled!" : "disabled!"));
+    }
+    if (keyCode == 90) {
+      DEBUG_MODE = !DEBUG_MODE;
+      await this.resetStage();
+      this.showPopup("Debug mode " + (DEBUG_MODE ? "enabled!" : "disabled!"));
+    }
+    if (keyCode == 72) {
+      this.showPopup(
+        "Welcome to APIRush.\nPress W-A-S-D to move around the board.\nInteract with tasks by using the spacebar.",
+        6000,
+        18,
+      );
     }
     //player.redraw();
   }
@@ -981,7 +1006,7 @@ export default class GamePlayground extends HTMLElement {
   }
 
   /* Show a popup on the screen for 3 seconds. */
-  showPopup(text: string, time?: number) {
+  showPopup(text: string, time?: number, fontSize?: number) {
     if (this.popupLayer !== undefined) {
       this.popupLayer
         .getChildren()
@@ -996,8 +1021,9 @@ export default class GamePlayground extends HTMLElement {
       x: 0,
       y: 0,
       text: text,
-      fontFamily: "Arial",
-      fontSize: 12,
+      fontFamily: "Roboto",
+      fontStyle: "bold",
+      fontSize: fontSize ? fontSize : 13,
       padding: 5,
       fill: "white",
       visible: true,
@@ -1016,8 +1042,7 @@ export default class GamePlayground extends HTMLElement {
       height: textObject.height() + 20,
       fill: "black",
       cornerRadius: 5,
-      opacity: 1,
-      alpha: 0.75,
+      opacity: 0.6,
       strokeWidth: 2,
       name: "popup",
       listening: false,

@@ -1,23 +1,13 @@
 import { Finger, FingerCurl, FingerDirection } from "fingerpose";
 import { GestureDescription } from "fingerpose";
-const raisedHandDescription = new GestureDescription("raisedhand");
+import { Gesture } from "./constants";
 
-// thumb:
-raisedHandDescription.addCurl(Finger.Thumb, FingerCurl.NoCurl, 0.5);
+const raisedHandDescription = new GestureDescription(Gesture.RaisedHand);
 
-// index:
-raisedHandDescription.addCurl(Finger.Index, FingerCurl.NoCurl, 1.0);
-
-// middle:
-raisedHandDescription.addCurl(Finger.Middle, FingerCurl.NoCurl, 1.0);
-
-// ring:
-raisedHandDescription.addCurl(Finger.Ring, FingerCurl.NoCurl, 1.0);
-
-// pinky:
-raisedHandDescription.addCurl(Finger.Pinky, FingerCurl.NoCurl, 1.0);
-
-raisedHandDescription.setWeight(Finger.Middle, 2);
-raisedHandDescription.setWeight(Finger.Ring, 2);
+for (let finger of [Finger.Thumb, Finger.Index, Finger.Middle, Finger.Ring, Finger.Pinky]) {
+  raisedHandDescription.addCurl(finger, FingerCurl.NoCurl, 1.0);
+  raisedHandDescription.addCurl(finger, FingerCurl.HalfCurl, 0.5);
+  raisedHandDescription.addCurl(finger, FingerCurl.NoCurl, -2.0);
+}
 
 export default raisedHandDescription;

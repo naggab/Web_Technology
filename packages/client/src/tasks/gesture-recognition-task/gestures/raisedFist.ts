@@ -1,22 +1,15 @@
 import { Finger, FingerCurl, FingerDirection } from "fingerpose";
 import { GestureDescription } from "fingerpose";
+import { Gesture } from "./constants";
 
-// describe gesture ✊
-const raisedFistDescription = new GestureDescription("raisedfist");
+//  ✊
+const raisedFistDescription = new GestureDescription(Gesture.RaisedFist);
 
-// thumb:
-raisedFistDescription.addCurl(Finger.Thumb, FingerCurl.FullCurl, 1.0);
-
-// index:
-raisedFistDescription.addCurl(Finger.Index, FingerCurl.FullCurl, 1.0);
-
-// middle:
-raisedFistDescription.addCurl(Finger.Middle, FingerCurl.FullCurl, 1.0);
-
-// ring:
-raisedFistDescription.addCurl(Finger.Ring, FingerCurl.FullCurl, 1.0);
-
-// pinky:
-raisedFistDescription.addCurl(Finger.Pinky, FingerCurl.FullCurl, 1.0);
+// all fingers are curled in a fist
+for (let finger of [Finger.Thumb, Finger.Index, Finger.Middle, Finger.Ring, Finger.Pinky]) {
+  raisedFistDescription.addCurl(finger, FingerCurl.FullCurl, 1.0);
+  raisedFistDescription.addCurl(finger, FingerCurl.HalfCurl, 0.5);
+  raisedFistDescription.addCurl(finger, FingerCurl.NoCurl, -2.0);
+}
 
 export default raisedFistDescription;
