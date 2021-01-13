@@ -174,7 +174,7 @@ export default class ResizeScreenTask extends Task {
     });
 
     resizeObserver.observe(this.resizeZone);
-
+    
     this.backButton.addEventListener("click", (e) => {
       if (firstButtonClick) {
         this.resizeZone.style.borderColor = "black";
@@ -193,6 +193,9 @@ export default class ResizeScreenTask extends Task {
         this.rootContainer.removeEventListener("mousemove", this.onMouseMove);
         this.backButton.setAttribute("label", "Back");
         firstButtonClick = false;
+        resizeObserver.unobserve(this.resizeZone);
+
+       
       } else {
         this.finish(taskSuccess, 1);
       }
