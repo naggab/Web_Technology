@@ -1,24 +1,33 @@
 import templateHTML from "./template.html";
+import { MasterOfDisaster } from "../../masterOfDisaster";
 
-export class toggleSwitch extends HTMLElement {
+export class ToggleSwitch extends HTMLElement {
+  _checkBox: HTMLInputElement;
+  _switch: HTMLInputElement;
+  _mod: MasterOfDisaster;
+
   constructor() {
     super();
-  }
-
-  get leftposition() {
-    return this.hasAttribute("leftposition");
-  }
-  get value() {
-    return this.hasAttribute("value");
-  }
-  get checked() {
-    return this.hasAttribute("checked");
   }
 
   connectedCallback() {
     let shadowRoot = this.attachShadow({ mode: "open" });
     shadowRoot.innerHTML = templateHTML;
+    this._checkBox = shadowRoot.querySelector("#checkbox") as HTMLInputElement;
+    this._switch = shadowRoot.querySelector("#checkbox") as HTMLInputElement;
+    this._switch.onclick = this.modeChanged.bind(this);
+  }
+  public initMOD() {
+    this._mod = MasterOfDisaster.getInstance();
+  }
+
+  private modeChanged() {
+    if (!this._switch.checked) {
+      this._mod.setMode("Light");
+    } else {
+      this._mod.setMode("Dark");
+    }
   }
 }
 
-window.customElements.define("toggle-switch", toggleSwitch);
+window.customElements.define("toggle-switch", ToggleSwitch);

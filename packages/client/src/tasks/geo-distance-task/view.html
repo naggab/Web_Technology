@@ -1,0 +1,54 @@
+<style>
+  .root {
+    min-height: 200px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 5px;
+  }
+  span {
+    color: gray;
+  }
+  .button {
+    justify-content: center;
+    align-items: center;
+    display: flex;
+  }
+  h1 {
+    padding: 10px;
+    margin-top: 10px;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    text-align: center;
+  }
+  h2 {
+    padding: 0px;
+    margin-top: 5px;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    text-align: center;
+  }
+  .distance-input-box {
+    width: 100%;
+  }
+</style>
+<div class="root">
+  <div class="canvasCotainer">
+    <h1>Guess the distance!</h1>
+    <h2>Your task is to guess the distance between your current location and a randomly selected city.</h2>
+    <h2 id="city-info">City: xxxxxxxxxxxxxxxxxxxxxxxx</h2>
+    <div id="distance-input-box">
+      <text-box id="distance-input" styletype="transparent" hint="Guess the distance in kilometers"></text-box>
+    </div>
+  </div>
+
+  <h1 class="info"></h1>
+  <div class="button">
+    <apirush-button id="check-button" label="Check" styletype="white"></apirush-button>
+  </div>
+</div>

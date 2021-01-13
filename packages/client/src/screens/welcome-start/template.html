@@ -7,13 +7,13 @@
   h1,
   h2,
   h3 {
-    color: white;
+    color: var(--white);
     font-family: "Roboto", sans-serif;
     text-align: center;
   }
 
   h1 {
-    margin-top: 5%;
+    margin-top: 2%;
     font-size: 400%;
     font-weight: bold;
   }
@@ -24,10 +24,8 @@
   }
 
   h3 {
-    position: absolute;
-    bottom: 40%;
-    font-size: 100%;
-    text-align: center;
+    margin-bottom: 2%;
+    font-size: 1rem;
   }
 
   .root {
@@ -41,25 +39,43 @@
   }
 
   #userNameInput {
-    margin-top: 5%;
-    margin-bottom: 3%;
+    width: 50%;
+    margin: 3% auto;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-content: center;
   }
   #button_wrapper {
     height: 100%;
+    width: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
+    justify-content: space-around;
+    align-content: center;
+  }
+  #textbox {
+    min-width: 600px;
+
+    width: 50%;
+    margin-right: 1%;
+  }
+  #header {
+    height: 20%;
   }
 </style>
 
 <div class="root">
-  <h1 id="title">WELCOME TO APIRUSH</h1>
-  <h2 id="subtitle">THE BEST GAME EVER</h2>
+  <div id="header">
+    <h1 id="title">WELCOME TO APIRUSH</h1>
+    <h2 id="subtitle">THE BEST GAME EVER</h2>
+  </div>
 
   <div id="userNameInput">
-    <text-box id="userName" styletype="transparent" hint="Define your username"></text-box>
-    <img src="../../../assets/img/pen.svg" height="60px" width="30px" style="position: absolute; left: 63.6%; top: 33%;" >
-
+    <div id="textbox">
+      <text-box id="userName" styletype="transparent" hint="Define your username"></text-box>
+    </div>
+    <img src="../../../assets/img/pen.svg" height="60px" width="30px" />
   </div>
 
   <apirush-container>
