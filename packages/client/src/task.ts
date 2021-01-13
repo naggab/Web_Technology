@@ -32,7 +32,7 @@ export class Task extends HTMLElement {
     if (mountResult) {
       await mountResult;
     }
-    this.startTime = new Date().getTime();
+    this.startTime = performance.now();
   }
 
   private async disconnectedCallback() {
@@ -47,7 +47,7 @@ export class Task extends HTMLElement {
   }
 
   protected finish(success: boolean, timeFactor: number = 1) {
-    this.endTime = new Date().getTime();
+    this.endTime = performance.now();
     const diff = (this.endTime - this.startTime) * timeFactor; //milliseconds
     this.opts.finishCb(diff, success);
   }
