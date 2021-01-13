@@ -17,6 +17,7 @@ export class Button extends HTMLElement {
   }
   public setLabel(text) {
     this._a.innerHTML = text;
+    this.setAttribute("label", text);
   }
   get label() {
     if (this.innerHTML) {
@@ -24,7 +25,13 @@ export class Button extends HTMLElement {
     }
     return this.getAttribute("label") || "";
   }
+  public setID(text){
+    this.setAttribute("id", text);
+  }
 
+  public setStyle(text){
+    this.setAttribute("styletype", text);
+  }
   get styletype(): ButtonStyleType[] {
     const styleList = this.getAttribute("styletype");
     return (styleList.split(",") as ButtonStyleType[]) || ["white"];

@@ -4,13 +4,21 @@ import "../../components/textBox";
 import { MasterOfDisaster } from "../../masterOfDisaster";
 import { Button } from "../../components/button";
 import { StatsStorage } from "../../statsStorage";
+import { variable } from "@tensorflow/tfjs";
+import { TaskManger} from "../../taskManager"
 
 
 
 class StatsScreen extends AbstractScreen {
   _userName_input: any;
   _mod: MasterOfDisaster;
-
+  _taskNumber: number;
+  _iter: number;
+  _container: HTMLDivElement;
+  button: Button; 
+  
+  buttons = [];
+  tasks = [];
 
   constructor() {
     super();
@@ -18,11 +26,27 @@ class StatsScreen extends AbstractScreen {
   }
 
   onMounted(){
-    this._userName_input = this.shadowRoot.querySelector("#userName");
-    this._userName_input.setHint(this._mod.getString().welcome_start.userName);
-
+  this._mod = MasterOfDisaster.getInstance();
+  this._container = this.shadowRoot.querySelector("#container") as HTMLDivElement;
+  this.tasks = TaskManger.getTaskIds()
+   
+  this.createButton();
   }
 
+  private createButton(){
+
+
+    TaskManger.getTaskIds().forEach(task =>{
+      this.button = new Button();
+      this.button.setStyle("transparent,stats");
+      this.button.setID(task);
+      this.button.setLabel(this._mod.getString().tasks[task]);
+      this.buttons.push(this.button);
+      this._container.appendChild(this.button);
+      
+  })
+   
+  }
   async getHtml() {
     return templateHTML;
   }

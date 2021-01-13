@@ -8,6 +8,17 @@ export const english = {
     debug: "DEBUG",
     reloadPage: "You have to reload the page to change the language!",
   },
+
+  tasks: {
+    "drag-and-drop-task": "Drag & Drop Task",
+    "fill-shape-task": "Fill Shapes Task",
+    "gesture-recognition-task": "Gesture Recognition Task",
+    "morse-code-task": "Morse Code Task",
+    "resize-screen-task": "Resize Screen Task",
+    "timing-task": "Timing Task",
+    "reaction-task": "Reaction Task",
+  },
+
   welcome_start: {
     title: "WELCOME TO APIRUSH",
     subTitle: "THE BEST GAME EVER",
@@ -37,9 +48,13 @@ export const english = {
   },
   welcome_stats: {
     title: "STATS SCREEN",
+    totalTime: "TOTAL PLAYING TIME",
+    
+
   },
   welcome_all_tasks: {
     title: "ALL TASKS",
+
   },
 };
 export const german = {
@@ -52,6 +67,16 @@ export const german = {
     debug: "DEBUG",
     reloadPage: "Sie müssen die Seite neu laden um die Sprache zu ändern!",
   },
+  tasks: {
+    "drag-and-drop-task": "DragAndDropTask",
+    "fill-shape-task": "FillShapeTask",
+    "gesture-recognition-task": "GestureRecognitionTask",
+    "morse-code-task": "MorseCodeTask",
+    "resize-screen-task": "ResizeScreenTask",
+    "timing-task": "TimingTask",
+    "reaction-task": "ReactionTask",
+  },
+  
   welcome_start: {
     title: "WILLKOMMEN BEI APIRUSH",
     subTitle: "DAS BESTE SPIEL ALLER ZEITEN",

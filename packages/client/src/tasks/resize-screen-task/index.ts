@@ -85,13 +85,13 @@ export default class ResizeScreenTask extends Task {
       this.staticPosX = this.currPosX;
       this.staticPosY = this.currPosY;
     });
-    this.bottomRightElement.addEventListener("mouseup", (e) => {
+    this.rootContainer.addEventListener("mouseup", (e) => {
       console.log("bottomRightElement");
       this.mouseDown = false;
     });
     this.bottomRightElement.addEventListener("mouseout", (e) => {
-      console.log("bottomRightElement");
-      this.mouseDown = false;
+      //this.mouseDown = false;
+      this.onMouseMove(e);
     });
     this.rootContainer.addEventListener("mousemove", this.onMouseMove);
 
@@ -202,7 +202,16 @@ export default class ResizeScreenTask extends Task {
     });
   }
   onUnmounting(): void | Promise<void> {}
+
+  blocked: boolean = false;
+
   onMouseMove(e: MouseEvent) {
+    if (this.blocked) {
+      return;
+    }
+    this.blocked = true;
+    setTimeout(() => (this.blocked = false), 15);
+
     this.currPosX = e.clientX;
     this.currPosY = e.clientY;
 
