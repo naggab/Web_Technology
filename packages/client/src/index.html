@@ -48,9 +48,12 @@
         position: fixed;
         bottom: 0;
       }
-      @media (height: 800px) {
-        footer {
+      @media (max-height: 800px) or (max-width: 1100px) {
+        #footer {
           display: none;
+        }
+        #dark_light_mode{
+          display:none;
         }
       }
     </style>
