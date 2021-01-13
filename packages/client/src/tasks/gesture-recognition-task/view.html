@@ -38,6 +38,15 @@
         height: 480px;
     }
 
+    #hidden-canvas {
+        display: none;
+        position: absolute;
+        top:0;
+        left: 0;
+        width: 640px;
+        height: 480px;
+    }
+
     #gesture-goals {
         font-size: 80px;
         min-height: 100px;
@@ -69,6 +78,8 @@
         Please wait ...
     </div>
 </div>
+
+<canvas id="hidden-canvas"></canvas>
 
 <template id="gesture-goal-entry-template">
     <div class="gesture-goal-entry inactive">
