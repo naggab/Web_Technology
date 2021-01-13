@@ -26,7 +26,7 @@ export default class GeoDistanceTask extends Task {
   checkButton: Button;
   distanceInput: TextBox;
   cities: City[];
-  position: GeolocationPosition;
+  position: Position;
   tolerance: number;
   firstClick: boolean;
   result: boolean;
@@ -128,7 +128,7 @@ export default class GeoDistanceTask extends Task {
     }
   }
 
-  showPosition(position: GeolocationPosition) {
+  showPosition(position: Position) {
     const seed = MasterOfDisaster.getInstance().getGameSeed();
     const index = seed % this.cities.length;
     this.cityInfo.innerHTML = "City: " + this.cities[index].cityName;
