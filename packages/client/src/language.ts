@@ -1,7 +1,7 @@
 export const english = {
   general: {
     changeLanguage: "Change Language to GERMAN",
-    teamName: "TEAMNAME",
+    teamName: "CSS DISASTER",
     warning: "WARNING",
     error: "ERROR",
     info: "INFO",
@@ -45,7 +45,7 @@ export const english = {
 export const german = {
   general: {
     changeLanguage: "Sprache ändern zu ENGLISCH",
-    teamName: "TEAMNAME",
+    teamName: "CSS KATASTROPHE",
     warning: "WARNUNG",
     error: "FEHLER",
     info: "INFO",
