@@ -21,6 +21,7 @@ export type ClientState =
   | "all-tasks";
 export type DarkLight = "Dark" | "Light";
 export type Languages = "English" | "German";
+
 export class MasterOfDisaster {
   private watchingForGameStart: boolean = false;
   private watchingForGameEnd: boolean = false;
@@ -46,6 +47,26 @@ export class MasterOfDisaster {
     this.language = localStorage.getItem("language") as Languages;
   }
 
+  public getMode() {
+    return this.mode;
+  }
+
+  public setMode(mode: DarkLight) {
+    this.mode = mode;
+    let root = document.documentElement;
+    if (this.mode == "Light") {
+      root.style.setProperty("white", "#ffffff");
+      root.style.setProperty("black", "#393939");
+      console.debug(mode);
+    } else {
+      root.style.setProperty("black", "#ffffff");
+      root.style.setProperty("white", "#393939");
+      console.debug(mode);
+    }
+    console.debug(mode);
+    router(this.state_);
+  }
+
   public getString() {
     switch (this.language) {
       case "English":
@@ -57,9 +78,11 @@ export class MasterOfDisaster {
         return english;
     }
   }
+
   public getLanguage() {
     return this.language;
   }
+
   public setLanguage(language: Languages) {
     if (language != (localStorage.getItem("language") as Languages)) {
       this.language = language;
@@ -110,6 +133,7 @@ export class MasterOfDisaster {
       this.watchForGameEnd();
     }
   }
+
   public getState() {
     return this.state;
   }

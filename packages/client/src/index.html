@@ -7,23 +7,26 @@
       href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
       rel="stylesheet"
     />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <style>
       :root {
         --red: #8a0707;
         --green: #198a07;
         --white: #ffffff;
         --black: #393939;
-        /*
-                dark mode
 
+        /*
                 --white: #393939;
                 --black: #ffffff;
-                */
+*/
       }
 
       * {
         font-family: "Roboto", sans-serif;
         user-select: none;
+        padding: 0;
+        margin: 0;
       }
 
       body {
@@ -37,7 +40,18 @@
       #dark_light_mode {
         position: absolute;
         top: 2%;
-        right: 3%;
+        right: 2%;
+        width: 7%;
+        height: 3%;
+      }
+      footer {
+        position: fixed;
+        bottom: 0;
+      }
+      @media (height: 800px) {
+        footer {
+          display: none;
+        }
       }
     </style>
   </head>
@@ -46,6 +60,8 @@
       <toggle-switch></toggle-switch>
     </div>
     <div id="app"></div>
-    <out-footer styletype="light"></out-footer>
+    <div id="footer">
+      <out-footer styletype="light"></out-footer>
+    </div>
   </body>
 </html>
