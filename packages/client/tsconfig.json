@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "./ts-dist/",
     "typeRoots": ["../../node_modules/@types", "node_modules/@types", "./src/@types"],
-    "types": ["webpack-env", "jest", "resize-observer-browser"],
+    "types": ["webpack-env", "jest", "jquery", "resize-observer-browser"],
     "lib": ["dom", "ESNEXT", "DOM.Iterable", "WebWorker.ImportScripts"]
   },
   "exclude": ["node_modules"]

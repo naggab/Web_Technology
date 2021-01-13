@@ -44,12 +44,30 @@ class WelcomeScreen extends AbstractScreen {
     this._createGameButton.setLabel(this._mod.getString().welcome_start.createGame);
     this._showStats_button.setLabel(this._mod.getString().welcome_start.showStats);
     this._userName_input.setHint(this._mod.getString().welcome_start.userName);
+
+    var response = (function () {
+      var tmp = null;
+      $.ajax({
+        async: false,
+
+        url: "https://randomuser.me/api/",
+        dataType: "json",
+        success: function (data) {
+          tmp = data;
+        },
+      });
+      return tmp;
+    })();
+    this._userName_input.setValue(response.results[0].name.first + " " + response.results[0].name.last);
+
     this.shadowRoot.querySelector("#title").innerHTML = this._mod.getString().welcome_start.title;
     this.shadowRoot.querySelector("#subtitle").innerHTML = this._mod.getString().welcome_start.subTitle;
   }
+
   showAllTasks() {
     router("all-tasks");
   }
+
   async showStats() {
     await this._mod.showStats();
   }
