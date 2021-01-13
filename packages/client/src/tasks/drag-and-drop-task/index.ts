@@ -69,7 +69,7 @@ export default class DragAndDropTask extends Task {
         download(this.selectedFile);
         this.firstClickFlag = true;
         this.backButton.setAttribute("label", "Back");
-      } else this.finish(this.result[0],1);
+      } else this.finish(this.result[0], 1);
     });
   }
   async onDrop(e: DragEvent) {

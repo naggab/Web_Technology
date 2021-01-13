@@ -1,54 +1,50 @@
 <style>
-    .root {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-    }
-    span {
-      color: gray;
-    }
-    #load-button {
-      color: red;
-    }
-    #resize-zone {
-      border: 4px rgb(0, 0, 0);
-      border-style: solid;
-      border-radius: 10px;
-      width: 50%;
-      height: 100vh;
-      padding: 25px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      margin: 10px;
-      font-size: 30px;
-      position: relative;
-    }
-    
-    #bottom-right {
-      width: 30px;
-      height: 30px;
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      background-color: black;
-      border-radius: 50px 0px 0px 0px;
+  .root {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+  span {
+    color: gray;
+  }
+  #load-button {
+    color: red;
+  }
+  #resize-zone {
+    border: 4px rgb(0, 0, 0);
+    border-style: solid;
+    border-radius: 10px;
+    width: 50%;
+    height: 100vh;
+    padding: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin: 10px;
+    font-size: 30px;
+    position: relative;
+  }
 
-    }
-  </style>
-  <div class="root">
-    <div id="resize-zone">
-      <div id="text">Loading...</div>
-      <div id="bottom-right"></div>
-
-    </div>
-      
-    <apirush-button id="back-button" label="Check" styletype="white"></apirush-button>
+  #bottom-right {
+    width: 30px;
+    height: 30px;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background-color: black;
+    border-radius: 50px 0px 0px 0px;
+  }
+</style>
+<div class="root">
+  <div id="resize-zone">
+    <div id="text">Loading...</div>
+    <div id="bottom-right"></div>
   </div>
 
-  
+  <apirush-button id="back-button" label="Check" styletype="white"></apirush-button>
+</div>
