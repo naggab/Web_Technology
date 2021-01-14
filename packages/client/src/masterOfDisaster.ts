@@ -8,6 +8,7 @@ import { TaskOpener } from "./components/taskOpener";
 import { english, german } from "./language";
 import { PopUp } from "./components/PopUp";
 import { CapabilitiesManager } from "./capabilitiesManager";
+import { MapStorage } from "@apirush/common/src/maps";
 
 export type ClientState =
   | "loading"
@@ -44,7 +45,6 @@ export class MasterOfDisaster {
     this.onGameDidStart = this.onGameDidStart.bind(this);
     this.onGameAborted = this.onGameAborted.bind(this);
     this.onGameDidFinish = this.onGameDidFinish.bind(this);
-    TaskManger.getTaskIds().forEach((taskId) => this.taskState.set(taskId, false));
 
     this.language = localStorage.getItem("language") as Languages;
   }
@@ -149,6 +149,7 @@ export class MasterOfDisaster {
   }
 
   private onGameDidStart() {
+    this.prepareGameStart();
     this.setState("in-game");
     this.serverSession.unsubscribe(GameEventOp.GAME_STARTED, this.onGameDidStart);
   }
@@ -236,7 +237,9 @@ export class MasterOfDisaster {
       const { player, game } = await this.serverSession.sendRPC(CommandOp.JOIN_GAME, { id: gameId });
       this.myPlayer = player;
       this.activeGame = game;
-
+      if (this.activeGame.state === "in-game") {
+        this.prepareGameStart();
+      }
       this.setState(this.activeGame.state);
       return;
     } catch (e) {
@@ -277,7 +280,7 @@ export class MasterOfDisaster {
     this.onTaskNeedsToBeOpened = to.openTask;
 
     const hash = window.location.hash.replace("#", "");
-    if (hash && TaskManger.getTaskIds().indexOf(hash as any) !== -1) {
+    if (hash && TaskManger.getTaskIdentifiers().indexOf(hash as any) !== -1) {
       console.log("hash", hash);
       this.setState("all-tasks");
     }
@@ -298,11 +301,34 @@ export class MasterOfDisaster {
     return this.onTaskNeedsToBeOpened(id);
   }
 
+  prepareGameStart() {
+    const taskIds = Object.keys(MapStorage[this.activeGame.map].taskPositions);
+    taskIds.forEach((taskId) => this.taskState.set(taskId, false));
+  }
+
+  getTaskIdentifierForId(taskId: string): TaskIdentifier {
+    const taskIdNumber = parseInt(taskId);
+    const taskIds = Object.keys(MapStorage[this.activeGame.map].taskPositions);
+    const seed = this.getGameSeed();
+    let taskIdentifiers = TaskManger.getTaskIdentifiers();
+    const numRotations = seed % taskIdentifiers.length;
+    console.log("using numRotations", numRotations);
+    for (var i = 0; i < numRotations; i++) {
+      const firstObject = taskIdentifiers[0];
+      taskIdentifiers = [...taskIdentifiers.slice(1), firstObject];
+    }
+
+    const index = taskIdNumber % taskIdentifiers.length;
+    console.log("random task idents", taskIdentifiers);
+
+    return taskIdentifiers[index];
+  }
+
   async openTask(id: string): Promise<boolean> {
     this.ensureHelloSent();
     this.ensureInGame();
 
-    const taskId = "drag-and-drop-task";
+    const taskId = this.getTaskIdentifierForId(id);
 
     const result = await this.openTaskByIdentifier(taskId);
     if (!result.success) {
