@@ -65,7 +65,6 @@ export default class ResizeScreenTask extends Task {
     var index = MasterOfDisaster.getInstance().getGameSeed() % resizeArray.length;
     var setDimensionFlag: boolean = true;
 
-
     this.errorSound = new Audio("/assets/errorSound.mp3");
     this.errorSound.loop = false;
 
@@ -168,7 +167,7 @@ export default class ResizeScreenTask extends Task {
     });
 
     this.resizeObserver.observe(this.resizeZone);
-    
+
     this.checkButton.addEventListener("click", this.onButtonClick);
   }
   onUnmounting(): void | Promise<void> {}
@@ -206,16 +205,16 @@ export default class ResizeScreenTask extends Task {
       this.tolerance +
       "]";
   }
-  onMouseDown(e: MouseEvent){
+  onMouseDown(e: MouseEvent) {
     console.log("bottomRightElement", "mousedown");
     this.mouseDown = true;
     this.staticPosX = this.currPosX;
     this.staticPosY = this.currPosY;
   }
-  onMouseOut(e: MouseEvent){
-     this.onMouseMove(e);
+  onMouseOut(e: MouseEvent) {
+    this.onMouseMove(e);
   }
-  onButtonClick(e: Event){
+  onButtonClick(e: Event) {
     this.resizeZone.style.borderColor = "black";
     if (
       Math.abs(this.currHeight - this.targetHeight) <= this.tolerance &&
@@ -235,9 +234,7 @@ export default class ResizeScreenTask extends Task {
     this.checkButton.style.display = "none";
     this.resizeObserver.unobserve(this.resizeZone);
 
-  
     this.finish(this.taskSuccess);
-
   }
 }
 

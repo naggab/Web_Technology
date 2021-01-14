@@ -88,7 +88,7 @@ export default class MorseCodeTask extends Task {
 
       animation = requestAnimationFrame(updateRectPos); // call requestAnimationFrame again to animate next frame
     }
-    
+
     let debugTimer: number = 0;
 
     const shiftIndex = () => {
@@ -128,7 +128,7 @@ export default class MorseCodeTask extends Task {
         return;
       }
       setTimeout(shiftIndex, 16);
-    }
+    };
     panel.addEventListener("mousedown", (e) => {
       console.log("mousedown");
       mouseDown = true;
@@ -138,17 +138,15 @@ export default class MorseCodeTask extends Task {
       mouseDown = false;
     });
 
-    function onClick(e:Event){
-        audioElement.play();
-        requestAnimationFrame(updateRectPos);
-        firstClick = false;
-        o.start();
-        controlButton.style.display = "none";
-        var i = 0;
-        shiftIndex();
-        controlButton.removeEventListener("click", onClick);
-      
-
+    function onClick(e: Event) {
+      audioElement.play();
+      requestAnimationFrame(updateRectPos);
+      firstClick = false;
+      o.start();
+      controlButton.style.display = "none";
+      var i = 0;
+      shiftIndex();
+      controlButton.removeEventListener("click", onClick);
     }
     controlButton.addEventListener("click", onClick);
   }

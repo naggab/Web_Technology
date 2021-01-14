@@ -60,7 +60,7 @@ export default class FillShapeTask extends Task {
     //set maximal number of checks
     this.maxCheck = 3;
     //set value
-    this.checkButton.setAttribute("label", "Check ["+this.maxCheck+"]");
+    this.checkButton.setAttribute("label", "Check [" + this.maxCheck + "]");
 
     this.flagMouseDown = false;
     //line thickness
@@ -89,13 +89,13 @@ export default class FillShapeTask extends Task {
       this.maxCheck--;
       this.tupleResult = this.shape.checkFillStatus(); //returns [bool,message]
       this.infoElement.innerHTML = this.tupleResult[1];
-      this.checkButton.setAttribute("label", "Check ["+this.maxCheck+"]");
+      this.checkButton.setAttribute("label", "Check [" + this.maxCheck + "]");
       this.infoElement.style.color = this.tupleResult[0] ? "green" : "red";
       //if press check to many times or the result is ok, finish the task!
       if (this.maxCheck <= 0 || this.tupleResult[0]) {
         this.checkButton.style.display = "none";
         this.finish(this.tupleResult[0]);
-      } 
+      }
     });
   }
   onUnmounting(): void | Promise<void> {}
@@ -343,13 +343,7 @@ class Smiley implements ShapeI {
     } else {
       return [
         false,
-        "Nope. Nice Try. (" +
-          Math.ceil(percentage_check) +
-          "% / " +
-          this.fill_shape +
-          "%, +/-" +
-          this.tolerance +
-          "%)",
+        "Nope. Nice Try. (" + Math.ceil(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
       ];
     }
   }
@@ -449,13 +443,7 @@ class Pyramid implements ShapeI {
     } else {
       return [
         false,
-        "Nope. Nice Try. (" +
-          Math.ceil(percentage_check) +
-          "% / " +
-          this.fill_shape +
-          "%, +/-" +
-          this.tolerance +
-          "%)",
+        "Nope. Nice Try. (" + Math.ceil(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
       ];
     }
   }
@@ -591,13 +579,7 @@ class Tree implements ShapeI {
     } else {
       return [
         false,
-        "Nope. Nice Try. (" +
-          Math.ceil(percentage_check) +
-          "% / " +
-          this.fill_shape +
-          "%, +/-" +
-          this.tolerance +
-          "%)",
+        "Nope. Nice Try. (" + Math.ceil(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
       ];
     }
   }
@@ -768,13 +750,7 @@ class Cactus implements ShapeI {
     } else {
       return [
         false,
-        "Nope. Nice Try. (" +
-          Math.ceil(percentage_check) +
-          "% / " +
-          this.fill_shape +
-          "%, +/-" +
-          this.tolerance +
-          "%)",
+        "Nope. Nice Try. (" + Math.ceil(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
       ];
     }
   }
