@@ -74,16 +74,15 @@ export default class DragAndDropTask extends Task {
     this.dropZone.style.background = this.result[0] ? "green" : "red";
     this.dropZone.innerHTML = this.result[1].toString();
     this.dropZone.removeEventListener("drop", this.onDrop);
-    this.backButton.removeEventListener("click",this.onClick);
+    this.backButton.removeEventListener("click", this.onClick);
     this.backButton.style.display = "none";
-    
+
     this.finish(this.result[0], 1);
   }
-  onClick(e:Event){
+  onClick(e: Event) {
     download(this.selectedFile);
-    this.backButton.removeEventListener("click",this.onClick);
+    this.backButton.removeEventListener("click", this.onClick);
     this.backButton.style.display = "none";
-    
   }
 
   onUnmounting(): void | Promise<void> {}
