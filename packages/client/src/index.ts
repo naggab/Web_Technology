@@ -22,6 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
   MasterOfDisaster.setup().then(() => {
     const footer = document.querySelector("out-footer") as Footer;
     const slider = document.querySelector("toggle-switch") as ToggleSwitch;
+    footer.initMOD();
     footer.changeLanguage(true);
     slider.initMOD();
 
