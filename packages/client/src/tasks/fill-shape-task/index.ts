@@ -30,9 +30,9 @@ export default class FillShapeTask extends Task {
   flagMouseDown: boolean;
   ctx: CanvasRenderingContext2D;
   pen_thickness = 20;
-  cnt_button_clicks = 0;
   shape: ShapeI;
   tupleResult: any;
+  maxCheck: number;
 
   constructor(props) {
     super(props);
@@ -56,6 +56,11 @@ export default class FillShapeTask extends Task {
     //this.shape = new shapes[seed % shapes.length](this.ctx, 100, 5, fillArry[seed % fillArry.length], 400, 10);
     this.shape = new shapes[3](this.ctx, 100, 5, fillArry[seed % fillArry.length], 400, 5);
     this.shape.draw();
+
+    //set maximal number of checks
+    this.maxCheck = 3;
+    //set value
+    this.checkButton.setAttribute("label", "Check ["+this.maxCheck+"]");
 
     this.flagMouseDown = false;
     //line thickness
@@ -81,17 +86,16 @@ export default class FillShapeTask extends Task {
     });
     this.checkButton.addEventListener("click", (c) => {
       c.preventDefault();
-      console.log("button", this.cnt_button_clicks);
-      if (this.cnt_button_clicks == 0) {
-        this.tupleResult = this.shape.checkFillStatus(); //returns [bool,message]
-        this.infoElement.innerHTML = this.tupleResult[1];
-      } else {
-        this.finish(this.tupleResult[0], 1);
-      }
+      this.maxCheck--;
+      this.tupleResult = this.shape.checkFillStatus(); //returns [bool,message]
+      this.infoElement.innerHTML = this.tupleResult[1];
+      this.checkButton.setAttribute("label", "Check ["+this.maxCheck+"]");
       this.infoElement.style.color = this.tupleResult[0] ? "green" : "red";
-      this.checkButton.setAttribute("label", "Back");
-
-      this.cnt_button_clicks++;
+      //if press check to many times or the result is ok, finish the task!
+      if (this.maxCheck <= 0 || this.tupleResult[0]) {
+        this.checkButton.style.display = "none";
+        this.finish(this.tupleResult[0]);
+      } 
     });
   }
   onUnmounting(): void | Promise<void> {}
@@ -113,8 +117,7 @@ export default class FillShapeTask extends Task {
         this.checkButton.setAttribute("label", "Back");
         this.canvasElement.removeEventListener("mousemove", this.onMouseMove);
         //to activate exit
-        this.cnt_button_clicks++;
-        this.tupleResult = [false, ""];
+        this.finish(false);
       }
     }
   }
@@ -335,13 +338,13 @@ class Smiley implements ShapeI {
     if (percentage_check > this.fill_shape - 5 && percentage_check < this.fill_shape + 5) {
       return [
         true,
-        "You did it! (" + Math.trunc(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
+        "You did it! (" + Math.ceil(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
       ];
     } else {
       return [
         false,
         "Nope. Nice Try. (" +
-          Math.trunc(percentage_check) +
+          Math.ceil(percentage_check) +
           "% / " +
           this.fill_shape +
           "%, +/-" +
@@ -441,13 +444,13 @@ class Pyramid implements ShapeI {
     if (percentage_check > this.fill_shape - 5 && percentage_check < this.fill_shape + 5) {
       return [
         true,
-        "You did it! (" + Math.trunc(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
+        "You did it! (" + Math.ceil(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
       ];
     } else {
       return [
         false,
         "Nope. Nice Try. (" +
-          Math.trunc(percentage_check) +
+          Math.ceil(percentage_check) +
           "% / " +
           this.fill_shape +
           "%, +/-" +
@@ -583,13 +586,13 @@ class Tree implements ShapeI {
     if (percentage_check > this.fill_shape - 5 && percentage_check < this.fill_shape + 5) {
       return [
         true,
-        "You did it! (" + Math.trunc(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
+        "You did it! (" + Math.ceil(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
       ];
     } else {
       return [
         false,
         "Nope. Nice Try. (" +
-          Math.trunc(percentage_check) +
+          Math.ceil(percentage_check) +
           "% / " +
           this.fill_shape +
           "%, +/-" +
@@ -760,13 +763,13 @@ class Cactus implements ShapeI {
     if (percentage_check > this.fill_shape - 5 && percentage_check < this.fill_shape + 5) {
       return [
         true,
-        "You did it! (" + Math.trunc(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
+        "You did it! (" + Math.ceil(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
       ];
     } else {
       return [
         false,
         "Nope. Nice Try. (" +
-          Math.trunc(percentage_check) +
+          Math.ceil(percentage_check) +
           "% / " +
           this.fill_shape +
           "%, +/-" +
