@@ -37,7 +37,7 @@ export default class ReactionTask extends Task {
     this.btnEnabled = true;
     var seed = MasterOfDisaster.getInstance().getGameSeed();
 
-    this.checkButton.addEventListener("click", (c) => {
+    this.checkButton.addEventListener("mousedown", (c) => {
       c.preventDefault();
       if (!this.timeAtStart) {
         this.infoElement.innerHTML = "Timer has not started yet. Try again!";
@@ -56,14 +56,16 @@ export default class ReactionTask extends Task {
             "s - Your reaction: " +
             (dif / 1000).toFixed(3) +
             "s - Success!";
-          this.successTimeout = setTimeout(this.taskSuccess.bind(this), 1500);
+          //this.successTimeout = setTimeout(this.taskSuccess.bind(this), 1500);
           this.btnEnabled = false;
+          this.taskSuccess();
         } else {
           this.infoElement.innerHTML =
             "You were " + Math.abs(result / 1000).toFixed(1) + " seconds too slow! Try again!";
           this.drawRect();
           this.btnEnabled = false;
-          this.failTimeout = setTimeout(this.taskFailed.bind(this), 1500);
+          //this.failTimeout = setTimeout(this.taskFailed.bind(this), 1500);
+          this.taskFailed();
         }
       }
     });

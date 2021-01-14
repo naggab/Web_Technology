@@ -37,14 +37,17 @@ export default class TimingTask extends Task {
     this.btnEnabled = true;
     var seed = MasterOfDisaster.getInstance().getGameSeed();
 
-    this.checkButton.addEventListener("click", (c) => {
+    this.checkButton.addEventListener("mousedown", (c) => {
+      if (this.btnEnabled) this.timeAtClick = performance.now();
+    });
+
+    this.checkButton.addEventListener("mouseup", (c) => {
       c.preventDefault();
       if (!this.timeAtStart || !this.timeToEnd) {
         this.infoElement.innerHTML = "Timer has not started yet. Try again!";
         if (this.timerTimeout) clearTimeout(this.timerTimeout);
         this.failTimeout = setTimeout(this.taskFailed.bind(this), 1500);
       } else if (this.btnEnabled) {
-        this.timeAtClick = performance.now();
         var dif = this.timeAtClick - this.timeAtStart;
         debugPrint("dif = " + dif);
         var result = dif - this.timeToEnd;
@@ -56,7 +59,8 @@ export default class TimingTask extends Task {
             " - Your time: " +
             (dif / 1000).toFixed(1) +
             " - Success!";
-          this.successTimeout = setTimeout(this.taskSuccess.bind(this), 1500);
+          //this.successTimeout = setTimeout(this.taskSuccess.bind(this), 1500);
+          this.taskSuccess();
           this.btnEnabled = false;
         } else {
           this.infoElement.innerHTML =
@@ -66,7 +70,8 @@ export default class TimingTask extends Task {
             " Try again!";
           this.drawRect();
           this.btnEnabled = false;
-          this.failTimeout = setTimeout(this.taskFailed.bind(this), 1500);
+          //this.failTimeout = setTimeout(this.taskFailed.bind(this), 1500);
+          this.taskFailed();
         }
       }
     });
