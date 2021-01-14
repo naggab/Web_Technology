@@ -14,7 +14,7 @@ class ListAllTasksScreen extends AbstractScreen {
 
   async onMounted() {
     const hash = window.location.hash.replace("#", "");
-    if (!hash || TaskManger.getTaskIds().indexOf(hash as any) === -1) {
+    if (!hash || TaskManger.getTaskIdentifiers().indexOf(hash as any) === -1) {
       return;
     }
     await MasterOfDisaster.getInstance().openTaskByIdentifier(hash as any);

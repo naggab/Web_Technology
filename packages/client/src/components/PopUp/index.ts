@@ -40,7 +40,7 @@ export class PopUp extends HTMLElement {
         this._title.innerHTML = this._mod.getString().general.error;
         break;
       case "debug":
-        if (MasterOfDisaster.getInstance().debugMode) {
+        if (MasterOfDisaster.getInstance().getMode()) {
           this._title.innerHTML = this._mod.getString().general.debug;
         } else {
           this.closeModal();

@@ -1,7 +1,7 @@
 import WelcomeScreen from "./screens/welcome-start";
 import JoinGameScreen from "./screens/welcome-join-game";
 import CreateNewGameScreen from "./screens/welcome-create-game";
-import { ClientState, MasterOfDisaster } from "./masterOfDisaster";
+import { ClientState } from "./masterOfDisaster";
 import ErrorScreen from "./screens/error";
 import { InGameScreen } from "./screens/in-game";
 import LoadingScreen from "./screens/loading";

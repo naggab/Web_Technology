@@ -49,12 +49,9 @@ export const english = {
   welcome_stats: {
     title: "STATS SCREEN",
     totalTime: "TOTAL PLAYING TIME",
-    
-
   },
   welcome_all_tasks: {
     title: "ALL TASKS",
-
   },
 };
 export const german = {
@@ -76,7 +73,7 @@ export const german = {
     "timing-task": "TimingTask",
     "reaction-task": "ReactionTask",
   },
-  
+
   welcome_start: {
     title: "WILLKOMMEN BEI APIRUSH",
     subTitle: "DAS BESTE SPIEL ALLER ZEITEN",

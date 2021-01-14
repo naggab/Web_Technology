@@ -29,6 +29,16 @@ class WelcomeCreateGame extends AbstractScreen {
     this.shadowRoot.querySelector("#choose-game").innerHTML = this._mod.getString().welcome_create.gameName;
     this._gameName_input.setHint(this._mod.getString().welcome_create.gameNameHint);
     this._createGameButton.setLabel(this._mod.getString().welcome_create.createGame);
+    this.setRandomName();
+  }
+  async setRandomName() {
+    const response = await fetch("https://pokeapi.co/api/v2/pokemon");
+    //const response = await fetch("https://randomuser.me/api/");
+    let data = await response.json();
+    //data = data.results[0].name;
+    data = data.results[Math.floor(Math.random() * data.results.length)];
+    //this._userName_input.setValue(data.first + " " + data.last);
+    this._gameName_input.setValue(data.name);
   }
 
   async createGame() {

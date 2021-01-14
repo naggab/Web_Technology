@@ -27,7 +27,7 @@ export type TaskIdentifier = keyof typeof TASK_LIST;
 class TaskManagerClass {
   constructor() {}
 
-  getTaskIds(): TaskIdentifier[] {
+  getTaskIdentifiers(): TaskIdentifier[] {
     return Object.keys(TASK_LIST) as any;
   }
 

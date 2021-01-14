@@ -14,7 +14,7 @@ export class TaskList extends List<TaskDetails> {
     this.entryContentTemplate_ = document.createElement("template");
     this.entryContentTemplate_.innerHTML = templateHTML;
 
-    TaskManger.getTaskIds().forEach((id) => {
+    TaskManger.getTaskIdentifiers().forEach((id) => {
       this.addEntry({ id });
     });
   }

@@ -35,7 +35,7 @@ class WelcomeScreen extends AbstractScreen {
 
     let _showAllTasks: Button = this.shadowRoot.querySelector("#show-all-tasks");
 
-    if (this._mod.debugMode) {
+    if (this._mod.getMode()) {
       _showAllTasks.classList.remove("hidden");
       _showAllTasks.onclick = this.showAllTasks;
     }
@@ -45,23 +45,16 @@ class WelcomeScreen extends AbstractScreen {
     this._showStats_button.setLabel(this._mod.getString().welcome_start.showStats);
     this._userName_input.setHint(this._mod.getString().welcome_start.userName);
 
-    var response = (function () {
-      var tmp = null;
-      $.ajax({
-        async: false,
-
-        url: "https://randomuser.me/api/",
-        dataType: "json",
-        success: function (data) {
-          tmp = data;
-        },
-      });
-      return tmp;
-    })();
-    this._userName_input.setValue(response.results[0].name.first + " " + response.results[0].name.last);
+    this.setRandomName();
 
     this.shadowRoot.querySelector("#title").innerHTML = this._mod.getString().welcome_start.title;
     this.shadowRoot.querySelector("#subtitle").innerHTML = this._mod.getString().welcome_start.subTitle;
+  }
+  async setRandomName() {
+    const response = await fetch("https://randomuser.me/api/");
+    let data = await response.json();
+    data = data.results[0].name;
+    this._userName_input.setValue(data.first + " " + data.last);
   }
 
   showAllTasks() {

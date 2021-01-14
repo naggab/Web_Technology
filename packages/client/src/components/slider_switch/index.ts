@@ -3,7 +3,7 @@ import { MasterOfDisaster } from "../../masterOfDisaster";
 
 export class ToggleSwitch extends HTMLElement {
   _checkBox: HTMLInputElement;
-  _switch: HTMLInputElement;
+  _slider: HTMLLabelElement;
   _mod: MasterOfDisaster;
 
   constructor() {
@@ -14,19 +14,18 @@ export class ToggleSwitch extends HTMLElement {
     let shadowRoot = this.attachShadow({ mode: "open" });
     shadowRoot.innerHTML = templateHTML;
     this._checkBox = shadowRoot.querySelector("#checkbox") as HTMLInputElement;
-    this._switch = shadowRoot.querySelector("#checkbox") as HTMLInputElement;
-    this._switch.onclick = this.modeChanged.bind(this);
+    this._slider = shadowRoot.querySelector("#switch") as HTMLLabelElement;
+    this._slider.onclick = this.modeChanged.bind(this);
   }
   public initMOD() {
     this._mod = MasterOfDisaster.getInstance();
+    if (this._mod.getMode()) {
+      this._slider.click();
+    }
   }
 
   private modeChanged() {
-    if (!this._switch.checked) {
-      this._mod.setMode("Light");
-    } else {
-      this._mod.setMode("Dark");
-    }
+    this._mod.setMode(this._checkBox.checked);
   }
 }
 
