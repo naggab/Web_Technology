@@ -24,14 +24,18 @@ export class Broker {
    */
   private scheduledCleanup() {
     this.cleanupTimer = null;
-    this.connections.forEach((conn) => {
-      if (!conn.ok) {
-        conn.leave();
-        return;
-      }
-      conn.ok = false;
-      conn.ws.ping();
-    });
+    try {
+      this.connections.forEach((conn) => {
+        if (!conn.ok || conn.ws.readyState !== WebSocket.OPEN) {
+          conn.leave();
+          return;
+        }
+        conn.ok = false;
+        conn.ws.ping();
+      });
+    } catch (e) {
+      console.error("error during scheduled cleanup", e);
+    }
     this.cleanupTimer = setTimeout(this.scheduledCleanup.bind(this), CLEANUP_SCHEDULE);
   }
 

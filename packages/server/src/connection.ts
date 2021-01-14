@@ -19,6 +19,7 @@ export interface WebSocketI {
   send(data: any, cb?: (err?: Error) => void): void;
   close();
   ping();
+  readyState: number;
 }
 
 export class Connection {
@@ -170,12 +171,17 @@ export class Connection {
   }
 
   sendEvent<T extends EventOp>(evt: Event<T>) {
-    const dataStr = JSON.stringify(evt);
-    this.ws.send(dataStr);
+    this.send(evt);
   }
 
   respondWith(res: (SuccessResponse<any> | ErrorResponseBody) & Respondable) {
-    const dataStr = JSON.stringify(res);
-    this.ws.send(dataStr);
+    this.send(res);
+  }
+
+  send(data: any) {
+    if (this.ws.readyState === WebSocket.OPEN) {
+      const dataStr = JSON.stringify(data);
+      this.ws.send(dataStr);
+    }
   }
 }
