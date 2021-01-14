@@ -303,20 +303,33 @@ export class MasterOfDisaster {
 
   getTaskIdentifierForId(taskId: string): TaskIdentifier {
     const taskIdNumber = parseInt(taskId);
-    const taskIds = Object.keys(MapStorage[this.activeGame.map].taskPositions);
     const seed = this.getGameSeed();
     let taskIdentifiers = TaskManger.getTaskIdentifiers();
-    const numRotations = seed % taskIdentifiers.length;
-    console.log("using numRotations", numRotations);
-    for (var i = 0; i < numRotations; i++) {
-      const firstObject = taskIdentifiers[0];
-      taskIdentifiers = [...taskIdentifiers.slice(1), firstObject];
+    let numRotations = seed % taskIdentifiers.length;
+    let selectedTask: TaskIdentifier;
+    while (true) {
+      for (var i = 0; i < numRotations; i++) {
+        const firstObject = taskIdentifiers[0];
+        taskIdentifiers = [...taskIdentifiers.slice(1), firstObject];
+      }
+
+      const index = taskIdNumber % taskIdentifiers.length;
+      selectedTask = taskIdentifiers[index];
+
+      const neededCapabilities = TaskManger.getTaskCapabilities(selectedTask);
+
+      if (
+        (neededCapabilities.camera && !this.capabilities.cameraAvailable) ||
+        (neededCapabilities.geolocation && !this.capabilities.geolocationAvailable)
+      ) {
+        console.log("task", selectedTask, "will not work, trying to find another task because of lacking capabilities");
+        numRotations = 1;
+        continue;
+      }
+      break;
     }
 
-    const index = taskIdNumber % taskIdentifiers.length;
-    console.log("random task idents", taskIdentifiers);
-
-    return taskIdentifiers[index];
+    return selectedTask;
   }
 
   async openTask(id: string): Promise<boolean> {
