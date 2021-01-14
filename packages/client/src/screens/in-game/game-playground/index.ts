@@ -465,11 +465,13 @@ class GridObject {
   type: ElementType;
   shape: Konva.Shape;
   task: string;
+  pos: Coord;
 
-  constructor(type: ElementType, shape: Konva.Shape, task?: string) {
+  constructor(type: ElementType, shape: Konva.Shape, task?: string, pos?: Coord) {
     this.type = type;
     this.shape = shape;
     if (task !== undefined) this.task = task;
+    if (pos !== undefined) this.pos = pos;
   }
 }
 
@@ -498,6 +500,9 @@ export default class GamePlayground extends HTMLElement {
   questionMarkDone: HTMLImageElement;
 
   endGameScreen: boolean;
+  editMode: boolean;
+  mouseIsDown: boolean;
+  newWall: Coord[];
 
   constructor() {
     super();
@@ -650,8 +655,112 @@ export default class GamePlayground extends HTMLElement {
         18,
       );
     }
-    if (keyCode == 67 && DEBUG_MODE) {
+    if (keyCode == 67 && DEBUG_MODE && !this.keyMap.get(17)) {
+      // c and not ctrl
       this.endGame(this.player.playerID);
+    }
+    if (keyCode == 77) {
+      this.editMode = !this.editMode;
+      if (this.grid) {
+        this.grid.forEach((gridRow) => {
+          gridRow.forEach((gridElem) => {
+            this.baseLayer.listening(this.editMode);
+            gridElem.shape.listening(this.editMode);
+
+            var mapExport = this.shadowRoot.getElementById("map-export") as HTMLElement;
+            if (this.editMode) {
+              mapExport.style.display = "block";
+              gridElem.shape.on(
+                "mousedown",
+                function () {
+                  this.mouseIsDown = true;
+                  this.newWall = [];
+                }.bind(this),
+              );
+              gridElem.shape.on(
+                "mouseup",
+                function () {
+                  this.mouseIsDown = false;
+
+                  if (gridElem.shape.fill() != "magenta" && !this.newWall.find((elem) => elem.pos == gridElem.pos)) {
+                    gridElem.shape.fill("magenta");
+                    gridElem.shape.draw();
+                    gridElem.type = ElementType.Wall;
+                    this.newWall.push(gridElem.pos);
+                  }
+
+                  if (this.newWall) {
+                    console.log(this.newWall);
+                    var str = "";
+                    var prev_x = 0;
+                    var prev_y = 0;
+
+                    var start_x = 0;
+                    var start_y = 0;
+
+                    var dir = 0; // 1 = hor, 2 = ver
+                    var prev_dir = 0;
+                    if (this.newWall.length == 1) {
+                      str = str + "cord(" + this.newWall[0].x + "," + this.newWall[0].y + ")";
+                    } else {
+                      for (var i = 0; i < this.newWall.length; i++) {
+                        var current = this.newWall[i];
+                        if (
+                          (current.x == prev_x && current.y == prev_y + 1) ||
+                          (current.x == prev_x && current.y == prev_y - 1)
+                        ) {
+                          dir = 2;
+                        } else if (
+                          (current.x == prev_x - 1 && current.y == prev_y) ||
+                          (current.x == prev_x + 1 && current.y == prev_y)
+                        ) {
+                          dir = 1;
+                        } else {
+                          console.log(current);
+                          start_x = current.x;
+                          start_y = current.y;
+                          str = str + "cord(" + current.x + "," + current.y + "),";
+                        }
+                        if (dir != prev_dir && prev_dir != 0) {
+                          console.log(prev_x, prev_y);
+                          start_x = prev_x;
+                          start_y = prev_y;
+                          str = str + "cord(" + prev_x + "," + prev_y + "),";
+                        }
+                        prev_x = current.x;
+                        prev_y = current.y;
+                        prev_dir = dir;
+                        console.log(dir);
+                      }
+                      str = str + "cord(" + prev_x + "," + prev_y + "),";
+                    }
+
+                    /*this.newWall.forEach((c) => {
+                      str = str + "cord(" + c.x + "," + c.y + "),";
+                    });*/
+                    mapExport.innerHTML = mapExport.innerHTML + "\n[" + str + "],";
+                  }
+                }.bind(this),
+              );
+              gridElem.shape.on(
+                "mousemove",
+                function (xit, yit) {
+                  if (gridElem.shape.fill() != "magenta" && this.mouseIsDown) {
+                    gridElem.shape.fill("magenta");
+                    gridElem.shape.draw();
+                    gridElem.type = ElementType.Wall;
+                    this.newWall.push(gridElem.pos);
+                  }
+                }.bind(this),
+              );
+            } else {
+              mapExport.style.display = "none";
+            }
+          });
+        });
+      }
+      if (!this.editMode) this.shadowRoot.getElementById("map-export").innerHTML = "";
+      this.showPopup("Edit mode " + (this.editMode ? "enabled!" : "disabled!"));
     }
     //player.redraw();
   }
@@ -959,6 +1068,8 @@ export default class GamePlayground extends HTMLElement {
             new GridObject(
               ElementType.OpenSpace,
               this.drawRect(this.baseLayer, this.stage, w * gridSize, y * gridSize, ElementType.OpenSpace),
+              undefined,
+              cord(w, h),
             ),
           );
         } else {
@@ -967,6 +1078,8 @@ export default class GamePlayground extends HTMLElement {
             new GridObject(
               ElementType.Wall,
               this.drawRect(this.baseLayer, this.stage, w * gridSize, y * gridSize, ElementType.Wall),
+              undefined,
+              cord(w, h),
             ),
           );
         }
