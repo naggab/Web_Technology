@@ -21,14 +21,36 @@ const TASK_LIST = {
   "reaction-task": ReactionTask,
   "geo-distance-task": GeoDistanceTask,
 } as const;
-
 export type TaskIdentifier = keyof typeof TASK_LIST;
+
+type TaskCapabilities = { camera: boolean; geolocation: boolean };
+
+const TASK_CAPABILITIES: { [key in TaskIdentifier]?: TaskCapabilities } = {
+  "gesture-recognition-task": {
+    camera: true,
+    geolocation: false,
+  },
+  "geo-distance-task": {
+    camera: false,
+    geolocation: true,
+  },
+} as const;
 
 class TaskManagerClass {
   constructor() {}
 
   getTaskIdentifiers(): TaskIdentifier[] {
     return Object.keys(TASK_LIST) as any;
+  }
+
+  getTaskCapabilities(name: TaskIdentifier): TaskCapabilities {
+    if (TASK_CAPABILITIES[name]) {
+      return TASK_CAPABILITIES[name];
+    }
+    return {
+      camera: false,
+      geolocation: false,
+    };
   }
 
   findTask(name: TaskIdentifier): typeof TASK_LIST[keyof typeof TASK_LIST] | null {
