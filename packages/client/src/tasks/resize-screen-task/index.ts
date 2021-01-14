@@ -6,7 +6,7 @@ import { times } from "lodash";
 import { Fade, Unstable_TrapFocus } from "@material-ui/core";
 
 export default class ResizeScreenTask extends Task {
-  backButton: Button;
+  checkButton: Button;
   resizeZone: HTMLDivElement;
   textElement: HTMLDivElement;
   bottomRightElement: HTMLDivElement;
@@ -30,6 +30,8 @@ export default class ResizeScreenTask extends Task {
   errorSound: HTMLAudioElement;
   widthErrorFlag: boolean = false;
   heightErrorFlag: boolean = false;
+  resizeObserver: any;
+  taskSuccess: boolean = false;
 
   //mouse:
   currPosX: number;
@@ -40,12 +42,15 @@ export default class ResizeScreenTask extends Task {
   constructor(props) {
     super(props);
     this.onMouseMove = this.onMouseMove.bind(this);
+    this.onMouseDown = this.onMouseDown.bind(this);
+    this.onMouseOut = this.onMouseOut.bind(this);
+    this.onButtonClick = this.onButtonClick.bind(this);
   }
 
   async onMounted() {
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = viewHtml;
-    this.backButton = this.shadowRoot.getElementById("back-button") as Button;
+    this.checkButton = this.shadowRoot.getElementById("back-button") as Button;
     this.textElement = this.shadowRoot.getElementById("text") as HTMLDivElement;
     this.rootContainer = this.shadowRoot.querySelector(".root") as HTMLDivElement;
     this.resizeZone = this.shadowRoot.getElementById("resize-zone") as HTMLDivElement;
@@ -60,14 +65,12 @@ export default class ResizeScreenTask extends Task {
     var index = MasterOfDisaster.getInstance().getGameSeed() % resizeArray.length;
     var setDimensionFlag: boolean = true;
 
-    var firstButtonClick: boolean = true;
-    var taskSuccess: boolean = true;
 
     this.errorSound = new Audio("/assets/errorSound.mp3");
     this.errorSound.loop = false;
 
     this.tolerance = 5;
-    this.maxHeight = 500;
+    this.maxHeight = 350;
     this.minHeight = 100;
     this.maxWidth = 1000;
     this.minWidth = 320;
@@ -79,26 +82,17 @@ export default class ResizeScreenTask extends Task {
     this.resizeZone.style.height = this.initHeight + "px";
     this.resizeZone.style.width = this.initWidth + "px";
 
-    this.bottomRightElement.addEventListener("mousedown", (e) => {
-      console.log("bottomRightElement", "mousedown");
-      this.mouseDown = true;
-      this.staticPosX = this.currPosX;
-      this.staticPosY = this.currPosY;
-    });
+    this.bottomRightElement.addEventListener("mousedown", this.onMouseDown);
     this.rootContainer.addEventListener("mouseup", (e) => {
-      console.log("bottomRightElement");
       this.mouseDown = false;
     });
-    this.bottomRightElement.addEventListener("mouseout", (e) => {
-      //this.mouseDown = false;
-      this.onMouseMove(e);
-    });
+    this.bottomRightElement.addEventListener("mouseout", this.onMouseOut);
     this.rootContainer.addEventListener("mousemove", this.onMouseMove);
 
     var widthMinMax = false;
     var heightMinMax = false;
 
-    const resizeObserver = new ResizeObserver((entries) => {
+    this.resizeObserver = new ResizeObserver((entries) => {
       this.currHeight = Math.trunc(entries[0].contentRect.height);
       this.currWidth = Math.trunc(entries[0].contentRect.width);
 
@@ -173,33 +167,9 @@ export default class ResizeScreenTask extends Task {
       }
     });
 
-    resizeObserver.observe(this.resizeZone);
+    this.resizeObserver.observe(this.resizeZone);
     
-    this.backButton.addEventListener("click", (e) => {
-      if (firstButtonClick) {
-        this.resizeZone.style.borderColor = "black";
-        if (
-          Math.abs(this.currHeight - this.targetHeight) <= this.tolerance &&
-          Math.abs(this.currWidth - this.targetWidth) <= this.tolerance
-        ) {
-          this.textElement.innerHTML = "Yes, you did it!!!";
-          this.resizeZone.style.background = "green";
-          taskSuccess = true;
-        } else {
-          this.textElement.innerHTML = "Nope, nice try.";
-          this.resizeZone.style.background = "red";
-          taskSuccess = false;
-        }
-        this.rootContainer.removeEventListener("mousemove", this.onMouseMove);
-        this.backButton.setAttribute("label", "Back");
-        firstButtonClick = false;
-        resizeObserver.unobserve(this.resizeZone);
-
-       
-      } else {
-        this.finish(taskSuccess, 1);
-      }
-    });
+    this.checkButton.addEventListener("click", this.onButtonClick);
   }
   onUnmounting(): void | Promise<void> {}
 
@@ -235,6 +205,39 @@ export default class ResizeScreenTask extends Task {
       " [+/-" +
       this.tolerance +
       "]";
+  }
+  onMouseDown(e: MouseEvent){
+    console.log("bottomRightElement", "mousedown");
+    this.mouseDown = true;
+    this.staticPosX = this.currPosX;
+    this.staticPosY = this.currPosY;
+  }
+  onMouseOut(e: MouseEvent){
+     this.onMouseMove(e);
+  }
+  onButtonClick(e: Event){
+    this.resizeZone.style.borderColor = "black";
+    if (
+      Math.abs(this.currHeight - this.targetHeight) <= this.tolerance &&
+      Math.abs(this.currWidth - this.targetWidth) <= this.tolerance
+    ) {
+      this.textElement.innerHTML = "Yes, you did it!!!";
+      this.resizeZone.style.background = "green";
+      this.taskSuccess = true;
+    } else {
+      this.textElement.innerHTML = "Nope, nice try.";
+      this.resizeZone.style.background = "red";
+    }
+    this.rootContainer.removeEventListener("mousemove", this.onMouseMove);
+    this.bottomRightElement.removeEventListener("mousedown", this.onMouseDown);
+    this.bottomRightElement.removeEventListener("mouseout", this.onMouseOut);
+    this.checkButton.removeEventListener("click", this.onButtonClick);
+    this.checkButton.style.display = "none";
+    this.resizeObserver.unobserve(this.resizeZone);
+
+  
+    this.finish(this.taskSuccess);
+
   }
 }
 

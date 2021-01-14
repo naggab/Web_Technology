@@ -114,7 +114,7 @@ export default class FillShapeTask extends Task {
       if (typeof this.shape.checkOutside(relativeMousePos) !== "undefined") {
         this.infoElement.innerHTML = this.shape.checkOutside(relativeMousePos)[1];
         this.infoElement.style.color = "red";
-        this.checkButton.setAttribute("label", "Back");
+        this.checkButton.style.display = "none";
         this.canvasElement.removeEventListener("mousemove", this.onMouseMove);
         //to activate exit
         this.finish(false);

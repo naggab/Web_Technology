@@ -29,6 +29,7 @@ export class Button extends HTMLElement {
     this.setAttribute("id", text);
   }
 
+
   public setStyle(text){
     this.setAttribute("styletype", text);
   }

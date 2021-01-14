@@ -20,6 +20,10 @@ export default class MorseCodeTask extends Task {
   morseLinePx: number;
   morseDotPx: number;
 
+  constructor(props) {
+    super(props);
+  }
+
   async onMounted() {
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = viewHtml;
@@ -73,9 +77,6 @@ export default class MorseCodeTask extends Task {
     var animitionFinish = false;
     var tupleResult: [boolean, string, number];
 
-    //variable to set interval
-    var updateData: any;
-
     //animation:
     var animation: any;
 
@@ -87,10 +88,10 @@ export default class MorseCodeTask extends Task {
 
       animation = requestAnimationFrame(updateRectPos); // call requestAnimationFrame again to animate next frame
     }
-
+    
     let debugTimer: number = 0;
 
-    function shiftIndex() {
+    const shiftIndex = () => {
       if (debugTimer) {
         let diff = debugTimer - performance.now();
         console.log("ms since last shift", Math.abs(diff), "current pixel:", pixelIndex);
@@ -121,7 +122,9 @@ export default class MorseCodeTask extends Task {
         infoHeading.style.color = tupleResult[0] ? "green" : "red";
         o.stop();
         audioElement.pause();
-        controlButton.style.display = "block";
+
+        //caall finish somehow
+        this.finish(tupleResult[0], 1 + (1 - tupleResult[2] / 100));
         return;
       }
       setTimeout(shiftIndex, 16);
@@ -135,21 +138,19 @@ export default class MorseCodeTask extends Task {
       mouseDown = false;
     });
 
-    controlButton.addEventListener("click", (e) => {
-      if (firstClick) {
+    function onClick(e:Event){
         audioElement.play();
         requestAnimationFrame(updateRectPos);
         firstClick = false;
         o.start();
-
         controlButton.style.display = "none";
-        controlButton.setAttribute("label", "Back");
         var i = 0;
         shiftIndex();
-      } else if (!firstClick && animitionFinish) {
-        this.finish(tupleResult[0], 1 + (1 - tupleResult[2] / 100));
-      }
-    });
+        controlButton.removeEventListener("click", onClick);
+      
+
+    }
+    controlButton.addEventListener("click", onClick);
   }
 
   onUnmounting(): void | Promise<void> {}

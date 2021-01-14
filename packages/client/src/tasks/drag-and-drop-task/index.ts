@@ -10,11 +10,11 @@ export default class DragAndDropTask extends Task {
   taskContainer: HTMLDivElement;
   result: any = [false, ""];
   selectedFile: any;
-  firstClickFlag: boolean = false;
   filesArray: Array<[string, string]> = [];
   constructor(props) {
     super(props);
     this.onDrop = this.onDrop.bind(this);
+    this.onClick = this.onClick.bind(this);
   }
 
   async onMounted() {
@@ -64,13 +64,7 @@ export default class DragAndDropTask extends Task {
     });
     this.dropZone.addEventListener("drop", this.onDrop);
 
-    this.backButton.addEventListener("click", (e) => {
-      if (!this.firstClickFlag) {
-        download(this.selectedFile);
-        this.firstClickFlag = true;
-        this.backButton.setAttribute("label", "Back");
-      } else this.finish(this.result[0], 1);
-    });
+    this.backButton.addEventListener("click", this.onClick);
   }
   async onDrop(e: DragEvent) {
     e.preventDefault(); //disable automatic browser preview
@@ -80,8 +74,16 @@ export default class DragAndDropTask extends Task {
     this.dropZone.style.background = this.result[0] ? "green" : "red";
     this.dropZone.innerHTML = this.result[1].toString();
     this.dropZone.removeEventListener("drop", this.onDrop);
-    this.backButton.setAttribute("label", "Back");
-    this.firstClickFlag = true;
+    this.backButton.removeEventListener("click",this.onClick);
+    this.backButton.style.display = "none";
+    
+    this.finish(this.result[0], 1);
+  }
+  onClick(e:Event){
+    download(this.selectedFile);
+    this.backButton.removeEventListener("click",this.onClick);
+    this.backButton.style.display = "none";
+    
   }
 
   onUnmounting(): void | Promise<void> {}
