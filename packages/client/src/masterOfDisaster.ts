@@ -7,6 +7,7 @@ import { StatsStorage } from "./statsStorage";
 import { TaskOpener } from "./components/taskOpener";
 import { english, german } from "./language";
 import { PopUp } from "./components/PopUp";
+import { CapabilitiesManager } from "./capabilitiesManager";
 
 export type ClientState =
   | "loading"
@@ -23,6 +24,7 @@ export type DarkLight = "Dark" | "Light";
 export type Languages = "English" | "German";
 
 export class MasterOfDisaster {
+  capabilities: CapabilitiesManager = new CapabilitiesManager();
   private watchingForGameStart: boolean = false;
   private watchingForGameEnd: boolean = false;
   private static instance_: MasterOfDisaster;

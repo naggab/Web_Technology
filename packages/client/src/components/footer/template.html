@@ -2,20 +2,50 @@
   #footer {
     position: fixed;
     left: 0;
-    bottom: -1.25%;
+    bottom: -16px;
+    padding-bottom: 12px;
     right: 0;
     height: auto;
     border-radius: 15px;
     display: flex;
     justify-content: space-between;
-    align-content: center;
+    align-items: center;
     padding-left: 20px;
     padding-right: 20px;
-  }
-
-  p {
     text-align: center;
     font-size: 1em;
+  }
+
+  .footer-left {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    min-width: 300px;
+  }
+
+  .capabilities {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    min-width: 120px;
+    font-size: 20px;
+  }
+
+  .capability {
+    border-radius: 10px;
+    padding: 2px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: red;
+    color: red;
+    transition: all 150ms;
+  }
+
+  .capability.ok {
+    border-color: green;
+    color: green;
   }
 
   .dark {
@@ -29,7 +59,13 @@
 </style>
 
 <div class="light" id="footer">
-  <p>v1.0 APIRush</p>
+  <div class="footer-left">
+    <span>v1.0 APIRush</span>
+    <div class="capabilities">
+      <div class="capability camera">CAM</div>
+      <div class="capability geolocation">GEO</div>
+    </div>
+  </div>
   <p>TEAMNAME</p>
   <p id="change-language">Change Language: ENGLISH</p>
 </div>

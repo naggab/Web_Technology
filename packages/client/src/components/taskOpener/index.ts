@@ -7,6 +7,8 @@ export class TaskOpener extends HTMLElement {
   backdrop_: HTMLDivElement;
   container_: HTMLDivElement;
 
+  willDisappearSoon: boolean = false;
+
   constructor() {
     super();
   }
@@ -22,6 +24,7 @@ export class TaskOpener extends HTMLElement {
   }
 
   private animateFadeIn() {
+    this.willDisappearSoon = false;
     document.body.style.overflow = "hidden";
     this.wrapper_.classList.add("open");
     setTimeout(() => {
@@ -44,16 +47,28 @@ export class TaskOpener extends HTMLElement {
     );
     this.backdrop_.classList.remove("open");
     this.container_.classList.remove("open");
+    this.willDisappearSoon = false;
   }
 
   openTask(taskId: TaskIdentifier): Promise<{ duration: number; success: boolean }> {
     return new Promise<{ duration: number; success: boolean }>((resolve, reject) => {
       const task = TaskManger.createTaskInstance(taskId, (duration, success) => {
-        if (this.container_.classList.contains("open")) {
-          this.animateFadeOut();
+        if (!this.container_.classList.contains("open")) {
+          //already closed
+          return;
         }
+        this.willDisappearSoon = true;
+        let timeout = 1500; //ms
+        if (!success) {
+          timeout = 2500; //ms
+        }
+        setTimeout(() => {
+          if (this.container_.classList.contains("open")) {
+            this.animateFadeOut();
+          }
 
-        resolve({ duration, success });
+          resolve({ duration, success });
+        }, timeout);
       });
       this.container_.innerHTML = "";
       this.container_.appendChild(task);
@@ -62,7 +77,9 @@ export class TaskOpener extends HTMLElement {
   }
 
   abortTask() {
-    this.animateFadeOut();
+    if (!this.willDisappearSoon) {
+      this.animateFadeOut();
+    }
   }
 
   disconnectedCallback() {
