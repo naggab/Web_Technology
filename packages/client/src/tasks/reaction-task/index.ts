@@ -42,7 +42,11 @@ export default class ReactionTask extends Task {
       if (!this.timeAtStart) {
         this.infoElement.innerHTML = "Timer has not started yet. Try again!";
         if (this.timerTimeout) clearTimeout(this.timerTimeout);
-        this.failTimeout = setTimeout(this.taskFailed.bind(this), 1500);
+        //this.failTimeout = setTimeout(this.taskFailed.bind(this), 1500);
+        this.infoElement.style.color = "red";
+        this.btnEnabled = false;
+        this.checkButton.style.display = "none";
+        this.taskFailed();
       } else if (this.btnEnabled) {
         this.timeAtClick = performance.now();
         var dif = this.timeAtClick - this.timeAtStart;
@@ -50,20 +54,19 @@ export default class ReactionTask extends Task {
         var result = dif - this.tolerance;
         debugPrint("result = " + Math.abs(result));
         if (result < 0) {
-          this.infoElement.innerHTML =
-            "Target reaction: " +
-            (this.tolerance / 1000).toFixed(3) +
-            "s - Your reaction: " +
-            (dif / 1000).toFixed(3) +
-            "s - Success!";
+          this.infoElement.innerHTML = "Your reaction: " + (dif / 1000).toFixed(3) + "s - Success!";
+          this.infoElement.style.color = "green";
           //this.successTimeout = setTimeout(this.taskSuccess.bind(this), 1500);
           this.btnEnabled = false;
+          this.checkButton.style.display = "none";
           this.taskSuccess();
         } else {
           this.infoElement.innerHTML =
-            "You were " + Math.abs(result / 1000).toFixed(1) + " seconds too slow! Try again!";
+            "You were " + Math.abs(result / 1000).toFixed(3) + " seconds too slow! Try again!";
           this.drawRect();
+          this.infoElement.style.color = "red";
           this.btnEnabled = false;
+          this.checkButton.style.display = "none";
           //this.failTimeout = setTimeout(this.taskFailed.bind(this), 1500);
           this.taskFailed();
         }

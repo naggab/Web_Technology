@@ -661,7 +661,8 @@ export default class GamePlayground extends HTMLElement {
 
     if (this.player.playerID == winnerID) {
       winningPlayer = this.player;
-    } else {
+    } else if (this.foreignPlayers) {
+      this.player.model.stop();
       winningPlayer = this.foreignPlayers.find((element) => element.playerID == winnerID);
     }
     if (winningPlayer) {
@@ -711,6 +712,12 @@ export default class GamePlayground extends HTMLElement {
       winningPlayer.model.frameRate(8);
       this.endGameScreen = true;
       this.showPopup("Press SPACE to play again!", 10000, 20);
+    }
+
+    if (this.foreignPlayers) {
+      this.foreignPlayers.forEach((pl) => {
+        if (pl.playerID != winnerID) pl.model.stop();
+      });
     }
   }
 

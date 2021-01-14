@@ -43,7 +43,7 @@ export default class GeoDistanceTask extends Task {
     this.cityInfo = this.shadowRoot.getElementById("city-info") as HTMLElement;
     this.firstClick = true;
     this.populateCities();
-    this.tolerance = 250; //km
+    this.tolerance = 0.5; //km
     this.result = false;
 
     this.attachGeoAPI();
@@ -51,44 +51,43 @@ export default class GeoDistanceTask extends Task {
     this.checkButton.addEventListener("click", (c) => {
       c.preventDefault();
       if (!this.position) this.changeButton();
-      if (this.firstClick) {
-        this.distanceInput = this.shadowRoot.getElementById("distance-input") as TextBox;
-        const seed = MasterOfDisaster.getInstance().getGameSeed();
-        const index = seed % this.cities.length;
-        console.log(this.position);
-        console.log("Current lat: " + this.position.coords.latitude + ", lon: " + this.position.coords.longitude);
-        console.log("Target lat: " + this.cities[index].cityLat + ", lon: " + this.cities[index].cityLon);
-        var calcDist = this.calcCrow(
-          this.position.coords.latitude,
-          this.position.coords.longitude,
-          this.cities[index].cityLat,
-          this.cities[index].cityLon,
-        );
-        console.log("Calculated distance: " + calcDist);
-        console.log("Input: " + this.distanceInput.getValue());
-        var dif = calcDist - toNumber(this.distanceInput.getValue());
-        console.log("Dif: " + dif);
+      this.distanceInput = this.shadowRoot.getElementById("distance-input") as TextBox;
+      const seed = MasterOfDisaster.getInstance().getGameSeed();
+      const index = seed % this.cities.length;
+      console.log(this.position);
+      console.log("Current lat: " + this.position.coords.latitude + ", lon: " + this.position.coords.longitude);
+      console.log("Target lat: " + this.cities[index].cityLat + ", lon: " + this.cities[index].cityLon);
+      var calcDist = this.calcCrow(
+        this.position.coords.latitude,
+        this.position.coords.longitude,
+        this.cities[index].cityLat,
+        this.cities[index].cityLon,
+      );
+      console.log("Calculated distance: " + calcDist);
+      console.log("Input: " + this.distanceInput.getValue());
+      var dif = calcDist - toNumber(this.distanceInput.getValue());
+      console.log("Dif: " + dif);
 
-        if (Math.abs(dif) > this.tolerance) {
-          this.infoElement.innerHTML = "Task failed! Try again.";
-          console.log("Task failed.");
-          this.result = false;
-        } else {
-          this.infoElement.innerHTML = "Task complete! Well done.";
-          console.log("Task complete.");
-          this.result = true;
-        }
-        this.changeButton();
+      if (Math.abs(dif) > this.tolerance) {
+        this.infoElement.innerHTML = "You are " + Math.abs(dif).toFixed(2) + "km off. Try again!";
+        this.infoElement.style.color = "red";
+        console.log("Task failed.");
+        this.result = false;
       } else {
-        this.finish(this.result);
+        this.infoElement.innerHTML = "Task complete! Distance: " + calcDist.toFixed(2);
+        console.log("Task complete.");
+        this.infoElement.style.color = "green";
+        this.result = true;
       }
+      this.changeButton();
+      this.finish(this.result);
     });
   }
   onUnmounting(): void | Promise<void> {}
 
   changeButton() {
     this.firstClick = false;
-    this.checkButton.setAttribute("label", "Back");
+    this.checkButton.style.display = "none";
   }
 
   showError(error) {
@@ -111,13 +110,15 @@ export default class GeoDistanceTask extends Task {
 
   populateCities() {
     this.cities = [];
-    this.cities.push(new City("Amsterdam, Netherlands", 52.22, 4.53));
-    this.cities.push(new City("Ankara, Turkey", 39.55, 32.55));
-    this.cities.push(new City("Athens, Greece", 37.58, 23.43));
-    this.cities.push(new City("Barcelona, Spain", 41.23, 2.9));
+    this.cities.push(new City("Airport, Graz", 46.992662757295506, 15.439313970639423));
+    this.cities.push(new City("Main Square, Graz", 47.070862490223575, 15.43828259288286));
+    this.cities.push(new City("Uhrturm, Graz", 47.073652843582806, 15.437710276978079));
+    this.cities.push(new City("TU, Old Campus, Graz", 47.06921300575033, 15.450570035291022));
+    this.cities.push(new City("TU, Inffeldgasse, Graz", 47.05843475596749, 15.460150503895983));
+    /*this.cities.push(new City("Barcelona, Spain", 41.23, 2.9));
     this.cities.push(new City("Berlin, Germany", 52.3, 13.25));
     this.cities.push(new City("Brussels, Belgium", 50.52, 4.22));
-    this.cities.push(new City("Bucharest, Romania", 44.25, 26.7));
+    this.cities.push(new City("Bucharest, Romania", 44.25, 26.7));*/
   }
 
   attachGeoAPI() {
@@ -131,7 +132,7 @@ export default class GeoDistanceTask extends Task {
   showPosition(position: Position) {
     const seed = MasterOfDisaster.getInstance().getGameSeed();
     const index = seed % this.cities.length;
-    this.cityInfo.innerHTML = "City: " + this.cities[index].cityName;
+    this.cityInfo.innerHTML = this.cities[index].cityName;
     this.position = position;
   }
   calcCrow(lat1: number, lon1: number, lat2: number, lon2: number) {

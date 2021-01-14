@@ -46,7 +46,11 @@ export default class TimingTask extends Task {
       if (!this.timeAtStart || !this.timeToEnd) {
         this.infoElement.innerHTML = "Timer has not started yet. Try again!";
         if (this.timerTimeout) clearTimeout(this.timerTimeout);
-        this.failTimeout = setTimeout(this.taskFailed.bind(this), 1500);
+        //this.failTimeout = setTimeout(this.taskFailed.bind(this), 1500);
+        this.taskFailed();
+        this.infoElement.style.color = "red";
+        this.btnEnabled = false;
+        this.checkButton.style.display = "none";
       } else if (this.btnEnabled) {
         var dif = this.timeAtClick - this.timeAtStart;
         debugPrint("dif = " + dif);
@@ -54,13 +58,11 @@ export default class TimingTask extends Task {
         debugPrint("result = " + Math.abs(result));
         if (Math.abs(dif - this.timeToEnd) < this.tolerance) {
           this.infoElement.innerHTML =
-            "Target time: " +
-            (this.timeToEnd / 1000).toFixed(1) +
-            " - Your time: " +
-            (dif / 1000).toFixed(1) +
-            " - Success!";
+            "Target time: " + (this.timeToEnd / 1000).toFixed(1) + "s - Your time: " + (dif / 1000).toFixed(1) + "s";
           //this.successTimeout = setTimeout(this.taskSuccess.bind(this), 1500);
           this.taskSuccess();
+          this.infoElement.style.color = "green";
+          this.checkButton.style.display = "none";
           this.btnEnabled = false;
         } else {
           this.infoElement.innerHTML =
@@ -68,8 +70,10 @@ export default class TimingTask extends Task {
             Math.abs(result / 1000).toFixed(1) +
             (result > 0 ? " seconds too slow!" : " seconds too fast!") +
             " Try again!";
+          this.infoElement.style.color = "red";
           this.drawRect();
           this.btnEnabled = false;
+          this.checkButton.style.display = "none";
           //this.failTimeout = setTimeout(this.taskFailed.bind(this), 1500);
           this.taskFailed();
         }
