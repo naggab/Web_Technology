@@ -23,9 +23,9 @@ export class ToggleSwitch extends HTMLElement {
 
   private modeChanged() {
     if (!this._switch.checked) {
-      this._mod.setMode("Light");
+      this._mod.setMode(true);
     } else {
-      this._mod.setMode("Dark");
+      this._mod.setMode(false);
     }
   }
 }

@@ -21,7 +21,6 @@ export type ClientState =
   | "in-game"
   | "post-game"
   | "all-tasks";
-export type DarkLight = "Dark" | "Light";
 export type Languages = "English" | "German";
 
 export class MasterOfDisaster {
@@ -37,8 +36,7 @@ export class MasterOfDisaster {
   readonly serverSession: ServerSession;
   readonly statsStorage: StatsStorage = new StatsStorage();
   private language: Languages = "English";
-  private mode: DarkLight = "Dark";
-  readonly debugMode: boolean = true;
+  private debugMode: boolean = localStorage.getItem("debugMode") == "true";
 
   constructor(sess: ServerSession) {
     this.serverSession = sess;
@@ -48,26 +46,22 @@ export class MasterOfDisaster {
 
     this.language = localStorage.getItem("language") as Languages;
   }
+  //--------------------------------------------------------------------------------------------------------------------
 
+  //Debug mode
+  //START
   public getMode() {
-    return this.mode;
+    return this.debugMode;
   }
 
-  public setMode(mode: DarkLight) {
-    this.mode = mode;
-    let root = document.documentElement;
-    if (this.mode == "Light") {
-      root.style.setProperty("white", "#ffffff");
-      root.style.setProperty("black", "#393939");
-      console.debug(mode);
-    } else {
-      root.style.setProperty("black", "#ffffff");
-      root.style.setProperty("white", "#393939");
-      console.debug(mode);
-    }
-    console.debug(mode);
-    router(this.state_);
+  public setMode(mode: boolean) {
+    this.debugMode = mode;
+    localStorage.setItem("debugMode", String(this.debugMode));
   }
+  //END
+  //--------------------------------------------------------------------------------------------------------------------
+  //Language settings
+  //START
 
   public getString() {
     switch (this.language) {
@@ -94,6 +88,8 @@ export class MasterOfDisaster {
       popup.openModal("info", this.getString().general.reloadPage);
     }
   }
+  //END
+  //--------------------------------------------------------------------------------------------------------------------
 
   static getInstance() {
     return this.instance_;
