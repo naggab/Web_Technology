@@ -21,7 +21,7 @@ type ShapeConstructor = new (
 ) => ShapeI;
 
 const shapes: Array<ShapeConstructor> = [];
-const fillArry: Array<number> = [10, 20, 30, 40, 50, 60, 70, 80, 90];
+const fillArry: Array<number> = [30, 40, 50, 60, 70];
 
 export default class FillShapeTask extends Task {
   canvasElement: HTMLCanvasElement;

@@ -40,8 +40,13 @@ export default class MorseCodeTask extends Task {
     var o = audioContext.createOscillator();
     o.type = "sine";
     o.frequency.value = 0;
-    o.connect(audioContext.destination);
-
+    const gainNode = audioContext.createGain();
+    //volume peep
+    gainNode.gain.value = 0.1; // setting it to 10%
+    gainNode.connect(audioContext.destination);
+    o.connect(gainNode);
+    //voume whitesound
+    this.audioElement.volume = 0.1;
     const infoHeading = this.info;
     this.ctx = this.canvasElement.getContext("2d");
     this.ctxAnimtated = this.canvasElement.getContext("2d");
