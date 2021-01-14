@@ -83,7 +83,7 @@ export class Game implements GameI {
     return {
       id: this.id,
       name: this.name,
-      maxPlayersCount: 5,
+      maxPlayersCount: 6,
       playersCount: this.players.size,
       seed: this.seed,
       state: this.state,

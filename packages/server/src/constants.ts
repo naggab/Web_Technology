@@ -8,12 +8,12 @@ export const ERR_PLAYER_DID_NOT_GREET = () => new Error(`Player did not send HEL
 export const ERR_PLAYER_DID_NOT_JOIN_GAME = () => new Error(`Player did not join game yet`);
 
 export const PLAYER_COLORS = [
-  "#efefef",
-  "#de1010",
-  "#3ffc00",
-  "#805c00",
-  "#001eff",
-  "#e500ff",
+  "#00baf0",
+  "#a817ea",
+  "#a97d2a",
+  "#00e10f",
+  "#f04e07",
+  "#fd3bff",
   "#ffe500",
   "#1a1a1a",
   "#00ffe2",
