@@ -9,6 +9,7 @@ import { english, german } from "./language";
 import { PopUp } from "./components/PopUp";
 import { CapabilitiesManager } from "./capabilitiesManager";
 import { MapStorage } from "@apirush/common/src/maps";
+import { IGameDidFinishCB } from "./screens/in-game/game-playground/index";
 
 export type ClientState =
   | "loading"
@@ -37,6 +38,7 @@ export class MasterOfDisaster {
   readonly statsStorage: StatsStorage = new StatsStorage();
   private language: Languages = "English";
   private debugMode: boolean = localStorage.getItem("debugMode") == "true";
+  private gameDidFinishCB: IGameDidFinishCB;
 
   constructor(sess: ServerSession) {
     this.serverSession = sess;
@@ -170,9 +172,17 @@ export class MasterOfDisaster {
   private onGameDidFinish(ev: Event<GameEventOp.GAME_FINISHED>) {
     console.log("Game did finish, winner is:", ev.payload.winner);
     this.gameWinner = ev.payload.winner;
-    this.setState("post-game");
+    //this.setState("post-game");
+
+    if (this.gameDidFinishCB) {
+      this.gameDidFinishCB(ev.payload.winner.id);
+    }
 
     this.stopWatchingForGameEnd();
+  }
+
+  registerGameFinishCB(cb: IGameDidFinishCB) {
+    this.gameDidFinishCB = cb;
   }
 
   private ensureHelloSent(v: boolean = true) {

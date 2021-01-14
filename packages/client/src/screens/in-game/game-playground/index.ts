@@ -52,6 +52,13 @@ interface IPlayerMovedCB {
 }
 
 /**
+ * Interface for "game finished" callback function.
+ */
+export interface IGameDidFinishCB {
+  (wid: number): void;
+}
+
+/**
  * Interface for "player opens task" callback function.
  */
 interface IOnTaskOpenCB {
@@ -292,6 +299,8 @@ export class Player {
                       });
                       this.playground.baseLayer.add(taskPos.shape);
                       this.playground.baseLayer.batchDraw();
+                      var t = this.playground.tasks.find((element) => element.id == taskPos.task);
+                      if (t) t.isCompleted = true;
                     }
                   }
                 });
@@ -488,8 +497,11 @@ export default class GamePlayground extends HTMLElement {
   questionMarkSprite: HTMLImageElement;
   questionMarkDone: HTMLImageElement;
 
+  endGameScreen: boolean;
+
   constructor() {
     super();
+    this.endGameScreen = false;
     this.keyMap = new Map();
     document.onkeydown = document.onkeyup = function (e) {
       if (this.keyMap.get(e.keyCode) != true && e.type == "keydown") {
@@ -513,6 +525,7 @@ export default class GamePlayground extends HTMLElement {
     modInstance = MasterOfDisaster.getInstance();
     if (!modInstance) throw console.error("no mod instance");
     DEBUG_MODE = modInstance.getMode();
+    modInstance.registerGameFinishCB(this.endGame.bind(this));
 
     window.addEventListener("resize", (event) => {
       debugPrint("RESIZING");
@@ -607,14 +620,18 @@ export default class GamePlayground extends HTMLElement {
     if (keyCode == 83 && !this.keyMap.get(87)) this.player.moveDown(1);
     if (keyCode == 68 && !this.keyMap.get(65)) this.player.moveRight(1);
     if (keyCode == 32) {
-      if (this.player.checkCollision(this.player.y, this.player.x, true) == CollisionType.Task) {
-        debugPrint(
-          "[SPCBR] pressed on player position: " + this.player.x + "," + this.player.y + " returns TASK in proximity",
-        );
+      if (!this.endGameScreen) {
+        if (this.player.checkCollision(this.player.y, this.player.x, true) == CollisionType.Task) {
+          debugPrint(
+            "[SPCBR] pressed on player position: " + this.player.x + "," + this.player.y + " returns TASK in proximity",
+          );
+        } else {
+          debugPrint(
+            "[SPCBR] pressed on player position: " + this.player.x + "," + this.player.y + " ... no task in prox",
+          );
+        }
       } else {
-        debugPrint(
-          "[SPCBR] pressed on player position: " + this.player.x + "," + this.player.y + " ... no task in prox",
-        );
+        window.location.reload();
       }
     }
     if (keyCode == 84) {
@@ -633,22 +650,27 @@ export default class GamePlayground extends HTMLElement {
         18,
       );
     }
-    if (keyCode == 67) {
-      this.showPopup("You're a cheater!", 3000, 18);
+    if (keyCode == 67 && DEBUG_MODE) {
       this.endGame(this.player.playerID);
     }
     //player.redraw();
   }
 
   async endGame(winnerID: number) {
+    var winningPlayer: Player;
+
     if (this.player.playerID == winnerID) {
-      console.log(this.player.x);
+      winningPlayer = this.player;
+    } else {
+      winningPlayer = this.foreignPlayers.find((element) => element.playerID == winnerID);
+    }
+    if (winningPlayer) {
       var ring: Konva.Ring;
       ring = new Konva.Ring({
-        x: this.player.x * gridSize + gridSize / 2,
-        y: this.player.y * gridSize + gridSize / 2,
-        innerRadius: 70,
-        outerRadius: this.stage.width() > this.stage.height() ? this.stage.width() : this.stage.height(),
+        x: winningPlayer.x * gridSize + gridSize / 2,
+        y: winningPlayer.y * gridSize + gridSize / 2,
+        innerRadius: gridSize * 4,
+        outerRadius: this.stage.width() > this.stage.height() ? this.stage.width() * 2 : this.stage.height() * 2,
         fill: "rgba(0,0,0,0.85)",
         stroke: "black",
       });
@@ -672,38 +694,23 @@ export default class GamePlayground extends HTMLElement {
         opacity: 0,
       });
       winnerText.x(
-        this.player.x < gridLength / 2
+        winningPlayer.x < gridLength / 2
           ? ring.x() + ring.innerRadius() - 30
           : ring.x() - ring.innerRadius() + 30 - winnerText.width(),
       );
-      winnerText.y((this.player.y - 1) * gridSize);
+      winnerText.y((winningPlayer.y - 1) * gridSize);
 
       this.baseLayer.add(winnerText);
       winnerText.to({
         opacity: 1,
         x:
-          this.player.x < gridLength / 2
+          winningPlayer.x < gridLength / 2
             ? ring.x() + ring.innerRadius() + 30
             : ring.x() - ring.innerRadius() - 30 - winnerText.width(),
       });
-
-      /*var anim = new Konva.Animation(
-        function (frame) {
-          this.model.y(this.model.y() - iter);
-          this.tooltip.y(this.tooltip.y() - iter);
-          this.tooltipShape.y(this.tooltipShape.y() - iter);
-          if (amount > 0 && this.model.y() <= stop) {
-            anim.stop();
-            this.model.y(stop);
-          } else if (amount < 0 && this.model.y() >= stop) {
-            anim.stop();
-            this.model.y(stop);
-          }
-        }.bind(this),
-        this.layer,
-      );
-      anim.start();*/
-    } else {
+      winningPlayer.model.frameRate(8);
+      this.endGameScreen = true;
+      this.showPopup("Press SPACE to play again!", 10000, 20);
     }
   }
 
@@ -985,26 +992,51 @@ export default class GamePlayground extends HTMLElement {
         var npx = newPos.shape.x();
         var npy = newPos.shape.y();
         newPos.shape.destroy();
-        var spr: Konva.Sprite;
-        spr = new Konva.Sprite({
-          x: npx,
-          y: npy,
-          image: this.questionMarkSprite,
-          animation: "idle",
-          scaleX: gridSize / 16.0,
-          scaleY: gridSize / 16.0,
-          animations: {
-            // prettier-ignore
-            idle: [
-              0, 0, 16, 16,
-              16, 0, 16, 16],
-          },
-          frameRate: 4,
-          frameIndex: 0,
-        });
-        this.baseLayer.add(spr);
-        spr.start();
-        newPos.shape = spr;
+        var alreadyComplete: boolean = false;
+        if (this.tasks !== undefined) {
+          console.log("LOOKING FOR TASKS");
+          var t = this.tasks.find((element) => element.id == key);
+          if (t) {
+            console.log("FOUND ELEMENT");
+            console.log(t);
+            if (t.isCompleted) {
+              newPos.shape = new Konva.Image({
+                x: npx,
+                y: npy,
+                image: this.questionMarkDone,
+                width: 16,
+                height: 16,
+                scaleX: gridSize / 16.0,
+                scaleY: gridSize / 16.0,
+              });
+              this.baseLayer.add(newPos.shape);
+              this.baseLayer.batchDraw();
+              alreadyComplete = true;
+            }
+          }
+        }
+        if (!alreadyComplete) {
+          var spr: Konva.Sprite;
+          spr = new Konva.Sprite({
+            x: npx,
+            y: npy,
+            image: this.questionMarkSprite,
+            animation: "idle",
+            scaleX: gridSize / 16.0,
+            scaleY: gridSize / 16.0,
+            animations: {
+              // prettier-ignore
+              idle: [
+                0, 0, 16, 16,
+                16, 0, 16, 16],
+            },
+            frameRate: 4,
+            frameIndex: 0,
+          });
+          this.baseLayer.add(spr);
+          spr.start();
+          newPos.shape = spr;
+        }
 
         newPos.type = ElementType.Task;
         newPos.task = key;
