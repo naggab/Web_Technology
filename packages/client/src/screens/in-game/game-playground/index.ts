@@ -1342,42 +1342,54 @@ export default class GamePlayground extends HTMLElement {
     var end_y: number;
     var start_x: number;
     var end_x: number;
-    coord.forEach((c) => {
-      if (this.grid[c.y] !== undefined) {
-        if (this.grid[c.y][c.x] !== undefined) {
-          if (previousCoord !== undefined) {
-            if (previousCoord.y < c.y) {
-              start_y = previousCoord.y;
-              end_y = c.y;
-            } else {
-              start_y = c.y;
-              end_y = previousCoord.y;
-            }
-            if (previousCoord.x < c.x) {
-              start_x = previousCoord.x;
-              end_x = c.x;
-            } else {
-              start_x = c.x;
-              end_x = previousCoord.x;
-            }
-            for (let i = start_y; i <= end_y; i++) {
-              for (let j = start_x; j <= end_x; j++) {
-                this.grid[i][j].shape.destroy();
-                (this.grid[i][j].shape = this.drawRect(
-                  this.baseLayer,
-                  this.stage,
-                  j * gridSize,
-                  i * gridSize,
-                  elemType,
-                )),
-                  (this.grid[i][j].type = elemType);
+    if (coord.length == 1) {
+      this.grid[coord[0].y][coord[0].x].shape.destroy();
+      (this.grid[coord[0].y][coord[0].x].shape = this.drawRect(
+        this.baseLayer,
+        this.stage,
+        coord[0].x * gridSize,
+        coord[0].y * gridSize,
+        elemType,
+      )),
+        (this.grid[coord[0].y][coord[0].x].type = elemType);
+    } else {
+      coord.forEach((c) => {
+        if (this.grid[c.y] !== undefined) {
+          if (this.grid[c.y][c.x] !== undefined) {
+            if (previousCoord !== undefined) {
+              if (previousCoord.y < c.y) {
+                start_y = previousCoord.y;
+                end_y = c.y;
+              } else {
+                start_y = c.y;
+                end_y = previousCoord.y;
+              }
+              if (previousCoord.x < c.x) {
+                start_x = previousCoord.x;
+                end_x = c.x;
+              } else {
+                start_x = c.x;
+                end_x = previousCoord.x;
+              }
+              for (let i = start_y; i <= end_y; i++) {
+                for (let j = start_x; j <= end_x; j++) {
+                  this.grid[i][j].shape.destroy();
+                  (this.grid[i][j].shape = this.drawRect(
+                    this.baseLayer,
+                    this.stage,
+                    j * gridSize,
+                    i * gridSize,
+                    elemType,
+                  )),
+                    (this.grid[i][j].type = elemType);
+                }
               }
             }
+            previousCoord = c;
           }
-          previousCoord = c;
         }
-      }
-    });
+      });
+    }
     this.baseLayer.batchDraw();
   }
 
