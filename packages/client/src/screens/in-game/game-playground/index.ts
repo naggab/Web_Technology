@@ -792,6 +792,16 @@ export default class GamePlayground extends HTMLElement {
     await imageObj4.decode();
     this.sprites.push(imageObj4);
 
+    const imageObj5 = new Image();
+    imageObj5.src = "/assets/img/sprite5.png";
+    await imageObj5.decode();
+    this.sprites.push(imageObj5);
+
+    const imageObj6 = new Image();
+    imageObj6.src = "/assets/img/sprite6.png";
+    await imageObj6.decode();
+    this.sprites.push(imageObj6);
+
     this.questionMarkSprite = new Image();
     this.questionMarkSprite.src = "/assets/img/questionMarkSprite.png";
     await this.questionMarkSprite.decode();
