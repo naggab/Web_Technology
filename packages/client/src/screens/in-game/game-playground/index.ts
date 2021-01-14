@@ -512,7 +512,7 @@ export default class GamePlayground extends HTMLElement {
 
     modInstance = MasterOfDisaster.getInstance();
     if (!modInstance) throw console.error("no mod instance");
-    DEBUG_MODE = modInstance.debugMode;
+    DEBUG_MODE = modInstance.getMode();
 
     window.addEventListener("resize", (event) => {
       debugPrint("RESIZING");

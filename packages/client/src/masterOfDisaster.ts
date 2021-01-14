@@ -57,6 +57,7 @@ export class MasterOfDisaster {
   public setMode(mode: boolean) {
     this.debugMode = mode;
     localStorage.setItem("debugMode", String(this.debugMode));
+    router(this.state);
   }
   //END
   //--------------------------------------------------------------------------------------------------------------------
@@ -83,9 +84,7 @@ export class MasterOfDisaster {
     if (language != (localStorage.getItem("language") as Languages)) {
       this.language = language;
       localStorage.setItem("language", this.language);
-      const popup = new PopUp();
-      document.body.appendChild(popup);
-      popup.openModal("info", this.getString().general.reloadPage);
+      router(this.state);
     }
   }
   //END
