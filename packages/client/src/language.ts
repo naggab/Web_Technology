@@ -46,6 +46,18 @@ export const english = {
     title: "OTHER PLAYERS ARE JOINING",
     startGame: "START NOW",
   },
+  in_game: {
+    startTask: "Press SPACE to start the task!",
+    enabled: "enabled",
+    disabled: "disabled",
+    animations: "Animations",
+    debug: "Debug mode",
+    help: "Welcome to APIRush.\nPress W-A-S-D to move around the board.\nInteract with tasks by using SPACE.",
+    playAgain: "Press SPACE to play again!",
+    joined: "joined the game!",
+    left: "left the game!",
+    winner: "WINNER",
+  },
   welcome_stats: {
     title: "STATS SCREEN",
     totalTime: "TOTAL PLAYING TIME",
@@ -100,6 +112,19 @@ export const german = {
   pre_game: {
     title: "ANDERE SPIELER SIND DABEI",
     startGame: "JETZT STARTEN",
+  },
+  in_game: {
+    startTask: "Drücken Sie die LEERTASTE, um den Task zu starten!",
+    enabled: "aktiviert",
+    disabled: "deaktiviert",
+    animations: "Animationen",
+    debug: "Debug Modus",
+    help:
+      "Willkommen bei APIRush.\nDrücken Sie W-A-S-D um sich über das Spielfeld zu bewegen.\nBenutzen Sie die LEERTASTE, um mit Aufgaben zu interagieren.",
+    playAgain: "Drücken Sie die LEERTASTE um erneut zu spielen",
+    joined: "ist dem Spiel beigetreten!",
+    left: "hat das Spiel verlassen!",
+    winner: "SIEGER",
   },
   welcome_stats: {
     title: "STATISTIKBILDSCHIRM",

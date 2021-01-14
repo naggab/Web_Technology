@@ -272,7 +272,7 @@ export class Player {
             col = CollisionType.Wall;
           } else if (newPos.type == ElementType.Task) {
             if (!this.didInteractWithTask)
-              this.playground.showPopup("Press the space bar to start the task!", 3000, 16);
+              this.playground.showPopup(modInstance.getString().in_game.startTask, 3000, 16);
             if (openTask !== undefined) {
               if (openTask) {
                 this.didInteractWithTask = true;
@@ -641,19 +641,25 @@ export default class GamePlayground extends HTMLElement {
     }
     if (keyCode == 84) {
       ANIMATIONS_ENABLED = !ANIMATIONS_ENABLED;
-      this.showPopup("Animations " + (ANIMATIONS_ENABLED ? "enabled!" : "disabled!"));
+      this.showPopup(
+        modInstance.getString().in_game.animations +
+          " " +
+          (ANIMATIONS_ENABLED ? modInstance.getString().in_game.enabled : modInstance.getString().in_game.disabled) +
+          "!",
+      );
     }
     if (keyCode == 90) {
       DEBUG_MODE = !DEBUG_MODE;
       await this.resetStage();
-      this.showPopup("Debug mode " + (DEBUG_MODE ? "enabled!" : "disabled!"));
+      this.showPopup(
+        modInstance.getString().in_game.debug +
+          " " +
+          (DEBUG_MODE ? modInstance.getString().in_game.enabled : modInstance.getString().in_game.disabled) +
+          "!",
+      );
     }
     if (keyCode == 72) {
-      this.showPopup(
-        "Welcome to APIRush.\nPress W-A-S-D to move around the board.\nInteract with tasks by using the spacebar.",
-        6000,
-        18,
-      );
+      this.showPopup(modInstance.getString().in_game.help, 6000, 18);
     }
     if (keyCode == 67 && DEBUG_MODE && !this.keyMap.get(17)) {
       // c and not ctrl
@@ -799,7 +805,7 @@ export default class GamePlayground extends HTMLElement {
       var winnerText = new Konva.Text({
         x: 0,
         y: 0,
-        text: "WINNER!",
+        text: modInstance.getString().in_game.winner,
         fontFamily: "Roboto",
         fontSize: gridSize * 3,
         fill: "white",
@@ -823,7 +829,7 @@ export default class GamePlayground extends HTMLElement {
       });
       winningPlayer.model.frameRate(8);
       this.endGameScreen = true;
-      this.showPopup("Press SPACE to play again!", -1, 20);
+      this.showPopup(modInstance.getString().in_game.playAgain, -1, 20);
     }
 
     if (this.foreignPlayers) {
@@ -855,7 +861,7 @@ export default class GamePlayground extends HTMLElement {
     const foreignPlayer = event.payload;
     this.addForeignPlayer(foreignPlayer);
 
-    this.showPopup(foreignPlayer.name + " joined the game!");
+    this.showPopup(foreignPlayer.name + " " + modInstance.getString().in_game.joined);
   }
 
   foreignPlayerLeft(event: Event<GameEventOp.PLAYER_LEFT>) {
@@ -914,7 +920,7 @@ export default class GamePlayground extends HTMLElement {
     var foundElem = false;
     for (let i = 0; i < this.foreignPlayers.length; i++) {
       if (this.foreignPlayers[i].playerID == fpl) {
-        this.showPopup(this.foreignPlayers[i].playerName + " left the game!");
+        this.showPopup(this.foreignPlayers[i].playerName + " " + modInstance.getString().in_game.left);
         this.foreignPlayers.splice(i, 1);
         this.foreignPlayerLayer
           .find("." + fpl)
