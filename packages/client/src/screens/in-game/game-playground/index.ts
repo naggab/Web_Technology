@@ -714,7 +714,7 @@ export default class GamePlayground extends HTMLElement {
       });
       winningPlayer.model.frameRate(8);
       this.endGameScreen = true;
-      this.showPopup("Press SPACE to play again!", 0, 20);
+      this.showPopup("Press SPACE to play again!", -1, 20);
     }
 
     if (this.foreignPlayers) {
@@ -1187,8 +1187,8 @@ export default class GamePlayground extends HTMLElement {
     this.popupLayer.to({ opacity: 1 });
 
     if (time) {
-      if (time != 0) setTimeout(this.clearPopup.bind(this), time ? time : 2000);
-    }
+      if (time != -1) setTimeout(this.clearPopup.bind(this), time ? time : 2000);
+    } else setTimeout(this.clearPopup.bind(this), time ? time : 2000);
   }
 
   async clearPopup() {
