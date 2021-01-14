@@ -663,6 +663,9 @@ export default class GamePlayground extends HTMLElement {
       winningPlayer = this.player;
     } else if (this.foreignPlayers) {
       this.player.model.stop();
+      this.player.model.opacity(0.5);
+      this.player.tooltip.opacity(0.5);
+      this.player.tooltipShape.opacity(0.5);
       winningPlayer = this.foreignPlayers.find((element) => element.playerID == winnerID);
     }
     if (winningPlayer) {
@@ -711,12 +714,17 @@ export default class GamePlayground extends HTMLElement {
       });
       winningPlayer.model.frameRate(8);
       this.endGameScreen = true;
-      this.showPopup("Press SPACE to play again!", 10000, 20);
+      this.showPopup("Press SPACE to play again!", 0, 20);
     }
 
     if (this.foreignPlayers) {
       this.foreignPlayers.forEach((pl) => {
-        if (pl.playerID != winnerID) pl.model.stop();
+        if (pl.playerID != winnerID) {
+          pl.model.stop();
+          pl.model.opacity(0.5);
+          pl.tooltip.opacity(0.5);
+          pl.tooltipShape.opacity(0.5);
+        }
       });
     }
   }
@@ -1178,7 +1186,9 @@ export default class GamePlayground extends HTMLElement {
 
     this.popupLayer.to({ opacity: 1 });
 
-    setTimeout(this.clearPopup.bind(this), time ? time : 2000);
+    if (time) {
+      if (time != 0) setTimeout(this.clearPopup.bind(this), time ? time : 2000);
+    }
   }
 
   async clearPopup() {
