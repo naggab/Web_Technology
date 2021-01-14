@@ -633,7 +633,78 @@ export default class GamePlayground extends HTMLElement {
         18,
       );
     }
+    if (keyCode == 67) {
+      this.showPopup("You're a cheater!", 3000, 18);
+      this.endGame(this.player.playerID);
+    }
     //player.redraw();
+  }
+
+  async endGame(winnerID: number) {
+    if (this.player.playerID == winnerID) {
+      console.log(this.player.x);
+      var ring: Konva.Ring;
+      ring = new Konva.Ring({
+        x: this.player.x * gridSize + gridSize / 2,
+        y: this.player.y * gridSize + gridSize / 2,
+        innerRadius: 70,
+        outerRadius: this.stage.width() > this.stage.height() ? this.stage.width() : this.stage.height(),
+        fill: "rgba(0,0,0,0.85)",
+        stroke: "black",
+      });
+      this.baseLayer.add(ring);
+      this.baseLayer.batchDraw();
+
+      var s = 20;
+      ring.scaleX(s);
+      ring.scaleY(s);
+
+      await ring.to({ scaleX: 1, scaleY: 1 });
+
+      var winnerText = new Konva.Text({
+        x: 0,
+        y: 0,
+        text: "WINNER!",
+        fontFamily: "Roboto",
+        fontSize: gridSize * 3,
+        fill: "white",
+        fontStyle: "bold",
+        opacity: 0,
+      });
+      winnerText.x(
+        this.player.x < gridLength / 2
+          ? ring.x() + ring.innerRadius() - 30
+          : ring.x() - ring.innerRadius() + 30 - winnerText.width(),
+      );
+      winnerText.y((this.player.y - 1) * gridSize);
+
+      this.baseLayer.add(winnerText);
+      winnerText.to({
+        opacity: 1,
+        x:
+          this.player.x < gridLength / 2
+            ? ring.x() + ring.innerRadius() + 30
+            : ring.x() - ring.innerRadius() - 30 - winnerText.width(),
+      });
+
+      /*var anim = new Konva.Animation(
+        function (frame) {
+          this.model.y(this.model.y() - iter);
+          this.tooltip.y(this.tooltip.y() - iter);
+          this.tooltipShape.y(this.tooltipShape.y() - iter);
+          if (amount > 0 && this.model.y() <= stop) {
+            anim.stop();
+            this.model.y(stop);
+          } else if (amount < 0 && this.model.y() >= stop) {
+            anim.stop();
+            this.model.y(stop);
+          }
+        }.bind(this),
+        this.layer,
+      );
+      anim.start();*/
+    } else {
+    }
   }
 
   sendMyPlayerMoved(x: number, y: number) {
