@@ -34,7 +34,8 @@
   a.white {
     background-color: var(--white);
     color: var(--black);
-    border-width: 0;
+    border-width: 2px;
+    border-color: white;
   }
 
   /* transparent styling */
@@ -47,7 +48,45 @@
 
   a.stats {
  width: 100%;
+ margin-bottom: 15px;
 
+  }
+  @media only screen and (max-width: 3840px) and (min-width: 2561px) {
+  a.stats {
+    text-align: center;
+    min-width: 16em;
+    font-weight: bold;
+    border-width: 4px;
+    margin: 15px;
+    border-radius: 40px;
+    display: inline-block;
+    cursor: pointer;
+    font-size: 30px;
+    padding: 20px 31px;
+    text-decoration: none;
+    transition: all 200ms;
+
+
+
+  }
+  }
+  @media only screen and (max-width: 2560px) and (min-width: 1921px) {
+  a.stats {
+    text-align: center;
+    min-width: 16em;
+    font-weight: bold;
+    margin: 10px;
+    border-radius: 35px;
+    display: inline-block;
+    cursor: pointer;
+    font-size: 25px;
+    padding: 16px 31px;
+    text-decoration: none;
+    transition: all 200ms;
+
+
+
+  }
   }
 
   /* red styling */
