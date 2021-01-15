@@ -31,6 +31,7 @@
     "worker-loader": "^3.0.7"
   },
   "scripts": {
+    "build": "webpack -c webpack.prod.config.js",
     "start": "webpack serve -c webpack.config.js",
     "test": "jest"
   }

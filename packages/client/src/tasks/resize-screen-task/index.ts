@@ -2,8 +2,6 @@ import viewHtml from "./view.html";
 import { Task } from "../../task";
 import { Button } from "../../components/button";
 import { MasterOfDisaster } from "../../masterOfDisaster";
-import { times } from "lodash";
-import { Fade, Unstable_TrapFocus } from "@material-ui/core";
 
 export default class ResizeScreenTask extends Task {
   checkButton: Button;

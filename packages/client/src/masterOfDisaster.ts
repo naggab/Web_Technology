@@ -309,7 +309,11 @@ export class MasterOfDisaster {
     if (!this.onTaskNeedsToBeOpened) {
       throw new Error("TaskOpener did not register itself");
     }
-    return this.onTaskNeedsToBeOpened(id);
+    const result = await this.onTaskNeedsToBeOpened(id);
+
+    this.statsStorage.taskCompleted(id, result.duration);
+
+    return result;
   }
 
   prepareGameStart() {
@@ -359,7 +363,6 @@ export class MasterOfDisaster {
       return false;
     }
 
-    this.statsStorage.taskCompleted(taskId, result.duration);
     this.taskState.set(id, true);
 
     if (this.allTasksCompleted) {

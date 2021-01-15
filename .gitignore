@@ -40,3 +40,4 @@ pids
 packages/server/coverage/
 .idea/discord.xml
 packages/client/src/screens/in-game/game-playground/old_playground.ts
+packages/client/dist/

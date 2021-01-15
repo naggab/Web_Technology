@@ -6,8 +6,7 @@ import path from "path";
 import { GameMaster } from "./gameMaster";
 
 const port = 3000;
-
-app.use(express.static("public"));
+app.use(express.static(path.resolve(__dirname, "..", "..", "client", "dist")));
 
 app.get("/api/test", (req, res) => {
   res.send("Hello World!");
@@ -20,14 +19,6 @@ const broker = new Broker(gameMaster);
 app.ws("/ws", function (ws, req) {
   broker.onConnected(ws);
 });
-
-//Gabriel start
-app.use("/screens", express.static(path.resolve(__dirname, "client", "screens")));
-app.get("/*", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "client", "index.html"));
-});
-
-//Gabriel end
 
 const cleanup = async (eventType) => {
   console.log("cleanup", eventType);
