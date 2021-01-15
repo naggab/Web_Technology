@@ -559,6 +559,19 @@ export default class GamePlayground extends HTMLElement {
     modInstance.serverSession.subscribe(GameEventOp.PLAYER_MOVED, this.foreignPlayerMoved);
     modInstance.serverSession.subscribe(GameEventOp.PLAYER_JOINED, this.foreignPlayerJoined);
     modInstance.serverSession.subscribe(GameEventOp.PLAYER_LEFT, this.foreignPlayerLeft);
+
+    this.loadAudio();
+  }
+
+  loadAudio() {
+    var audioElement = this.shadowRoot.getElementById("audio-player") as HTMLAudioElement;
+    audioElement.src = "/assets/music.ogg";
+    audioElement.addEventListener("loadeddata", () => {
+      let duration = audioElement.duration;
+      audioElement.volume = 0.2;
+      audioElement.loop = true;
+      audioElement.play();
+    });
   }
 
   async resetStage() {

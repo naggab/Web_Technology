@@ -23,11 +23,24 @@
     margin-bottom: 1rem;
   }
 
+  #bottom {
+    margin-top: 0.5rem;
+    width: 100%;
+    text-align: center;
+  }
+
+  #credits {
+    font-size: 60%;
+    font-family: "Roboto", sans-serif;
+    text-align: center;
+    color: rgba(255, 255, 255);
+  }
+
   #outer-container {
     margin: 0 auto;
     width: 85%;
 
-    height: 70vh;
+    height: 60vh;
   }
 
   #container {
@@ -50,5 +63,11 @@
 </div>
 <div id="outer-container">
   <div id="container"></div>
+</div>
+<div id="bottom">
+  <audio id="audio-player" controls></audio>
+  <p>
+    <a href="http://EricSkiff.com/music" id="credits">Music: Eric Skiff - Come and Find Me - Resistor Anthems</a>
+  </p>
 </div>
 <textarea id="map-export" rows="8" cols="100"></textarea>
