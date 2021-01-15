@@ -58,6 +58,10 @@ export interface IGameDidFinishCB {
   (wid: number): void;
 }
 
+export interface IDebugToggleCB {
+  (d: boolean): void;
+}
+
 /**
  * Interface for "player opens task" callback function.
  */
@@ -552,6 +556,7 @@ export default class GamePlayground extends HTMLElement {
     if (!modInstance) throw console.error("no mod instance");
     DEBUG_MODE = modInstance.getMode();
     modInstance.registerGameFinishCB(this.endGame.bind(this));
+    modInstance.registerDebugToggleCB(this.debugToggle.bind(this));
 
     window.addEventListener("resize", (event) => {
       debugPrint("RESIZING");
@@ -627,6 +632,11 @@ export default class GamePlayground extends HTMLElement {
       }
       centerDiv.style.height = (centerDiv.clientHeight - topDiv.clientHeight - botDiv.clientHeight).toString() + "px";
     }
+  }
+
+  debugToggle(d: boolean) {
+    DEBUG_MODE = d;
+    this.resetStage();
   }
 
   /**

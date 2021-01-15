@@ -9,7 +9,7 @@ import { english, german } from "./language";
 import { PopUp } from "./components/PopUp";
 import { CapabilitiesManager } from "./capabilitiesManager";
 import { MapStorage } from "@apirush/common/src/maps";
-import { IGameDidFinishCB } from "./screens/in-game/game-playground/index";
+import { IGameDidFinishCB, IDebugToggleCB } from "./screens/in-game/game-playground/index";
 
 export type ClientState =
   | "loading"
@@ -39,6 +39,7 @@ export class MasterOfDisaster {
   private language: Languages = "English";
   private debugMode: boolean = localStorage.getItem("debugMode") == "true";
   private gameDidFinishCB: IGameDidFinishCB;
+  private debugToggleCB: IDebugToggleCB;
 
   constructor(sess: ServerSession) {
     this.serverSession = sess;
@@ -59,7 +60,8 @@ export class MasterOfDisaster {
   public setMode(mode: boolean) {
     this.debugMode = mode;
     localStorage.setItem("debugMode", String(this.debugMode));
-    router(this.state);
+    if (this.state != "in-game" && this.state != "welcome-stats") router(this.state);
+    else if (this.state == "in-game") this.debugToggleCB(mode);
   }
   //END
   //--------------------------------------------------------------------------------------------------------------------
@@ -183,6 +185,10 @@ export class MasterOfDisaster {
 
   registerGameFinishCB(cb: IGameDidFinishCB) {
     this.gameDidFinishCB = cb;
+  }
+
+  registerDebugToggleCB(cb: IDebugToggleCB) {
+    this.debugToggleCB = cb;
   }
 
   private ensureHelloSent(v: boolean = true) {
