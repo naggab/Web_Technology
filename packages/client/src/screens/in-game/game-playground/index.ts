@@ -558,6 +558,8 @@ export default class GamePlayground extends HTMLElement {
     modInstance.registerGameFinishCB(this.endGame.bind(this));
     modInstance.registerDebugToggleCB(this.debugToggle.bind(this));
 
+    this.fixCSS();
+
     window.addEventListener("resize", (event) => {
       debugPrint("RESIZING");
       this.resetStage();
