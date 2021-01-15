@@ -17,6 +17,7 @@ export const english = {
     "resize-screen-task": "Resize Screen Task",
     "timing-task": "Timing Task",
     "reaction-task": "Reaction Task",
+    "geo-distance-task": "Geo Distance Task",
   },
 
   welcome_start: {
@@ -84,6 +85,7 @@ export const german = {
     "resize-screen-task": "ResizeScreenTask",
     "timing-task": "TimingTask",
     "reaction-task": "ReactionTask",
+    "geo-distance-task": "Geo Distance Task",
   },
 
   welcome_start: {
