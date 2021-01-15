@@ -257,6 +257,12 @@ export class Player {
     this.redraw();
   }
 
+  calculateTooltipPos(): Coord {
+    let c_x = this.x * gridSize + gridSize / 2 - this.tooltip.width() / 2;
+    let c_y = (this.y - 2) * gridSize + gridSize / 2 - this.tooltip.height() / 2;
+    return cord(c_x, c_y);
+  }
+
   /**
    * Manual collision detection, checks collisions around the new
    * player position.
@@ -322,8 +328,8 @@ export class Player {
    * @param amount The amount of grid elements the player should move.
    */
   moveUp(amount: number) {
-    this.model.y((this.y - 1) * gridSize);
-    if (ANIMATIONS_ENABLED) this.refreshTooltip(undefined, false, true);
+    //this.model.y((this.y - 1) * gridSize);
+    //if (ANIMATIONS_ENABLED) this.refreshTooltip(undefined, false, true);
     var newPos = this.playground.grid[this.y - amount][this.x];
     var foundCollision = this.checkCollision(this.y - amount, this.x);
     if (newPos !== undefined && foundCollision != CollisionType.Wall) {
@@ -331,6 +337,7 @@ export class Player {
         this.y -= amount;
 
         if (ANIMATIONS_ENABLED) {
+          /*
           var iter = (gridSize / 7) * amount;
           var stop = this.model.y() - amount * gridSize;
 
@@ -349,7 +356,10 @@ export class Player {
             }.bind(this),
             this.layer,
           );
-          anim.start();
+          anim.start();*/
+          this.model.to({ y: (this.y - 1) * gridSize, duration: 0.14 });
+          this.tooltip.to({ y: this.calculateTooltipPos().y, duration: 0.14 });
+          this.tooltipShape.to({ y: this.calculateTooltipPos().y, duration: 0.14 });
         } else {
           this.model.y(this.model.y() - amount * gridSize);
           this.refreshTooltip(undefined, false, true);
@@ -363,8 +373,8 @@ export class Player {
   }
 
   moveLeft(amount: number) {
-    this.model.x((this.x - 1) * gridSize);
-    if (ANIMATIONS_ENABLED) this.refreshTooltip(undefined, true, false);
+    //this.model.x((this.x - 1) * gridSize);
+    //if (ANIMATIONS_ENABLED) this.refreshTooltip(undefined, true, false);
     if (amount < 0) this.model.animation("idleRight");
     else this.model.animation("idleLeft");
     var newPos = this.playground.grid[this.y][this.x - amount];
@@ -375,6 +385,7 @@ export class Player {
         this.x -= amount;
 
         if (ANIMATIONS_ENABLED) {
+          /*
           var iter = (gridSize / 7) * amount;
           var stop = this.model.x() - amount * gridSize;
 
@@ -393,7 +404,10 @@ export class Player {
             }.bind(this),
             this.layer,
           );
-          anim.start();
+          anim.start();*/
+          this.model.to({ x: (this.x - 1) * gridSize, duration: 0.14 });
+          this.tooltip.to({ x: this.calculateTooltipPos().x, duration: 0.14 });
+          this.tooltipShape.to({ x: this.calculateTooltipPos().x, duration: 0.14 });
         } else {
           this.model.x(this.model.x() - amount * gridSize);
           this.refreshTooltip(undefined, true, false);
@@ -448,10 +462,17 @@ export class Player {
     this.x = x;
     this.y = y;
 
-    this.model.x((x - 1) * gridSize);
-    this.model.y((y - 1) * gridSize);
+    if (ANIMATIONS_ENABLED) {
+      this.model.to({ x: (x - 1) * gridSize, y: (y - 1) * gridSize, duration: 0.14 });
+      let tPos = this.calculateTooltipPos();
+      this.tooltip.to({ x: tPos.x, y: tPos.y, duration: 0.14 });
+      this.tooltipShape.to({ x: tPos.x, y: tPos.y, duration: 0.14 });
+    } else {
+      this.model.x((x - 1) * gridSize);
+      this.model.y((y - 1) * gridSize);
+      this.refreshTooltip();
+    }
 
-    this.refreshTooltip();
     this.redraw();
   }
 }
@@ -563,18 +584,56 @@ export default class GamePlayground extends HTMLElement {
     this.loadAudio();
   }
 
+  /**
+   * Load audio file and fix CSS.
+   * Audio player will be hidden if it fails to load.
+   */
   loadAudio() {
     var audioElement = this.shadowRoot.getElementById("audio-player") as HTMLAudioElement;
-    audioElement.src = "/assets/music.ogg";
-    audioElement.addEventListener("loadeddata", () => {
-      let duration = audioElement.duration;
-      audioElement.volume = 0.2;
-      audioElement.loop = true;
-      audioElement.play();
-    });
+    if (audioElement) {
+      audioElement.src = "/assets/music.ogg";
+      audioElement.addEventListener("loadeddata", () => {
+        let duration = audioElement.duration;
+        audioElement.volume = 0.2;
+        audioElement.loop = true;
+        audioElement.play();
+        this.fixCSS();
+      });
+      audioElement.addEventListener("error", () => {
+        var bottomDiv = this.shadowRoot.getElementById("bottom") as HTMLElement;
+        if (bottomDiv) {
+          bottomDiv.style.display = "none";
+          var outerContainer = this.shadowRoot.getElementById("outer-container") as HTMLElement;
+          if (outerContainer) {
+            this.resetStage();
+          }
+        }
+      });
+    }
   }
 
+  /**
+   * Fix CSS by giving the center div an absolute height based on the heading and bottom.
+   */
+  fixCSS() {
+    var topDiv = this.shadowRoot.getElementById("heading");
+    var centerDiv = this.shadowRoot.getElementById("outer-container");
+    var botDiv = this.shadowRoot.getElementById("bottom");
+    if (topDiv && centerDiv && botDiv) {
+      centerDiv.style.height = "75vh";
+      var title = this.shadowRoot.getElementById("title");
+      if (title) {
+        title.style.fontSize = centerDiv.clientHeight < 600 ? "100%" : "400%";
+      }
+      centerDiv.style.height = (centerDiv.clientHeight - topDiv.clientHeight - botDiv.clientHeight).toString() + "px";
+    }
+  }
+
+  /**
+   * Reset the stage to its original state (except for already completed tasks)
+   */
   async resetStage() {
+    this.fixCSS();
     if (this.grid) this.grid = [];
     this.stage.clear();
     if (this.baseLayer) this.baseLayer.destroy();
@@ -608,6 +667,9 @@ export default class GamePlayground extends HTMLElement {
     this.stage.add(this.getCurrentPlayer().layer);
   }
 
+  /**
+   * Interval function for keydown (called while holding down keys).
+   */
   keyDownCheck() {
     if (this.keyMap == undefined || this.player == undefined) return;
     if (
@@ -632,6 +694,10 @@ export default class GamePlayground extends HTMLElement {
     }
   }
 
+  /**
+   * Keydown function for a key press (not holding down).
+   * @param keyCode
+   */
   async handleMove(keyCode?: number) {
     if (keyCode == 87 && !this.keyMap.get(83)) this.player.moveUp(1);
     if (keyCode == 65 && !this.keyMap.get(68)) this.player.moveLeft(1);
@@ -784,6 +850,10 @@ export default class GamePlayground extends HTMLElement {
     //player.redraw();
   }
 
+  /**
+   * End the game by drawing a ring around the winning player and stopping all other players sprites.
+   * @param winnerID The ID of the winning player.
+   */
   async endGame(winnerID: number) {
     var winningPlayer: Player;
 
@@ -857,10 +927,19 @@ export default class GamePlayground extends HTMLElement {
     }
   }
 
+  /**
+   * Sends the MOVE command to the server for the current player.
+   * @param x
+   * @param y
+   */
   sendMyPlayerMoved(x: number, y: number) {
     modInstance.serverSession.sendRPC(CommandOp.MOVE, { position: { x, y } });
   }
 
+  /**
+   * MOVE event for foreign players.
+   * @param event
+   */
   foreignPlayerMoved(event: Event<GameEventOp.PLAYER_MOVED>) {
     const { id, position } = event.payload;
     this.foreignPlayers.forEach((fp) => {
@@ -870,6 +949,10 @@ export default class GamePlayground extends HTMLElement {
     });
   }
 
+  /**
+   * PLAYER_JOINED event for foreign players.
+   * @param event
+   */
   foreignPlayerJoined(event: Event<GameEventOp.PLAYER_JOINED>) {
     const foreignPlayer = event.payload;
     this.addForeignPlayer(foreignPlayer);
@@ -877,6 +960,10 @@ export default class GamePlayground extends HTMLElement {
     this.showPopup(foreignPlayer.name + " " + modInstance.getString().in_game.joined);
   }
 
+  /**
+   * PLAYER_LEFT event for foreign players.
+   * @param event
+   */
   foreignPlayerLeft(event: Event<GameEventOp.PLAYER_LEFT>) {
     const { id } = event.payload;
     this.removeForeignPlayer(id);
@@ -991,6 +1078,9 @@ export default class GamePlayground extends HTMLElement {
     }
   }
 
+  /**
+   * Load all necessary sprites.
+   */
   async loadSprites() {
     this.sprites = [];
     const imageObj = new Image();
@@ -1192,23 +1282,6 @@ export default class GamePlayground extends HTMLElement {
       }
       this.baseLayer.batchDraw();
     }
-
-    /* DEMO IMPLEMENTATION BLOCK
-    // PLAYER
-    var playerLayer = new Konva.Layer();
-    player = new Player(20, 20, "orange", playerLayer, this.stage, 0);
-
-    // CALLBACK
-    player.attachCallback(function (x: number, y: number): void {
-      debugPrint("Player X: " + x + "; Y: " + y);
-    });
-
-    // + WALL
-    this.addWall([new Coord(5, 17), new Coord(10, 17), new Coord(10, 22), new Coord(30, 22)]);
-
-    // - WALL
-    this.removeWall([new Coord(10, 29), new Coord(27, 29)]);
-    */
   }
 
   /**
