@@ -104,7 +104,7 @@ if(!curr_stats[curr_id]){
   texts[3].innerHTML = "No Stats :,("
 }
 else{
-texts[3].innerHTML = curr_stats[curr_id] / 1000 + "s"
+texts[3].innerHTML = (curr_stats[curr_id] / 1000).toFixed(3) + "s"
 }
 }
 }
