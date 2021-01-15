@@ -25,12 +25,11 @@ export class Button extends HTMLElement {
     }
     return this.getAttribute("label") || "";
   }
-  public setID(text){
+  public setID(text) {
     this.setAttribute("id", text);
   }
 
-
-  public setStyle(text){
+  public setStyle(text) {
     this.setAttribute("styletype", text);
   }
   get styletype(): ButtonStyleType[] {
