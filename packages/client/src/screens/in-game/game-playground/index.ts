@@ -785,7 +785,6 @@ export default class GamePlayground extends HTMLElement {
                   }
 
                   if (this.newWall) {
-                    console.log(this.newWall);
                     var str = "";
                     var prev_x = 0;
                     var prev_y = 0;
@@ -811,13 +810,11 @@ export default class GamePlayground extends HTMLElement {
                         ) {
                           dir = 1;
                         } else {
-                          console.log(current);
                           start_x = current.x;
                           start_y = current.y;
                           str = str + "cord(" + current.x + "," + current.y + "),";
                         }
                         if (dir != prev_dir && prev_dir != 0) {
-                          console.log(prev_x, prev_y);
                           start_x = prev_x;
                           start_y = prev_y;
                           str = str + "cord(" + prev_x + "," + prev_y + "),";
@@ -825,7 +822,6 @@ export default class GamePlayground extends HTMLElement {
                         prev_x = current.x;
                         prev_y = current.y;
                         prev_dir = dir;
-                        console.log(dir);
                       }
                       str = str + "cord(" + prev_x + "," + prev_y + "),";
                     }
@@ -1241,11 +1237,9 @@ export default class GamePlayground extends HTMLElement {
         newPos.shape.destroy();
         var alreadyComplete: boolean = false;
         if (this.tasks !== undefined) {
-          console.log("LOOKING FOR TASKS");
           var t = this.tasks.find((element) => element.id == key);
           if (t) {
-            console.log("FOUND ELEMENT");
-            console.log(t);
+            debugPrint(t);
             if (t.isCompleted) {
               newPos.shape = new Konva.Image({
                 x: npx,
