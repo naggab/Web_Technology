@@ -6,8 +6,7 @@ import { Button } from "../../components/button";
 import { StatsStorage } from "../../statsStorage";
 import { any, variable } from "@tensorflow/tfjs";
 import { TaskManger, TaskIdentifier} from "../../taskManager"
-import { event, globalEval } from "jquery";
-import { useForkRef } from "@material-ui/core";
+
 
 
 var curr_id:any
@@ -24,13 +23,9 @@ class StatsScreen extends AbstractScreen {
   _iter: any;
   _container: HTMLDivElement;
   _stat: HTMLDivElement;
-  _index: any
   button: Button; 
   tasks = [];
-  _taskname: any
-  _highscore: any
-  _score: any
-  _t_in_s: any
+
 
   private stat: { [key in TaskIdentifier]?: number };
   async getHtml() {
