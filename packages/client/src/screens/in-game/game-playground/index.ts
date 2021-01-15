@@ -361,9 +361,10 @@ export class Player {
             this.layer,
           );
           anim.start();*/
+          let tPos = this.calculateTooltipPos();
           this.model.to({ y: (this.y - 1) * gridSize, duration: 0.14 });
-          this.tooltip.to({ y: this.calculateTooltipPos().y, duration: 0.14 });
-          this.tooltipShape.to({ y: this.calculateTooltipPos().y, duration: 0.14 });
+          this.tooltip.to({ y: tPos.y, duration: 0.14 });
+          this.tooltipShape.to({ y: tPos.y, duration: 0.14 });
         } else {
           this.model.y(this.model.y() - amount * gridSize);
           this.refreshTooltip(undefined, false, true);
@@ -409,9 +410,10 @@ export class Player {
             this.layer,
           );
           anim.start();*/
+          let tPos = this.calculateTooltipPos();
           this.model.to({ x: (this.x - 1) * gridSize, duration: 0.14 });
-          this.tooltip.to({ x: this.calculateTooltipPos().x, duration: 0.14 });
-          this.tooltipShape.to({ x: this.calculateTooltipPos().x, duration: 0.14 });
+          this.tooltip.to({ x: tPos.x, duration: 0.14 });
+          this.tooltipShape.to({ x: tPos.x, duration: 0.14 });
         } else {
           this.model.x(this.model.x() - amount * gridSize);
           this.refreshTooltip(undefined, true, false);
