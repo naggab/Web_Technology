@@ -26,6 +26,7 @@ export type Languages = "English" | "German";
 
 export class MasterOfDisaster {
   capabilities: CapabilitiesManager = new CapabilitiesManager();
+  taskOpener_: TaskOpener;
   private watchingForGameStart: boolean = false;
   private watchingForGameEnd: boolean = false;
   private static instance_: MasterOfDisaster;
@@ -179,12 +180,18 @@ export class MasterOfDisaster {
   }
 
   private onGameAborted() {
+    if (this.taskOpener_) {
+      this.taskOpener_.abortTask();
+    }
     this.setState("post-game");
     console.log("Game was aborted");
     this.stopWatchingForGameEnd();
   }
 
   private onGameDidFinish(ev: Event<GameEventOp.GAME_FINISHED>) {
+    if (this.taskOpener_) {
+      this.taskOpener_.abortTask();
+    }
     console.log("Game did finish, winner is:", ev.payload.winner);
     this.gameWinner = ev.payload.winner;
     //this.setState("post-game");
@@ -301,16 +308,13 @@ export class MasterOfDisaster {
   }
 
   registerTaskOpener(to: TaskOpener) {
-    this.onTaskNeedsToBeOpened = to.openTask;
-
+    this.taskOpener_ = to;
     const hash = window.location.hash.replace("#", "");
     if (hash && TaskManger.getTaskIdentifiers().indexOf(hash as any) !== -1) {
       console.log("hash", hash);
       this.setState("all-tasks");
     }
   }
-
-  onTaskNeedsToBeOpened?: (taskId: TaskIdentifier) => Promise<{ duration: number; success: boolean }>;
 
   taskState: Map<string, boolean> = new Map<string, boolean>();
 
@@ -319,10 +323,10 @@ export class MasterOfDisaster {
   }
 
   async openTaskByIdentifier(id: TaskIdentifier) {
-    if (!this.onTaskNeedsToBeOpened) {
+    if (!this.taskOpener_) {
       throw new Error("TaskOpener did not register itself");
     }
-    const result = await this.onTaskNeedsToBeOpened(id);
+    const result = await this.taskOpener_.openTask(id);
 
     this.statsStorage.taskCompleted(id, result.duration);
 

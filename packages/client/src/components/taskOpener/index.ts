@@ -85,7 +85,7 @@ export class TaskOpener extends HTMLElement {
 
   disconnectedCallback() {
     const mod = MasterOfDisaster.getInstance();
-    mod.onTaskNeedsToBeOpened = undefined;
+    mod.taskOpener_ = undefined;
   }
 }
 
