@@ -50,9 +50,10 @@ export default class FillShapeTask extends Task {
     const ctx = this.ctx;
     const canvasPanel = this.canvasElement.getBoundingClientRect(); //get size according to html spec
 
-    modInstance= MasterOfDisaster.getInstance();
+    modInstance = MasterOfDisaster.getInstance();
     var seed = modInstance.getGameSeed();
-    this.infoElement.innerHTML = modInstance.getString().fill_shape_task.fill_msg +" "+ fillArry[seed % fillArry.length] + "%";
+    this.infoElement.innerHTML =
+      modInstance.getString().fill_shape_task.fill_msg + " " + fillArry[seed % fillArry.length] + "%";
 
     shapes.push(Smiley, Pyramid, Tree, Cactus);
     //this.shape = new shapes[seed % shapes.length](this.ctx, 100, 5, fillArry[seed % fillArry.length], 400, 10);
@@ -304,7 +305,6 @@ class Smiley implements ShapeI {
         this.cnt_max_outside--;
       }
       if (this.cnt_max_px_outside < 0) {
-        
         return [true, modInstance.getString().fill_shape_task.error_msg_many_px_outside];
       }
       if (this.cnt_max_outside < 0) {
@@ -333,12 +333,26 @@ class Smiley implements ShapeI {
     if (percentage_check > this.fill_shape - 5 && percentage_check < this.fill_shape + 5) {
       return [
         true,
-        modInstance.getString().fill_shape_task.percentage_check_win_msg + "(" + Math.ceil(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
+        modInstance.getString().fill_shape_task.percentage_check_win_msg +
+          "(" +
+          Math.ceil(percentage_check) +
+          "% / " +
+          this.fill_shape +
+          "%, +/-" +
+          this.tolerance +
+          "%)",
       ];
     } else {
       return [
         false,
-        modInstance.getString().fill_shape_task.percentage_check_fail_msg+"(" + Math.ceil(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
+        modInstance.getString().fill_shape_task.percentage_check_fail_msg +
+          "(" +
+          Math.ceil(percentage_check) +
+          "% / " +
+          this.fill_shape +
+          "%, +/-" +
+          this.tolerance +
+          "%)",
       ];
     }
   }
@@ -397,7 +411,6 @@ class Pyramid implements ShapeI {
         this.cnt_max_outside--;
       }
       if (this.cnt_max_px_outside < 0) {
-        
         return [true, modInstance.getString().fill_shape_task.error_msg_many_px_outside];
       }
       if (this.cnt_max_outside < 0) {
@@ -429,12 +442,26 @@ class Pyramid implements ShapeI {
     if (percentage_check > this.fill_shape - 5 && percentage_check < this.fill_shape + 5) {
       return [
         true,
-        modInstance.getString().fill_shape_task.percentage_check_win_msg + "(" + Math.ceil(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
+        modInstance.getString().fill_shape_task.percentage_check_win_msg +
+          "(" +
+          Math.ceil(percentage_check) +
+          "% / " +
+          this.fill_shape +
+          "%, +/-" +
+          this.tolerance +
+          "%)",
       ];
     } else {
       return [
         false,
-        modInstance.getString().fill_shape_task.percentage_check_fail_msg+"(" + Math.ceil(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
+        modInstance.getString().fill_shape_task.percentage_check_fail_msg +
+          "(" +
+          Math.ceil(percentage_check) +
+          "% / " +
+          this.fill_shape +
+          "%, +/-" +
+          this.tolerance +
+          "%)",
       ];
     }
   }
@@ -507,7 +534,6 @@ class Tree implements ShapeI {
         this.cnt_max_outside--;
       }
       if (this.cnt_max_px_outside < 0) {
-        
         return [true, modInstance.getString().fill_shape_task.error_msg_many_px_outside];
       }
       if (this.cnt_max_outside < 0) {
@@ -561,12 +587,26 @@ class Tree implements ShapeI {
     if (percentage_check > this.fill_shape - 5 && percentage_check < this.fill_shape + 5) {
       return [
         true,
-        modInstance.getString().fill_shape_task.percentage_check_win_msg + "(" + Math.ceil(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
+        modInstance.getString().fill_shape_task.percentage_check_win_msg +
+          "(" +
+          Math.ceil(percentage_check) +
+          "% / " +
+          this.fill_shape +
+          "%, +/-" +
+          this.tolerance +
+          "%)",
       ];
     } else {
       return [
         false,
-        modInstance.getString().fill_shape_task.percentage_check_fail_msg+"(" + Math.ceil(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
+        modInstance.getString().fill_shape_task.percentage_check_fail_msg +
+          "(" +
+          Math.ceil(percentage_check) +
+          "% / " +
+          this.fill_shape +
+          "%, +/-" +
+          this.tolerance +
+          "%)",
       ];
     }
   }
@@ -671,7 +711,6 @@ class Cactus implements ShapeI {
         this.cnt_max_outside--;
       }
       if (this.cnt_max_px_outside < 0) {
-        
         return [true, modInstance.getString().fill_shape_task.error_msg_many_px_outside];
       }
       if (this.cnt_max_outside < 0) {
@@ -732,12 +771,26 @@ class Cactus implements ShapeI {
     if (percentage_check > this.fill_shape - 5 && percentage_check < this.fill_shape + 5) {
       return [
         true,
-        modInstance.getString().fill_shape_task.percentage_check_win_msg + "(" + Math.ceil(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
+        modInstance.getString().fill_shape_task.percentage_check_win_msg +
+          "(" +
+          Math.ceil(percentage_check) +
+          "% / " +
+          this.fill_shape +
+          "%, +/-" +
+          this.tolerance +
+          "%)",
       ];
     } else {
       return [
         false,
-        modInstance.getString().fill_shape_task.percentage_check_fail_msg+"(" + Math.ceil(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
+        modInstance.getString().fill_shape_task.percentage_check_fail_msg +
+          "(" +
+          Math.ceil(percentage_check) +
+          "% / " +
+          this.fill_shape +
+          "%, +/-" +
+          this.tolerance +
+          "%)",
       ];
     }
   }

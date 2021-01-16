@@ -70,7 +70,7 @@ export default class MorseCodeTask extends Task {
       [0, 0, 0, 0, 0, 0],
     ]; //0=Space 1=SOS, 2=ABC, 3=HI
     const patternDescr: Array<string> = ["SOS", "ABC", "HI"]; //0=Space 1=SOS, 2=ABC, 3=HI
-    modInstance= MasterOfDisaster.getInstance();
+    modInstance = MasterOfDisaster.getInstance();
     var index = modInstance.getGameSeed() % pattern.length;
 
     this.info.innerHTML = "Morse:" + " '" + patternDescr[index] + "'";
@@ -91,7 +91,7 @@ export default class MorseCodeTask extends Task {
     const calcPrec = this.calcPrecision;
 
     function updateRectPos() {
-      ctxAnimtated.clearRect(pixelIndex-1, 160, 2, 30);
+      ctxAnimtated.clearRect(pixelIndex - 1, 160, 2, 30);
       ctxAnimtated.fillRect(pixelIndex, 160, 2, 30);
 
       animation = requestAnimationFrame(updateRectPos); // call requestAnimationFrame again to animate next frame
@@ -228,7 +228,11 @@ export default class MorseCodeTask extends Task {
     if (result < 80) {
       message = [false, modInstance.getString().morse_code_task.error_msg_signal_incomplete, 0];
     } else {
-      message = [true, modInstance.getString().morse_code_task.msg_signal_complete + result.toFixed(1) + " %", result.toFixed(1)];
+      message = [
+        true,
+        modInstance.getString().morse_code_task.msg_signal_complete + result.toFixed(1) + " %",
+        result.toFixed(1),
+      ];
     }
 
     return message;

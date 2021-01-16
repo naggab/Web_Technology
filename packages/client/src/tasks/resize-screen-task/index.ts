@@ -192,12 +192,14 @@ export default class ResizeScreenTask extends Task {
       this.staticPosY = this.currPosY;
     }
     this.textElement.innerHTML =
-      modInstance.getString().resize_screen_task.current_size_msg + "<br>" +
+      modInstance.getString().resize_screen_task.current_size_msg +
+      "<br>" +
       this.currWidth +
       " x " +
       this.currHeight +
       " px <br>" +
-      modInstance.getString().resize_screen_task.resize_to_msg + "<br>" +
+      modInstance.getString().resize_screen_task.resize_to_msg +
+      "<br>" +
       this.targetWidth +
       " x " +
       this.targetHeight +

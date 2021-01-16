@@ -36,12 +36,17 @@ export default class DragAndDropTask extends Task {
       ["hallo.txt", "Das ist richtig " + dateTime],
       ["adios.txt", "File es correcto " + dateTime],
     );
-    modInstance =  MasterOfDisaster.getInstance();
+    modInstance = MasterOfDisaster.getInstance();
     var randomSeed = modInstance.getGameSeed();
     console.log("random", randomSeed, randomSeed % this.filesArray.length);
     this.selectedFile = this.filesArray[randomSeed % this.filesArray.length];
 
-    this.dropZone.innerHTML = modInstance.getString().drag_and_drop_task.task_msg_1 +"'" + this.selectedFile[0] + "'"+ modInstance.getString().drag_and_drop_task.task_msg_2;
+    this.dropZone.innerHTML =
+      modInstance.getString().drag_and_drop_task.task_msg_1 +
+      "'" +
+      this.selectedFile[0] +
+      "'" +
+      modInstance.getString().drag_and_drop_task.task_msg_2;
 
     this.taskContainer.addEventListener("drop", (e) => {
       e.preventDefault();
