@@ -23,7 +23,9 @@ export default class Container extends HTMLElement {
   public showArrow() {
     this._wrapper.classList.remove("no_arrow");
     this._backArrow.classList.remove("hidden");
-    //this._wrapper.onclick = MasterOfDisaster.getInstance().goBack.bind(this, null);
+    this._backArrow.onclick = function () {
+      history.back();
+    };
   }
 
   disconnectedCallback() {}
