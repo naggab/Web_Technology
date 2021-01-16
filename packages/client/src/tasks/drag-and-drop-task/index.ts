@@ -3,6 +3,8 @@ import { Task } from "../../task";
 import { Button } from "../../components/button";
 import { MasterOfDisaster } from "../../masterOfDisaster";
 
+var modInstance: MasterOfDisaster;
+
 export default class DragAndDropTask extends Task {
   backButton: Button;
   serverResponseSpan: HTMLSpanElement;
@@ -31,14 +33,15 @@ export default class DragAndDropTask extends Task {
     this.filesArray.push(
       ["hello.txt", "Yes you downloaded the correct file! " + dateTime],
       ["bye.txt", "The file says goodbye! " + dateTime],
-      ["ciao.txt", "File is correct " + dateTime],
+      ["hallo.txt", "Das ist richtig " + dateTime],
       ["adios.txt", "File es correcto " + dateTime],
     );
-    var randomSeed = MasterOfDisaster.getInstance().getGameSeed();
+    modInstance =  MasterOfDisaster.getInstance();
+    var randomSeed = modInstance.getGameSeed();
     console.log("random", randomSeed, randomSeed % this.filesArray.length);
     this.selectedFile = this.filesArray[randomSeed % this.filesArray.length];
 
-    this.dropZone.innerHTML = "Drag and Drop file '" + this.selectedFile[0] + "' from Downloads";
+    this.dropZone.innerHTML = modInstance.getString().drag_and_drop_task.task_msg_1 +"'" + this.selectedFile[0] + "'"+ modInstance.getString().drag_and_drop_task.task_msg_2;
 
     this.taskContainer.addEventListener("drop", (e) => {
       e.preventDefault();
@@ -109,13 +112,13 @@ async function checkUpload(files: FileList, download: [string, string]) {
     } catch (e) {}
     if (fileContents == download[1]) {
       //&& name == download[0]) {
-      return [true, "Congrats, you did it!"];
+      return [true, modInstance.getString().drag_and_drop_task.check_win_msg];
     } /* else if (fileContents != download[1] && name == download[0]) {
       return [false, "Nope, correct file name. Wrong content."];
     } else if (name != download[0] && fileContents == download[1]) {
       return [false, "Nope, wrong file name. Correct content."];
     }*/
-    return [false, "Nope, wrong file."];
+    return [false, modInstance.getString().drag_and_drop_task.check_fail_msg];
   }
 }
 
