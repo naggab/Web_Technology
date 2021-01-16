@@ -12,10 +12,16 @@
   },
   "devDependencies": {
     "concurrently": "^5.3.0",
+    "cross-env": "^7.0.3",
+    "cross-var": "^1.1.0",
     "prettier": "^2.1.2",
     "webpack": "^5.3.0"
   },
   "scripts": {
+    "build:client": "yarn --cwd packages/client run build",
+    "build:dockerimage": "cross-var cross-env docker build -f ./Dockerfile -t registry.omnity.at/stefan.schintler/web_technology:$npm_package_version .",
+    "push:dockerimage": "cross-var cross-env docker push registry.omnity.at/stefan.schintler/web_technology:$npm_package_version",
+    "build": "yarn run build:client && yarn run build:dockerimage",
     "check-codestyle": "prettier --check .",
     "fix-codestyle": "prettier --write .",
     "start:client": "yarn --cwd packages/client run start",
