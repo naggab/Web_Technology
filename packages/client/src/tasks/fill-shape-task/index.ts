@@ -22,6 +22,7 @@ type ShapeConstructor = new (
 
 const shapes: Array<ShapeConstructor> = [];
 const fillArry: Array<number> = [30, 40, 50, 60, 70];
+var modInstance: MasterOfDisaster;
 
 export default class FillShapeTask extends Task {
   canvasElement: HTMLCanvasElement;
@@ -49,8 +50,10 @@ export default class FillShapeTask extends Task {
     const ctx = this.ctx;
     const canvasPanel = this.canvasElement.getBoundingClientRect(); //get size according to html spec
 
-    var seed = MasterOfDisaster.getInstance().getGameSeed();
-    this.infoElement.innerHTML = "Fill: " + fillArry[seed % fillArry.length] + "%";
+    modInstance = MasterOfDisaster.getInstance();
+    var seed = modInstance.getGameSeed();
+    this.infoElement.innerHTML =
+      modInstance.getString().fill_shape_task.fill_msg + " " + fillArry[seed % fillArry.length] + "%";
 
     shapes.push(Smiley, Pyramid, Tree, Cactus);
     //this.shape = new shapes[seed % shapes.length](this.ctx, 100, 5, fillArry[seed % fillArry.length], 400, 10);
@@ -302,10 +305,10 @@ class Smiley implements ShapeI {
         this.cnt_max_outside--;
       }
       if (this.cnt_max_px_outside < 0) {
-        return [true, "Woops, too many  pixels colored outside."];
+        return [true, modInstance.getString().fill_shape_task.error_msg_many_px_outside];
       }
       if (this.cnt_max_outside < 0) {
-        return [true, "Woops, too many times colored outside."];
+        return [true, modInstance.getString().fill_shape_task.error_msg_many_times_outside];
       }
       this.cnt_max_px_outside--;
     }
@@ -316,14 +319,6 @@ class Smiley implements ShapeI {
     var outRect2 = this.rect_2.calcPixelsFilled();
     var outRect3 = this.rect_3.calcPixelsFilled();
 
-    /*
-    console.log("Circle", outCircle.coloredPixel, outCircle.totalPixel);
-    console.log("Rectangle_left", outRect1.coloredPixel, outRect1.totalPixel);
-    console.log("Rectangle_right", outRect2.coloredPixel, outRect2.totalPixel);
-    console.log("Rectangle_bottom", outRect3.coloredPixel, outRect3.totalPixel);
-
-    this.count_pixel = z.filled;
-    this.count_total = z.total;*/
     var percentage_check =
       ((outCircle.coloredPixel + outRect1.coloredPixel + outRect2.coloredPixel + outRect3.coloredPixel) /
         (outCircle.totalPixel + outRect1.totalPixel + outRect2.totalPixel + outRect3.totalPixel)) *
@@ -338,12 +333,26 @@ class Smiley implements ShapeI {
     if (percentage_check > this.fill_shape - 5 && percentage_check < this.fill_shape + 5) {
       return [
         true,
-        "You did it! (" + Math.ceil(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
+        modInstance.getString().fill_shape_task.percentage_check_win_msg +
+          "(" +
+          Math.ceil(percentage_check) +
+          "% / " +
+          this.fill_shape +
+          "%, +/-" +
+          this.tolerance +
+          "%)",
       ];
     } else {
       return [
         false,
-        "Nope. Nice Try. (" + Math.ceil(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
+        modInstance.getString().fill_shape_task.percentage_check_fail_msg +
+          "(" +
+          Math.ceil(percentage_check) +
+          "% / " +
+          this.fill_shape +
+          "%, +/-" +
+          this.tolerance +
+          "%)",
       ];
     }
   }
@@ -402,11 +411,10 @@ class Pyramid implements ShapeI {
         this.cnt_max_outside--;
       }
       if (this.cnt_max_px_outside < 0) {
-        //to do break in-game
-        return [true, "Woops, too many  pixels colored outside."];
+        return [true, modInstance.getString().fill_shape_task.error_msg_many_px_outside];
       }
       if (this.cnt_max_outside < 0) {
-        return [true, "Woops, too many times colored outside."];
+        return [true, modInstance.getString().fill_shape_task.error_msg_many_times_outside];
       }
       this.cnt_max_px_outside--;
     }
@@ -416,10 +424,6 @@ class Pyramid implements ShapeI {
     var outRect2 = this.rect_2.calcPixelsFilled();
     var outRect3 = this.rect_3.calcPixelsFilled();
     var outRect4 = this.rect_4.calcPixelsFilled();
-
-    console.log("Rectangle_left", outRect1.coloredPixel, outRect1.totalPixel);
-    console.log("Rectangle_right", outRect2.coloredPixel, outRect2.totalPixel);
-    console.log("Rectangle_bottom", outRect3.coloredPixel, outRect3.totalPixel);
 
     /*
     this.count_pixel = z.filled;
@@ -438,12 +442,26 @@ class Pyramid implements ShapeI {
     if (percentage_check > this.fill_shape - 5 && percentage_check < this.fill_shape + 5) {
       return [
         true,
-        "You did it! (" + Math.ceil(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
+        modInstance.getString().fill_shape_task.percentage_check_win_msg +
+          "(" +
+          Math.ceil(percentage_check) +
+          "% / " +
+          this.fill_shape +
+          "%, +/-" +
+          this.tolerance +
+          "%)",
       ];
     } else {
       return [
         false,
-        "Nope. Nice Try. (" + Math.ceil(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
+        modInstance.getString().fill_shape_task.percentage_check_fail_msg +
+          "(" +
+          Math.ceil(percentage_check) +
+          "% / " +
+          this.fill_shape +
+          "%, +/-" +
+          this.tolerance +
+          "%)",
       ];
     }
   }
@@ -516,11 +534,10 @@ class Tree implements ShapeI {
         this.cnt_max_outside--;
       }
       if (this.cnt_max_px_outside < 0) {
-        //to do break in-game
-        return [true, "Woops, too many pixels colored outside."];
+        return [true, modInstance.getString().fill_shape_task.error_msg_many_px_outside];
       }
       if (this.cnt_max_outside < 0) {
-        return [true, "Woops, too many times colored outside."];
+        return [true, modInstance.getString().fill_shape_task.error_msg_many_times_outside];
       }
       this.cnt_max_px_outside--;
     }
@@ -532,10 +549,6 @@ class Tree implements ShapeI {
     var outRect4 = this.rect_4.calcPixelsFilled();
     var outRect5 = this.rect_5.calcPixelsFilled();
     var outRect6 = this.rect_6.calcPixelsFilled();
-
-    console.log("Rectangle_left", outRect1.coloredPixel, outRect1.totalPixel);
-    console.log("Rectangle_right", outRect2.coloredPixel, outRect2.totalPixel);
-    console.log("Rectangle_bottom", outRect3.coloredPixel, outRect3.totalPixel);
 
     /*
     this.count_pixel = z.filled;
@@ -574,12 +587,26 @@ class Tree implements ShapeI {
     if (percentage_check > this.fill_shape - 5 && percentage_check < this.fill_shape + 5) {
       return [
         true,
-        "You did it! (" + Math.ceil(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
+        modInstance.getString().fill_shape_task.percentage_check_win_msg +
+          "(" +
+          Math.ceil(percentage_check) +
+          "% / " +
+          this.fill_shape +
+          "%, +/-" +
+          this.tolerance +
+          "%)",
       ];
     } else {
       return [
         false,
-        "Nope. Nice Try. (" + Math.ceil(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
+        modInstance.getString().fill_shape_task.percentage_check_fail_msg +
+          "(" +
+          Math.ceil(percentage_check) +
+          "% / " +
+          this.fill_shape +
+          "%, +/-" +
+          this.tolerance +
+          "%)",
       ];
     }
   }
@@ -684,11 +711,10 @@ class Cactus implements ShapeI {
         this.cnt_max_outside--;
       }
       if (this.cnt_max_px_outside < 0) {
-        //to do break in-game
-        return [true, "Woops, too many pixels colored outside."];
+        return [true, modInstance.getString().fill_shape_task.error_msg_many_px_outside];
       }
       if (this.cnt_max_outside < 0) {
-        return [true, "Woops, too many times colored outside."];
+        return [true, modInstance.getString().fill_shape_task.error_msg_many_times_outside];
       }
       this.cnt_max_px_outside--;
     }
@@ -745,12 +771,26 @@ class Cactus implements ShapeI {
     if (percentage_check > this.fill_shape - 5 && percentage_check < this.fill_shape + 5) {
       return [
         true,
-        "You did it! (" + Math.ceil(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
+        modInstance.getString().fill_shape_task.percentage_check_win_msg +
+          "(" +
+          Math.ceil(percentage_check) +
+          "% / " +
+          this.fill_shape +
+          "%, +/-" +
+          this.tolerance +
+          "%)",
       ];
     } else {
       return [
         false,
-        "Nope. Nice Try. (" + Math.ceil(percentage_check) + "% / " + this.fill_shape + "%, +/-" + this.tolerance + "%)",
+        modInstance.getString().fill_shape_task.percentage_check_fail_msg +
+          "(" +
+          Math.ceil(percentage_check) +
+          "% / " +
+          this.fill_shape +
+          "%, +/-" +
+          this.tolerance +
+          "%)",
       ];
     }
   }

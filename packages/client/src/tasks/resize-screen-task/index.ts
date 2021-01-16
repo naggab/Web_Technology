@@ -3,6 +3,8 @@ import { Task } from "../../task";
 import { Button } from "../../components/button";
 import { MasterOfDisaster } from "../../masterOfDisaster";
 
+var modInstance: MasterOfDisaster;
+
 export default class ResizeScreenTask extends Task {
   checkButton: Button;
   resizeZone: HTMLDivElement;
@@ -60,7 +62,8 @@ export default class ResizeScreenTask extends Task {
       [800, 200],
       [900, 250],
     ]; //height width tuple
-    var index = MasterOfDisaster.getInstance().getGameSeed() % resizeArray.length;
+    modInstance = MasterOfDisaster.getInstance();
+    var index = modInstance.getGameSeed() % resizeArray.length;
     var setDimensionFlag: boolean = true;
 
     this.errorSound = new Audio("/assets/errorSound.mp3");
@@ -189,12 +192,14 @@ export default class ResizeScreenTask extends Task {
       this.staticPosY = this.currPosY;
     }
     this.textElement.innerHTML =
-      "Current size: <br>" +
+      modInstance.getString().resize_screen_task.current_size_msg +
+      "<br>" +
       this.currWidth +
       " x " +
       this.currHeight +
       " px <br>" +
-      "Resize to: <br>" +
+      modInstance.getString().resize_screen_task.resize_to_msg +
+      "<br>" +
       this.targetWidth +
       " x " +
       this.targetHeight +
@@ -218,11 +223,11 @@ export default class ResizeScreenTask extends Task {
       Math.abs(this.currHeight - this.targetHeight) <= this.tolerance &&
       Math.abs(this.currWidth - this.targetWidth) <= this.tolerance
     ) {
-      this.textElement.innerHTML = "Yes, you did it!!!";
+      this.textElement.innerHTML = modInstance.getString().resize_screen_task.check_win_msg;
       this.resizeZone.style.background = "green";
       this.taskSuccess = true;
     } else {
-      this.textElement.innerHTML = "Nope, nice try.";
+      this.textElement.innerHTML = modInstance.getString().resize_screen_task.check_fail_msg;
       this.resizeZone.style.background = "red";
     }
     this.rootContainer.removeEventListener("mousemove", this.onMouseMove);

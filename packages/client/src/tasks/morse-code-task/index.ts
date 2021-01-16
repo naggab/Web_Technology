@@ -5,6 +5,8 @@ import { Button } from "../../components/button";
 import { MasterOfDisaster } from "../../masterOfDisaster";
 import { range } from "lodash";
 
+var modInstance: MasterOfDisaster;
+
 export default class MorseCodeTask extends Task {
   controlButton: Button;
   canvasElement: HTMLCanvasElement;
@@ -68,7 +70,8 @@ export default class MorseCodeTask extends Task {
       [0, 0, 0, 0, 0, 0],
     ]; //0=Space 1=SOS, 2=ABC, 3=HI
     const patternDescr: Array<string> = ["SOS", "ABC", "HI"]; //0=Space 1=SOS, 2=ABC, 3=HI
-    var index = MasterOfDisaster.getInstance().getGameSeed() % pattern.length;
+    modInstance = MasterOfDisaster.getInstance();
+    var index = modInstance.getGameSeed() % pattern.length;
 
     this.info.innerHTML = "Morse:" + " '" + patternDescr[index] + "'";
     var binaryArray = this.getBinaryPattern(pattern[index], this.morseLinePx, this.morseDotPx, this.morseGapPx);
@@ -218,16 +221,18 @@ export default class MorseCodeTask extends Task {
         cntTotalLineDot++;
       }
     }
-    console.log("correct line dot", cntCorrectLineDot, cntTotalLineDot);
-    console.log("correct gap", cntCorrectGap, cntTotalGap);
 
     var result = ((cntCorrectLineDot / cntTotalLineDot) * 100) / 2 + ((cntCorrectGap / cntTotalGap) * 100) / 2;
     var message: any;
 
     if (result < 80) {
-      message = [false, "Signal incomplete. (<80%)", 0];
+      message = [false, modInstance.getString().morse_code_task.error_msg_signal_incomplete, 0];
     } else {
-      message = [true, "Accuracy: " + result.toFixed(1) + " %", result.toFixed(1)];
+      message = [
+        true,
+        modInstance.getString().morse_code_task.msg_signal_complete + result.toFixed(1) + " %",
+        result.toFixed(1),
+      ];
     }
 
     return message;

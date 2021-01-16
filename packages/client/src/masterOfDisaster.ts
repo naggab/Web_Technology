@@ -49,9 +49,18 @@ export class MasterOfDisaster {
 
     this.language = localStorage.getItem("language") as Languages;
   }
+
+  //--------------------------------------------------------------------------------------------------------------------
+  //BACK ARROW
+  //START
+  public goBack(state: ClientState) {
+    this.state_ = state;
+  }
+
+  //END
   //--------------------------------------------------------------------------------------------------------------------
 
-  //Debug mode
+  //DEBUG MODE
   //START
   public getMode() {
     return this.debugMode;
@@ -63,9 +72,10 @@ export class MasterOfDisaster {
     if (this.state != "in-game" && this.state != "welcome-stats") router(this.state);
     else if (this.state == "in-game") this.debugToggleCB(mode);
   }
+
   //END
   //--------------------------------------------------------------------------------------------------------------------
-  //Language settings
+  //LANGUAGE SETTINGS
   //START
 
   public getString() {
@@ -91,6 +101,7 @@ export class MasterOfDisaster {
       router(this.state);
     }
   }
+
   //END
   //--------------------------------------------------------------------------------------------------------------------
 
@@ -122,6 +133,9 @@ export class MasterOfDisaster {
   get state() {
     return this.state_;
   }
+  public getState() {
+    return this.state;
+  }
 
   private setState(newState: ClientState) {
     this.state_ = newState;
@@ -133,10 +147,9 @@ export class MasterOfDisaster {
     if (newState === "in-game" && !this.watchingForGameEnd) {
       this.watchForGameEnd();
     }
-  }
-
-  public getState() {
-    return this.state;
+    if (newState != "loading") {
+      history.pushState(newState, newState, null);
+    }
   }
 
   get helloSent() {

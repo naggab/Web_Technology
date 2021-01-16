@@ -2,16 +2,16 @@ import AbstractScreen from "../AbstractScreen";
 import templateHTML from "./template.html";
 import { Button } from "../../components/button";
 import { MasterOfDisaster } from "../../masterOfDisaster";
-
-import { router } from "../../router";
 import "../../components/PopUp";
 import { PopUp } from "../../components/PopUp";
+import Container from "../../components/container";
 
 class WelcomeCreateGame extends AbstractScreen {
   _gameName_input: any;
   _createGameButton: Button;
   _mod: MasterOfDisaster;
   _modal: PopUp;
+  _container: Container;
 
   constructor() {
     super();
@@ -25,12 +25,15 @@ class WelcomeCreateGame extends AbstractScreen {
     this._createGameButton.onclick = this.createGame.bind(this);
     this._modal = this.shadowRoot.querySelector("apirush-popup");
 
+    this._container = this.shadowRoot.querySelector("apirush-container");
+    this._container.showArrow();
     this.shadowRoot.querySelector("#title").innerHTML = this._mod.getString().welcome_create.title;
     this.shadowRoot.querySelector("#choose-game").innerHTML = this._mod.getString().welcome_create.gameName;
     this._gameName_input.setHint(this._mod.getString().welcome_create.gameNameHint);
     this._createGameButton.setLabel(this._mod.getString().welcome_create.createGame);
     this.setRandomName();
   }
+
   async setRandomName() {
     const response = await fetch("https://pokeapi.co/api/v2/pokemon");
     //const response = await fetch("https://randomuser.me/api/");

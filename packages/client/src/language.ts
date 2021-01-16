@@ -70,6 +70,29 @@ export const english = {
   gesture_recognition_task: {
     pleaseWait: "Please wait ...",
   },
+  fill_shape_task: {
+    error_msg_many_times_outside: "Woops, too many times colored outside.",
+    error_msg_many_px_outside: "Woops, too many  pixels colored outside",
+    fill_msg: "Fill",
+    percentage_check_win_msg: "You did it!!! ",
+    percentage_check_fail_msg: "Nope. Nice Try. ",
+  },
+  morse_code_task: {
+    error_msg_signal_incomplete: "Signal incomplete. (<80%)",
+    msg_signal_complete: "Accuracy: ",
+  },
+  resize_screen_task: {
+    current_size_msg: "Current size:",
+    resize_to_msg: "Resize to:",
+    check_win_msg: "You did it!!! ",
+    check_fail_msg: "Nope. Nice Try. ",
+  },
+  drag_and_drop_task: {
+    check_win_msg: "You did it!!! ",
+    check_fail_msg: "Nope. Wrong File. ",
+    task_msg_1: "Drag and Drop file ",
+    task_msg_2: " from folder 'Downloads'",
+  },
 };
 export const german = {
   general: {
@@ -141,5 +164,28 @@ export const german = {
 
   gesture_recognition_task: {
     pleaseWait: "Bitte warten ...",
+  },
+  fill_shape_task: {
+    error_msg_many_times_outside: "Uups, zu oft rausgemahlt.",
+    error_msg_many_px_outside: "Uups, zu viele falsche Pixel ausgemahlt.",
+    fill_msg: "Fülle",
+    percentage_check_win_msg: "Du hast es geschafft!!! ",
+    percentage_check_fail_msg: "Nein. Netter Versuch. ",
+  },
+  morse_code_task: {
+    error_msg_signal_incomplete: "Signal unvollständig. (<80%)",
+    msg_signal_complete: "Genauigkeit: ",
+  },
+  resize_screen_task: {
+    current_size_msg: "Aktuelle Göße",
+    resize_to_msg: "Zielgröße:",
+    check_win_msg: "Du hast es geschafft!!! ",
+    check_fail_msg: "Nein. Netter Versuch. ",
+  },
+  drag_and_drop_task: {
+    check_win_msg: "Du hast es geschafft!!! ",
+    check_fail_msg: "Nein. Falsche Datei. ",
+    task_msg_1: "Drag and Drop Datei ",
+    task_msg_2: " vom Ordner 'Downloads'",
   },
 };

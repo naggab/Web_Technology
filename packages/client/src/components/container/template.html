@@ -1,26 +1,50 @@
 <style>
   .container {
-      width: 50%;
+    width: 100%;
     height: 50vh;
-    min-height: 400px;
-    min-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
     border-radius: 25px;
     background: rgba(0, 0, 0, 0.4);
     padding: 2%;
     overflow: auto;
   }
-  @media only screen and (max-width: 1350px) and (min-width: 900px) {
-     .container {
-         width: 75%;
-     }
-  }
-  @media only screen and (max-width: 900px) {
-      .container {
-          width: 90%;
-      }
+
+  .wrapper {
+    height: calc(50vh + 50px);
+
+    width: 50%;
+    min-height: 400px;
+    min-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
+  #back_arrow {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 16px;
+    cursor: pointer;
+  }
+
+  .no_arrow {
+    height: 50vh;
+  }
+  .hidden {
+    display: none;
+  }
+
+  @media only screen and (max-width: 1350px) and (min-width: 900px) {
+    .wrapper {
+      width: 75%;
+    }
+  }
+
+  @media only screen and (max-width: 900px) {
+    .wrapper {
+      width: 90%;
+    }
+  }
 </style>
-<div class="container"></div>
+<div class="wrapper no_arrow">
+  <img id="back_arrow" class="hidden" src="../../../assets/img/backArrow.svg" />
+  <div class="container"></div>
+</div>
