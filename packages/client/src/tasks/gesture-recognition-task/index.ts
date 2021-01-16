@@ -22,6 +22,7 @@ const GestureGoals: Array<Gesture[]> = [
 export default class GestureRecognitionTask extends Task {
   stopped: boolean;
   analyseRunning: boolean = false;
+  failsaveTimeout: any;
 
   gestureGoalsContainer_: HTMLDivElement;
   gestureGoalEntryTemplate_: HTMLTemplateElement;
@@ -44,27 +45,34 @@ export default class GestureRecognitionTask extends Task {
     return this.goal_[index];
   }
 
-  nextGoal() {
+  nextGoal(success: boolean = true) {
+    if (this.failsaveTimeout) {
+      clearTimeout(this.failsaveTimeout);
+    }
     const currentGoal = this.currentGoal;
     currentGoal.done = true;
     currentGoal.el.classList.add("inactive");
+    currentGoal.el.classList.add(success ? "success" : "fail");
     const newGoal = this.currentGoal;
     if (newGoal) {
       newGoal.el.classList.remove("inactive");
+      this.failsaveTimeout = setTimeout(() => this.nextGoal(false), 30 * 1000);
     } else {
-      this.finish(true, 0);
+      this.finish(true);
     }
   }
 
   async onMounted() {
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = viewHtml;
-    const seed = MasterOfDisaster.getInstance().getGameSeed();
+    const mod = MasterOfDisaster.getInstance();
+    const seed = mod.getGameSeed();
 
     const gestureGoal = GestureGoals[seed % GestureGoals.length];
 
     this.gestureGoalsContainer_ = this.shadowRoot.querySelector("#gesture-goals") as HTMLDivElement;
     this.loadingOverlay_ = this.shadowRoot.querySelector(".loading-overlay") as HTMLDivElement;
+    this.loadingOverlay_.innerHTML = mod.getString().gesture_recognition_task.pleaseWait;
     this.hiddenCanvas_ = this.shadowRoot.querySelector("#hidden-canvas") as HTMLCanvasElement;
     this.gestureGoalEntryTemplate_ = this.shadowRoot.querySelector(
       "#gesture-goal-entry-template",
@@ -75,17 +83,17 @@ export default class GestureRecognitionTask extends Task {
     this.goal_[0].el.classList.remove("inactive");
 
     this.video_ = this.shadowRoot.querySelector("#video-element");
-
+    grWorker.onmessage = this.handleMsgFromWorker.bind(this);
+    grWorker.postMessage({
+      type: WorkerRequestTypes.CHECK_IS_READY,
+    });
     this.initCamera(config.video.width, config.video.height, config.video.fps).then((video) => {
       this.video_.play();
       this.video_.addEventListener("loadeddata", (event) => {
         this.startPredictions();
       });
     });
-    grWorker.onmessage = this.handleMsgFromWorker.bind(this);
-    grWorker.postMessage({
-      type: WorkerRequestTypes.CHECK_IS_READY,
-    });
+    this.failsaveTimeout = setTimeout(() => this.nextGoal(false), 30 * 1000);
   }
 
   handleMsgFromWorker(e: MessageEvent) {
@@ -100,7 +108,7 @@ export default class GestureRecognitionTask extends Task {
         grWorker.postMessage({
           type: WorkerRequestTypes.CHECK_IS_READY,
         });
-      }, 500);
+      }, 250);
     } else if (resp.type === WorkerRequestTypes.CONFIGURE_ESTIMATOR && resp.ok) {
       this.startPredictions();
     } else if (resp.type === WorkerRequestTypes.ANALYZE_IMAGE) {
@@ -111,7 +119,7 @@ export default class GestureRecognitionTask extends Task {
       this.analyseRunning = false;
       if (this.currentGoal?.gesture === resp.gesture) {
         console.log("detected goal, next!");
-        this.nextGoal();
+        this.nextGoal(true);
       }
     }
   }

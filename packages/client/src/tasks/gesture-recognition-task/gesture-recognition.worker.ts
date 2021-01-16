@@ -70,6 +70,8 @@ const analyseImage = async (imageData: ImageData): Promise<Gesture | null> => {
         return result.name as Gesture;
       }
       lastDetected = result.name;
+    } else {
+      lastDetected = "";
     }
   }
   return null;

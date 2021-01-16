@@ -66,6 +66,10 @@ export const english = {
   welcome_all_tasks: {
     title: "ALL TASKS",
   },
+
+  gesture_recognition_task: {
+    pleaseWait: "Please wait ...",
+  },
 };
 export const german = {
   general: {
@@ -133,5 +137,9 @@ export const german = {
   },
   welcome_all_tasks: {
     title: "ALLE AUFGABEN",
+  },
+
+  gesture_recognition_task: {
+    pleaseWait: "Bitte warten ...",
   },
 };

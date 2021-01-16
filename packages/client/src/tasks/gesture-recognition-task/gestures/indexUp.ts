@@ -15,6 +15,7 @@ indexUpDescription.addCurl(Finger.Index, FingerCurl.NoCurl, 1.0);
 
 for (let finger of [Finger.Index, Finger.Middle, Finger.Ring, Finger.Pinky, Finger.Thumb]) {
   indexUpDescription.addCurl(finger, FingerCurl.FullCurl, 1.0);
+  indexUpDescription.addCurl(finger, FingerCurl.NoCurl, -1.0);
 }
 
 indexUpDescription.setWeight(Finger.Index, 2);
