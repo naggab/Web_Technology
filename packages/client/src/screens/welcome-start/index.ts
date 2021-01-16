@@ -6,6 +6,7 @@ import { MasterOfDisaster } from "../../masterOfDisaster";
 import { router } from "../../router";
 import "../../components/PopUp";
 import { PopUp } from "../../components/PopUp";
+import Container from "../../components/container";
 
 class WelcomeScreen extends AbstractScreen {
   _joinGameButton: Button;

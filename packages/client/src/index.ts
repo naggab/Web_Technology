@@ -30,6 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const taskOpener = new TaskOpener();
     document.body.appendChild(taskOpener);
     router("welcome-start");
+    history.pushState("welcome-start", "welcome-start", null);
     MasterOfDisaster.getInstance().registerTaskOpener(taskOpener);
   });
 });

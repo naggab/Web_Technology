@@ -1,7 +1,7 @@
 import WelcomeScreen from "./screens/welcome-start";
 import JoinGameScreen from "./screens/welcome-join-game";
 import CreateNewGameScreen from "./screens/welcome-create-game";
-import { ClientState } from "./masterOfDisaster";
+import { ClientState, MasterOfDisaster } from "./masterOfDisaster";
 import ErrorScreen from "./screens/error";
 import { InGameScreen } from "./screens/in-game";
 import LoadingScreen from "./screens/loading";
@@ -50,9 +50,25 @@ export async function router(state: ClientState) {
       break;
     default:
       screen = new WelcomeScreen();
-
       break;
   }
+
   document.querySelector("#app").innerHTML = "";
   document.querySelector("#app").appendChild(screen);
+}
+
+export async function back() {
+  window.addEventListener("popstate", (event) => {
+    const mod = MasterOfDisaster.getInstance();
+    if (mod == null) {
+      console.error("Master of disater is null");
+      return;
+    }
+    const state = event.state;
+
+    mod.goBack(state);
+    if (state != "loading") {
+      router(state);
+    }
+  });
 }
