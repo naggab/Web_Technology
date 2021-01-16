@@ -114,6 +114,8 @@ export class Player {
   public playerMovedCB: IPlayerMovedCB;
   public onTaskOpenCB: IOnTaskOpenCB;
 
+  taskOpen: boolean;
+
   constructor(
     x: number,
     y: number,
@@ -138,6 +140,7 @@ export class Player {
     else this.playerID = -1;
 
     this.bibNumber = bibNumber;
+    this.taskOpen = false;
 
     this.drawPlayer();
   }
@@ -290,7 +293,9 @@ export class Player {
                 var taskPos = newPos;
                 var ty = newPosY + i;
                 var tx = newPosX + j;
+                this.taskOpen = true;
                 modInstance.openTask(taskPos.task).then((completed) => {
+                  this.taskOpen = false;
                   if (completed) {
                     // Get new grid object in case we had to redraw while doing the task
                     taskPos = this.playground.grid[ty][tx];
@@ -687,11 +692,12 @@ export default class GamePlayground extends HTMLElement {
   keyDownCheck() {
     if (this.keyMap == undefined || this.player == undefined) return;
     if (
-      !this.keyMap.get(87) &&
-      !this.keyMap.get(65) &&
-      !this.keyMap.get(83) &&
-      !this.keyMap.get(68) &&
-      !this.keyMap.get(32)
+      (!this.keyMap.get(87) &&
+        !this.keyMap.get(65) &&
+        !this.keyMap.get(83) &&
+        !this.keyMap.get(68) &&
+        !this.keyMap.get(32)) ||
+      this.player.taskOpen
     ) {
       clearInterval(this.timerFunction);
       this.timerFunction = false;
@@ -713,151 +719,157 @@ export default class GamePlayground extends HTMLElement {
    * @param keyCode
    */
   async handleMove(keyCode?: number) {
-    if (keyCode == 87 && !this.keyMap.get(83)) this.player.moveUp(1);
-    if (keyCode == 65 && !this.keyMap.get(68)) this.player.moveLeft(1);
-    if (keyCode == 83 && !this.keyMap.get(87)) this.player.moveDown(1);
-    if (keyCode == 68 && !this.keyMap.get(65)) this.player.moveRight(1);
-    if (keyCode == 32) {
-      if (!this.endGameScreen) {
-        if (this.player.checkCollision(this.player.y, this.player.x, true) == CollisionType.Task) {
-          debugPrint(
-            "[SPCBR] pressed on player position: " + this.player.x + "," + this.player.y + " returns TASK in proximity",
-          );
+    if (!this.player.taskOpen) {
+      if (keyCode == 87 && !this.keyMap.get(83)) this.player.moveUp(1);
+      if (keyCode == 65 && !this.keyMap.get(68)) this.player.moveLeft(1);
+      if (keyCode == 83 && !this.keyMap.get(87)) this.player.moveDown(1);
+      if (keyCode == 68 && !this.keyMap.get(65)) this.player.moveRight(1);
+      if (keyCode == 32) {
+        if (!this.endGameScreen) {
+          if (this.player.checkCollision(this.player.y, this.player.x, true) == CollisionType.Task) {
+            debugPrint(
+              "[SPCBR] pressed on player position: " +
+                this.player.x +
+                "," +
+                this.player.y +
+                " returns TASK in proximity",
+            );
+          } else {
+            debugPrint(
+              "[SPCBR] pressed on player position: " + this.player.x + "," + this.player.y + " ... no task in prox",
+            );
+          }
         } else {
-          debugPrint(
-            "[SPCBR] pressed on player position: " + this.player.x + "," + this.player.y + " ... no task in prox",
-          );
+          window.location.reload();
         }
-      } else {
-        window.location.reload();
       }
-    }
-    if (keyCode == 84) {
-      ANIMATIONS_ENABLED = !ANIMATIONS_ENABLED;
-      this.showPopup(
-        modInstance.getString().in_game.animations +
-          " " +
-          (ANIMATIONS_ENABLED ? modInstance.getString().in_game.enabled : modInstance.getString().in_game.disabled) +
-          "!",
-      );
-    }
-    if (keyCode == 90) {
-      DEBUG_MODE = !DEBUG_MODE;
-      await this.resetStage();
-      this.showPopup(
-        modInstance.getString().in_game.debug +
-          " " +
-          (DEBUG_MODE ? modInstance.getString().in_game.enabled : modInstance.getString().in_game.disabled) +
-          "!",
-      );
-    }
-    if (keyCode == 72) {
-      this.showPopup(modInstance.getString().in_game.help, 6000, 18);
-    }
-    if (keyCode == 67 && DEBUG_MODE && !this.keyMap.get(17)) {
-      // c and not ctrl
-      this.endGame(this.player.playerID);
-    }
-    if (keyCode == 77) {
-      this.editMode = !this.editMode;
-      if (this.grid) {
-        this.grid.forEach((gridRow) => {
-          gridRow.forEach((gridElem) => {
-            this.baseLayer.listening(this.editMode);
-            gridElem.shape.listening(this.editMode);
+      if (keyCode == 84) {
+        ANIMATIONS_ENABLED = !ANIMATIONS_ENABLED;
+        this.showPopup(
+          modInstance.getString().in_game.animations +
+            " " +
+            (ANIMATIONS_ENABLED ? modInstance.getString().in_game.enabled : modInstance.getString().in_game.disabled) +
+            "!",
+        );
+      }
+      if (keyCode == 90) {
+        DEBUG_MODE = !DEBUG_MODE;
+        await this.resetStage();
+        this.showPopup(
+          modInstance.getString().in_game.debug +
+            " " +
+            (DEBUG_MODE ? modInstance.getString().in_game.enabled : modInstance.getString().in_game.disabled) +
+            "!",
+        );
+      }
+      if (keyCode == 72) {
+        this.showPopup(modInstance.getString().in_game.help, 6000, 18);
+      }
+      if (keyCode == 67 && DEBUG_MODE && !this.keyMap.get(17)) {
+        // c and not ctrl
+        this.endGame(this.player.playerID);
+      }
+      if (keyCode == 77) {
+        this.editMode = !this.editMode;
+        if (this.grid) {
+          this.grid.forEach((gridRow) => {
+            gridRow.forEach((gridElem) => {
+              this.baseLayer.listening(this.editMode);
+              gridElem.shape.listening(this.editMode);
 
-            var mapExport = this.shadowRoot.getElementById("map-export") as HTMLElement;
-            if (this.editMode) {
-              mapExport.style.display = "block";
-              gridElem.shape.on(
-                "mousedown",
-                function () {
-                  this.mouseIsDown = true;
-                  this.newWall = [];
-                }.bind(this),
-              );
-              gridElem.shape.on(
-                "mouseup",
-                function () {
-                  this.mouseIsDown = false;
+              var mapExport = this.shadowRoot.getElementById("map-export") as HTMLElement;
+              if (this.editMode) {
+                mapExport.style.display = "block";
+                gridElem.shape.on(
+                  "mousedown",
+                  function () {
+                    this.mouseIsDown = true;
+                    this.newWall = [];
+                  }.bind(this),
+                );
+                gridElem.shape.on(
+                  "mouseup",
+                  function () {
+                    this.mouseIsDown = false;
 
-                  if (gridElem.shape.fill() != "magenta" && !this.newWall.find((elem) => elem.pos == gridElem.pos)) {
-                    gridElem.shape.fill("magenta");
-                    gridElem.shape.draw();
-                    gridElem.type = ElementType.Wall;
-                    this.newWall.push(gridElem.pos);
-                  }
-
-                  if (this.newWall) {
-                    var str = "";
-                    var prev_x = 0;
-                    var prev_y = 0;
-
-                    var start_x = 0;
-                    var start_y = 0;
-
-                    var dir = 0; // 1 = hor, 2 = ver
-                    var prev_dir = 0;
-                    if (this.newWall.length == 1) {
-                      str = str + "cord(" + this.newWall[0].x + "," + this.newWall[0].y + ")";
-                    } else {
-                      for (var i = 0; i < this.newWall.length; i++) {
-                        var current = this.newWall[i];
-                        if (
-                          (current.x == prev_x && current.y == prev_y + 1) ||
-                          (current.x == prev_x && current.y == prev_y - 1)
-                        ) {
-                          dir = 2;
-                        } else if (
-                          (current.x == prev_x - 1 && current.y == prev_y) ||
-                          (current.x == prev_x + 1 && current.y == prev_y)
-                        ) {
-                          dir = 1;
-                        } else {
-                          start_x = current.x;
-                          start_y = current.y;
-                          str = str + "cord(" + current.x + "," + current.y + "),";
-                        }
-                        if (dir != prev_dir && prev_dir != 0) {
-                          start_x = prev_x;
-                          start_y = prev_y;
-                          str = str + "cord(" + prev_x + "," + prev_y + "),";
-                        }
-                        prev_x = current.x;
-                        prev_y = current.y;
-                        prev_dir = dir;
-                      }
-                      str = str + "cord(" + prev_x + "," + prev_y + "),";
+                    if (gridElem.shape.fill() != "magenta" && !this.newWall.find((elem) => elem.pos == gridElem.pos)) {
+                      gridElem.shape.fill("magenta");
+                      gridElem.shape.draw();
+                      gridElem.type = ElementType.Wall;
+                      this.newWall.push(gridElem.pos);
                     }
 
-                    /*this.newWall.forEach((c) => {
+                    if (this.newWall) {
+                      var str = "";
+                      var prev_x = 0;
+                      var prev_y = 0;
+
+                      var start_x = 0;
+                      var start_y = 0;
+
+                      var dir = 0; // 1 = hor, 2 = ver
+                      var prev_dir = 0;
+                      if (this.newWall.length == 1) {
+                        str = str + "cord(" + this.newWall[0].x + "," + this.newWall[0].y + ")";
+                      } else {
+                        for (var i = 0; i < this.newWall.length; i++) {
+                          var current = this.newWall[i];
+                          if (
+                            (current.x == prev_x && current.y == prev_y + 1) ||
+                            (current.x == prev_x && current.y == prev_y - 1)
+                          ) {
+                            dir = 2;
+                          } else if (
+                            (current.x == prev_x - 1 && current.y == prev_y) ||
+                            (current.x == prev_x + 1 && current.y == prev_y)
+                          ) {
+                            dir = 1;
+                          } else {
+                            start_x = current.x;
+                            start_y = current.y;
+                            str = str + "cord(" + current.x + "," + current.y + "),";
+                          }
+                          if (dir != prev_dir && prev_dir != 0) {
+                            start_x = prev_x;
+                            start_y = prev_y;
+                            str = str + "cord(" + prev_x + "," + prev_y + "),";
+                          }
+                          prev_x = current.x;
+                          prev_y = current.y;
+                          prev_dir = dir;
+                        }
+                        str = str + "cord(" + prev_x + "," + prev_y + "),";
+                      }
+
+                      /*this.newWall.forEach((c) => {
                       str = str + "cord(" + c.x + "," + c.y + "),";
                     });*/
-                    mapExport.innerHTML = mapExport.innerHTML + "\n[" + str + "],";
-                  }
-                }.bind(this),
-              );
-              gridElem.shape.on(
-                "mousemove",
-                function (xit, yit) {
-                  if (gridElem.shape.fill() != "magenta" && this.mouseIsDown) {
-                    gridElem.shape.fill("magenta");
-                    gridElem.shape.draw();
-                    gridElem.type = ElementType.Wall;
-                    this.newWall.push(gridElem.pos);
-                  }
-                }.bind(this),
-              );
-            } else {
-              mapExport.style.display = "none";
-            }
+                      mapExport.innerHTML = mapExport.innerHTML + "\n[" + str + "],";
+                    }
+                  }.bind(this),
+                );
+                gridElem.shape.on(
+                  "mousemove",
+                  function (xit, yit) {
+                    if (gridElem.shape.fill() != "magenta" && this.mouseIsDown) {
+                      gridElem.shape.fill("magenta");
+                      gridElem.shape.draw();
+                      gridElem.type = ElementType.Wall;
+                      this.newWall.push(gridElem.pos);
+                    }
+                  }.bind(this),
+                );
+              } else {
+                mapExport.style.display = "none";
+              }
+            });
           });
-        });
+        }
+        if (!this.editMode) this.shadowRoot.getElementById("map-export").innerHTML = "";
+        this.showPopup("Edit mode " + (this.editMode ? "enabled!" : "disabled!"));
       }
-      if (!this.editMode) this.shadowRoot.getElementById("map-export").innerHTML = "";
-      this.showPopup("Edit mode " + (this.editMode ? "enabled!" : "disabled!"));
+      //player.redraw();
     }
-    //player.redraw();
   }
 
   /**
