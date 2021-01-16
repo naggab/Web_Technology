@@ -23,6 +23,7 @@ export class Footer extends HTMLElement {
     this._camera = this._shadowRoot.querySelector(".camera");
     this._geolocation = this._shadowRoot.querySelector(".geolocation");
     this._changeLanguage.onclick = this.changeLanguage.bind(this, false);
+    this._footer.querySelector("#version").innerHTML = process.env.VERSION || "?";
   }
 
   checkCameraCapabilities() {

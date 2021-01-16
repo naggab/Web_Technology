@@ -4,8 +4,6 @@
   "private": true,
   "dependencies": {
     "@apirush/common": "^0.0.0",
-    "@tensorflow-models/handpose": "^0.0.6",
-    "@tensorflow/tfjs": "^2.8.3",
     "@types/resize-observer-browser": "^0.1.5",
     "copy-webpack-plugin": "^7.0.0",
     "file-loader": "^6.2.0",

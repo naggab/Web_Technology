@@ -1,12 +1,13 @@
 {
   "name": "web_technology",
-  "version": "1.0.0",
+  "version": "1.1",
   "private": true,
   "workspaces": [
     "packages/**"
   ],
   "dependencies": {
     "@material/textfield": "^8.0.0",
+    "glob-zip": "^1.0.0",
     "input": "^1.0.1",
     "lit-element": "^2.4.0"
   },
@@ -18,7 +19,8 @@
     "webpack": "^5.3.0"
   },
   "scripts": {
-    "build:client": "yarn --cwd packages/client run build",
+    "build:zip": "cross-var cross-env glob-zip -E ./apirush_$npm_package_version.zip  \"./!(node_modules|.git|docs|.idea)\" \"./packages/*/!(node_modules|dist|coverage)\" \"./packages/*/!(node_modules|dist|coverage)/**/*\" ",
+    "build:client": "cross-var cross-env VERSION=$npm_package_version yarn --cwd packages/client run build",
     "build:dockerimage": "cross-var cross-env docker build -f ./Dockerfile -t registry.omnity.at/stefan.schintler/web_technology:$npm_package_version .",
     "push:dockerimage": "cross-var cross-env docker push registry.omnity.at/stefan.schintler/web_technology:$npm_package_version",
     "build": "yarn run build:client && yarn run build:dockerimage",

@@ -4,7 +4,6 @@ import "../../components/textBox";
 import { MasterOfDisaster } from "../../masterOfDisaster";
 import { Button } from "../../components/button";
 import { StatsStorage } from "../../statsStorage";
-import { any, variable } from "@tensorflow/tfjs";
 import { TaskManger, TaskIdentifier } from "../../taskManager";
 
 var curr_id: any;

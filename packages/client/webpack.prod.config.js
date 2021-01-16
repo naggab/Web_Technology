@@ -1,6 +1,7 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const webpack = require("webpack");
 
 module.exports = {
   mode: "production",
@@ -36,6 +37,9 @@ module.exports = {
     }),
     new CopyWebpackPlugin({
       patterns: [{ from: "assets", to: "assets" }],
+    }),
+    new webpack.DefinePlugin({
+      "process.env.VERSION": JSON.stringify(process.env.VERSION ? `v${process.env.VERSION}` : "dev"),
     }),
   ],
 };

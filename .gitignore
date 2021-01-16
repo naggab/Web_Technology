@@ -1,3 +1,4 @@
+*.zip
 # compiled output
 /dist
 /ts-dist
