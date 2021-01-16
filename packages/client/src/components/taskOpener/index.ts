@@ -55,6 +55,7 @@ export class TaskOpener extends HTMLElement {
       const task = TaskManger.createTaskInstance(taskId, (duration, success) => {
         if (!this.container_.classList.contains("open")) {
           //already closed
+          resolve({ duration, success });
           return;
         }
         this.willDisappearSoon = true;
