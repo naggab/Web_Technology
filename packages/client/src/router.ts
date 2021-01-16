@@ -52,23 +52,8 @@ export async function router(state: ClientState) {
       screen = new WelcomeScreen();
       break;
   }
-
+  console.debug("moved to:", state);
+  console.debug(history);
   document.querySelector("#app").innerHTML = "";
   document.querySelector("#app").appendChild(screen);
-}
-
-export async function back() {
-  window.addEventListener("popstate", (event) => {
-    const mod = MasterOfDisaster.getInstance();
-    if (mod == null) {
-      console.error("Master of disater is null");
-      return;
-    }
-    const state = event.state;
-
-    mod.goBack(state);
-    if (state != "loading") {
-      router(state);
-    }
-  });
 }

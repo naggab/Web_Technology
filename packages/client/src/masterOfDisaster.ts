@@ -50,16 +50,15 @@ export class MasterOfDisaster {
 
     this.language = localStorage.getItem("language") as Languages;
   }
-
   //--------------------------------------------------------------------------------------------------------------------
-  //BACK ARROW
+  //HISTORY API
   //START
   public goBack(state: ClientState) {
     this.state_ = state;
+    console.debug("back to:", state);
+    router(state);
   }
-
   //END
-  //--------------------------------------------------------------------------------------------------------------------
 
   //DEBUG MODE
   //START
@@ -148,8 +147,8 @@ export class MasterOfDisaster {
     if (newState === "in-game" && !this.watchingForGameEnd) {
       this.watchForGameEnd();
     }
-    if (newState != "loading") {
-      history.pushState(newState, newState, null);
+    if (newState !== "loading") {
+      history.pushState(newState, null, null);
     }
   }
 

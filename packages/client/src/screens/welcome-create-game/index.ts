@@ -36,11 +36,8 @@ class WelcomeCreateGame extends AbstractScreen {
 
   async setRandomName() {
     const response = await fetch("https://pokeapi.co/api/v2/pokemon");
-    //const response = await fetch("https://randomuser.me/api/");
     let data = await response.json();
-    //data = data.results[0].name;
     data = data.results[Math.floor(Math.random() * data.results.length)];
-    //this._userName_input.setValue(data.first + " " + data.last);
     this._gameName_input.setValue(data.name);
   }
 

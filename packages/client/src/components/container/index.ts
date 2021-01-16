@@ -1,10 +1,10 @@
 import viewHtml from "./template.html";
 import { MasterOfDisaster } from "../../masterOfDisaster";
-import { back } from "../../router";
 
 export default class Container extends HTMLElement {
   _backArrow: HTMLImageElement;
   _wrapper: HTMLDivElement;
+
   constructor() {
     super();
   }
@@ -19,13 +19,11 @@ export default class Container extends HTMLElement {
     this._wrapper = this.querySelector(".wrapper");
     this._backArrow = this.querySelector("#back_arrow");
   }
+
   public showArrow() {
     this._wrapper.classList.remove("no_arrow");
     this._backArrow.classList.remove("hidden");
-    this._wrapper.onclick = this.goBack.bind(this);
-  }
-  goBack() {
-    window.history.back();
+    //this._wrapper.onclick = MasterOfDisaster.getInstance().goBack.bind(this, null);
   }
 
   disconnectedCallback() {}

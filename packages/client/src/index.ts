@@ -34,3 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
     MasterOfDisaster.getInstance().registerTaskOpener(taskOpener);
   });
 });
+window.addEventListener("popstate", (event) => {
+  MasterOfDisaster.getInstance().goBack(event.state);
+});
