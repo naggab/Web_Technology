@@ -88,10 +88,12 @@ export class Connection {
     switch (op) {
       case CommandOp.HELLO: {
         const params = untypedParams as CommandOpParamsMap[CommandOp.HELLO];
-        if (this.hasGreeted) {
-          throw ERR_PLAYER_ALREADY_GREETED();
+        if (!this.hasGreeted) {
+          this.player = this.gm.createPlayer(params.name, this.sendEvent.bind(this));
+        } else {
+          this.player.name = params.name;
         }
-        this.player = this.gm.createPlayer(params.name, this.sendEvent.bind(this));
+
         return {
           id: this.player.id,
         };

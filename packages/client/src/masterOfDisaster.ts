@@ -33,6 +33,7 @@ export class MasterOfDisaster {
   private state_: ClientState = "welcome-start";
   activeGame: GameDetails | null = null;
   myPlayerId: number | null = null;
+  myPlayerName: string;
   myPlayer: PlayerInGameI | null = null;
   gameWinner: PlayerInGameI | null = null;
   readonly serverSession: ServerSession;
@@ -226,9 +227,9 @@ export class MasterOfDisaster {
   }
 
   private async sendHello(playerName: string) {
-    this.ensureHelloSent(false);
     const { id } = await this.serverSession.sendRPC(CommandOp.HELLO, { name: playerName });
     this.myPlayerId = id;
+    this.myPlayerName = playerName;
   }
 
   async showStats() {

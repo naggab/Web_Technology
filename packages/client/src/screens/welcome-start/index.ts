@@ -46,7 +46,11 @@ class WelcomeScreen extends AbstractScreen {
     this._showStats_button.setLabel(this._mod.getString().welcome_start.showStats);
     this._userName_input.setHint(this._mod.getString().welcome_start.userName);
 
-    this.setRandomName();
+    if (this._mod.myPlayerName) {
+      this._userName_input.setValue(this._mod.myPlayerName);
+    } else {
+      this.setRandomName();
+    }
 
     this.shadowRoot.querySelector("#title").innerHTML = this._mod.getString().welcome_start.title;
     this.shadowRoot.querySelector("#subtitle").innerHTML = this._mod.getString().welcome_start.subTitle;
