@@ -24,7 +24,7 @@ export default class SampleTask extends Task {
   async loadFromServer() {
     this.counter++;
     if (this.counter > 5) {
-      this.finish(true,1);
+      this.finish(true, 1);
     }
     this.loadButton.setAttribute("label", "loading...");
 

@@ -52,8 +52,6 @@ export async function router(state: ClientState) {
       screen = new WelcomeScreen();
       break;
   }
-  console.debug("moved to:", state);
-  console.debug(history);
   document.querySelector("#app").innerHTML = "";
   document.querySelector("#app").appendChild(screen);
 }

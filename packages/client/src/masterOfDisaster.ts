@@ -55,7 +55,6 @@ export class MasterOfDisaster {
   //START
   public goBack(state: ClientState) {
     this.state_ = state;
-    console.debug("back to:", state);
     router(state);
   }
   //END
