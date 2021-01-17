@@ -111,6 +111,8 @@ export const english = {
     geo_title: "Guess the distance!",
     geo_desc: "Distance between your current location and:",
     hint: "Guess the distance in kilometers",
+    reverse_geo: "The browser thinks you are",
+    here: "here",
   },
   timer_tasks: {
     not_started: "Timer has not started yet. Try again!",
@@ -239,6 +241,8 @@ export const german = {
     geo_title: "Schätzen Sie die Entfernung!",
     geo_desc: "Entfernung von Ihrem aktuellen Standort und:",
     hint: "Schätzen Sie die Distanz in Kilometer",
+    reverse_geo: "Der Browser denkt Sie sind",
+    here: "hier",
   },
   timer_tasks: {
     not_started: "Der Timer wurde noch nicht gestartet! Versuchen Sie es erneut!",

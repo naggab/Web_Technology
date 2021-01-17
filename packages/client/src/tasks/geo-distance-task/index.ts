@@ -26,10 +26,17 @@ export default class GeoDistanceTask extends Task {
   checkButton: Button;
   distanceInput: TextBox;
   cities: City[];
+  citiesFar: City[];
   position: Position;
   tolerance: number;
   firstClick: boolean;
   result: boolean;
+
+  gameSeed: number;
+  index: number;
+
+  accurate: boolean;
+  accuracy: number;
 
   modInstance: MasterOfDisaster;
 
@@ -68,21 +75,27 @@ export default class GeoDistanceTask extends Task {
       c.preventDefault();
       if (!this.position) this.changeButton();
       this.distanceInput = this.shadowRoot.getElementById("distance-input") as TextBox;
-      const seed = MasterOfDisaster.getInstance().getGameSeed();
-      const index = seed % this.cities.length;
-      debugPrint(this.position);
-      debugPrint("Current lat: " + this.position.coords.latitude + ", lon: " + this.position.coords.longitude);
-      debugPrint("Target lat: " + this.cities[index].cityLat + ", lon: " + this.cities[index].cityLon);
+
+      const target = this.accurate ? this.cities[this.index] : this.citiesFar[this.index];
+      this.modInstance.log(this.position);
+      this.modInstance.log(
+        "Current lat: " + this.position.coords.latitude + ", lon: " + this.position.coords.longitude,
+      );
+      this.modInstance.log("Target lat: " + target.cityLat + ", lon: " + target.cityLon);
       var calcDist = this.calcCrow(
         this.position.coords.latitude,
         this.position.coords.longitude,
-        this.cities[index].cityLat,
-        this.cities[index].cityLon,
+        target.cityLat,
+        target.cityLon,
       );
-      debugPrint("Calculated distance: " + calcDist);
-      debugPrint("Input: " + this.distanceInput.getValue());
+      this.modInstance.log("Calculated distance: " + calcDist);
+
+      const accuracyOffset = this.accuracy < 100000 ? this.accuracy / 1000 : 100;
+      this.tolerance = calcDist * 0.1 + accuracyOffset;
+      this.modInstance.log("Calculated tolerance: " + this.tolerance);
+      this.modInstance.log("Input: " + this.distanceInput.getValue());
       var dif = calcDist - toNumber(this.distanceInput.getValue());
-      debugPrint("Dif: " + dif);
+      this.modInstance.log("Dif: " + dif);
 
       if (Math.abs(dif) > this.tolerance) {
         this.infoElement.innerHTML =
@@ -90,11 +103,11 @@ export default class GeoDistanceTask extends Task {
           Math.abs(dif).toFixed(2) +
           this.modInstance.getString().geo_distance_task.km_off;
         this.infoElement.style.color = "red";
-        debugPrint("Task failed.");
+        this.modInstance.log("Task failed.");
         this.result = false;
       } else {
         this.infoElement.innerHTML = this.modInstance.getString().geo_distance_task.task_complete + calcDist.toFixed(2);
-        debugPrint("Task complete.");
+        this.modInstance.log("Task complete.");
         this.infoElement.style.color = "green";
         this.result = true;
       }
@@ -127,8 +140,48 @@ export default class GeoDistanceTask extends Task {
     this.changeButton();
   }
 
+  async reverseGeocode() {
+    //https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=37.42159&longitude=-122.0837&localityLanguage=de
+    const response = await fetch(
+      "https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=" +
+        this.position.coords.latitude +
+        "&longitude=" +
+        this.position.coords.longitude +
+        "&localityLanguage=de",
+    );
+    let data = await response.json();
+    if (data) {
+      let reverseGeo = this.shadowRoot.getElementById("reverse-geo") as HTMLElement;
+      if (data.locality) {
+        this.modInstance.log("User belongs to: " + data.locality);
+        reverseGeo.innerHTML =
+          "(" +
+          this.modInstance.getString().geo_distance_task.reverse_geo +
+          " in <a href=https://www.google.com/maps/search/?api=1&query=" +
+          this.position.coords.latitude +
+          "," +
+          this.position.coords.longitude +
+          ">" +
+          data.locality +
+          "</a>)";
+      } else {
+        reverseGeo.innerHTML =
+          "(" +
+          this.modInstance.getString().geo_distance_task.reverse_geo +
+          " <a href=https://www.google.com/maps/search/?api=1&query=" +
+          this.position.coords.latitude +
+          "," +
+          this.position.coords.longitude +
+          ">" +
+          this.modInstance.getString().geo_distance_task.here +
+          "</a>)";
+      }
+    }
+  }
+
   populateCities() {
     this.cities = [];
+    this.citiesFar = [];
     this.cities.push(
       new City(
         this.modInstance.getString().geo_distance_task.locations.airport,
@@ -160,25 +213,38 @@ export default class GeoDistanceTask extends Task {
     this.cities.push(
       new City(this.modInstance.getString().geo_distance_task.locations.inffeld, 47.05843475596749, 15.460150503895983),
     );
-    /*this.cities.push(new City("Barcelona, Spain", 41.23, 2.9));
-    this.cities.push(new City("Berlin, Germany", 52.3, 13.25));
-    this.cities.push(new City("Brussels, Belgium", 50.52, 4.22));
-    this.cities.push(new City("Bucharest, Romania", 44.25, 26.7));*/
+
+    this.citiesFar.push(new City("Barcelona, Spain", 41.38944063532783, 2.168256911382828));
+    this.citiesFar.push(new City("Berlin, Germany", 52.51632115408761, 13.379261492644249));
+    this.citiesFar.push(new City("Brussels, Belgium", 50.846576717475195, 4.353359962004268));
+    this.citiesFar.push(new City("Bucharest, Romania", 44.43552746503677, 26.10252373681218));
+    this.citiesFar.push(new City("London, England", 51.501113719778765, -0.12637402000154613));
+    this.citiesFar.push(new City("New York, USA", 40.71685401232322, -74.01083618081547));
+    this.citiesFar.push(new City("Chicago, USA", 41.87557396655769, -87.62917945773634));
+    this.citiesFar.push(new City("Istanbul, Turkey", 41.00810759168975, 28.978237100904202));
   }
 
   attachGeoAPI() {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(this.showPosition.bind(this), this.showError.bind(this));
+      navigator.geolocation.getCurrentPosition(this.showPosition.bind(this), this.showError.bind(this), {
+        maximumAge: 1000 * 60 * 60 * 24,
+        timeout: 2000,
+        enableHighAccuracy: true,
+      });
     } else {
       this.infoElement.innerHTML = this.modInstance.getString().geo_distance_task.geo_position_unavailable;
     }
   }
 
   showPosition(position: Position) {
-    const seed = MasterOfDisaster.getInstance().getGameSeed();
-    const index = seed % this.cities.length;
-    this.cityInfo.innerHTML = this.cities[index].cityName;
     this.position = position;
+    this.gameSeed = MasterOfDisaster.getInstance().getGameSeed();
+    this.accuracy = this.position.coords.accuracy;
+    this.accurate = this.accuracy < 1000 ? true : false;
+    this.modInstance.log("Accurate measurement? " + this.accurate);
+    this.index = this.accurate ? this.gameSeed % this.cities.length : this.gameSeed % this.citiesFar.length;
+    this.cityInfo.innerHTML = this.accurate ? this.cities[this.index].cityName : this.citiesFar[this.index].cityName;
+    this.reverseGeocode();
   }
   calcCrow(lat1: number, lon1: number, lat2: number, lon2: number) {
     var R = 6371; // km

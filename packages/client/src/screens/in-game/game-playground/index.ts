@@ -20,7 +20,7 @@ const cord = (x: number, y: number) => ({ x, y });
 var DEBUG_MODE: boolean = true;
 var ANIMATIONS_ENABLED: boolean = true;
 export function debugPrint(x: any) {
-  if (DEBUG_MODE) {
+  if (MasterOfDisaster.getInstance().getMode) {
     console.log(x);
   }
 }
@@ -568,7 +568,7 @@ export default class GamePlayground extends HTMLElement {
     this.fixCSS();
 
     window.addEventListener("resize", (event) => {
-      debugPrint("RESIZING");
+      MasterOfDisaster.log("RESIZING");
       this.resetStage();
     });
 
@@ -727,7 +727,7 @@ export default class GamePlayground extends HTMLElement {
       if (keyCode == 32) {
         if (!this.endGameScreen) {
           if (this.player.checkCollision(this.player.y, this.player.x, true) == CollisionType.Task) {
-            debugPrint(
+            MasterOfDisaster.log(
               "[SPCBR] pressed on player position: " +
                 this.player.x +
                 "," +
@@ -735,7 +735,7 @@ export default class GamePlayground extends HTMLElement {
                 " returns TASK in proximity",
             );
           } else {
-            debugPrint(
+            MasterOfDisaster.log(
               "[SPCBR] pressed on player position: " + this.player.x + "," + this.player.y + " ... no task in prox",
             );
           }
@@ -1190,7 +1190,7 @@ export default class GamePlayground extends HTMLElement {
     /**
      * Parse the map.
      */
-    debugPrint("Empty map mode - width: " + this.map.width + ", height: " + this.map.height);
+    MasterOfDisaster.log("Empty map mode - width: " + this.map.width + ", height: " + this.map.height);
     for (let h = 0; h < this.map.height; h++) {
       gridRow = new Array();
       for (let w = 0; w < this.map.width; w++) {
@@ -1236,7 +1236,7 @@ export default class GamePlayground extends HTMLElement {
     /* DEMO - Adding tasks in all possible locations */
 
     for (var key in this.map.taskPositions) {
-      debugPrint(
+      MasterOfDisaster.log(
         "Adding task [" +
           key +
           "] on coordinates (X,Y) [" +
@@ -1255,7 +1255,7 @@ export default class GamePlayground extends HTMLElement {
         if (this.tasks !== undefined) {
           var t = this.tasks.find((element) => element.id == key);
           if (t) {
-            debugPrint(t);
+            MasterOfDisaster.log(t);
             if (t.isCompleted) {
               newPos.shape = new Konva.Image({
                 x: npx,

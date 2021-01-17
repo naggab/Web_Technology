@@ -52,9 +52,9 @@ export default class ReactionTask extends Task {
       } else if (this.btnEnabled) {
         this.timeAtClick = performance.now();
         var dif = this.timeAtClick - this.timeAtStart;
-        debugPrint("dif = " + dif);
+        this.modInstance.log("dif = " + dif);
         var result = dif - this.tolerance;
-        debugPrint("result = " + Math.abs(result));
+        this.modInstance.log("result = " + Math.abs(result));
         if (result < 0) {
           this.infoElement.innerHTML =
             this.modInstance.getString().timer_tasks.your_reaction +
@@ -86,7 +86,7 @@ export default class ReactionTask extends Task {
 
     var timeToStart = ((seed % 3) + 2) * 1000;
     if (timeToStart > 7000 || timeToStart < 3000) timeToStart = 3000;
-    debugPrint(timeToStart + " ms until the box turns green");
+    this.modInstance.log(timeToStart + " ms until the box turns green");
     this.infoElement.innerHTML = this.modInstance.getString().timer_tasks.reaction_info;
     this.timerTimeout = setTimeout(this.startTimer.bind(this), timeToStart);
 

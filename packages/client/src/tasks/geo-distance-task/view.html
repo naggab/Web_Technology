@@ -36,12 +36,19 @@
   .distance-input-box {
     width: 100%;
   }
+  p {
+    margin-top: 5px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
 </style>
 <div class="root">
   <div class="canvasCotainer">
     <h1 id="title">Guess the distance!</h1>
     <h2 id="desc">Distance between your current location and:</h2>
     <h2 id="city-info">City: ?</h2>
+    <p id="reverse-geo"></p>
     <div id="distance-input-box">
       <text-box
         id="distance-input"
