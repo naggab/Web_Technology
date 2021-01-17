@@ -38,7 +38,7 @@ export default class DragAndDropTask extends Task {
     );
     modInstance = MasterOfDisaster.getInstance();
     var randomSeed = modInstance.getGameSeed();
-    console.log("random", randomSeed, randomSeed % this.filesArray.length);
+    modInstance.log("random", randomSeed, randomSeed % this.filesArray.length);
     this.selectedFile = this.filesArray[randomSeed % this.filesArray.length];
 
     this.dropZone.innerHTML =
@@ -61,13 +61,13 @@ export default class DragAndDropTask extends Task {
     this.dropZone.addEventListener("dragover", (e) => {
       e.preventDefault(); //disable automatic browser preview
       //fill background gray
-      console.log("dragover");
+      modInstance.log("dragover");
       this.dropZone.style.border = "4px solid";
     });
     this.dropZone.addEventListener("dragleave", (e) => {
       e.preventDefault(); //disable automatic browser preview
       //fill background gray
-      console.log("dragleave");
+      modInstance.log("dragleave");
       this.dropZone.style.border = "4px dashed";
     });
     this.dropZone.addEventListener("drop", this.onDrop);
@@ -76,7 +76,7 @@ export default class DragAndDropTask extends Task {
   }
   async onDrop(e: DragEvent) {
     e.preventDefault(); //disable automatic browser preview
-    console.log("dropped");
+    modInstance.log("dropped");
     var files = e.dataTransfer.files;
     this.result = await checkUpload(files, this.selectedFile);
     this.dropZone.style.background = this.result[0] ? "green" : "red";
