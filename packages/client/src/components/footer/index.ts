@@ -3,6 +3,8 @@ import { Languages, MasterOfDisaster } from "../../masterOfDisaster";
 
 type footerType = "dark" | "light";
 
+declare var _VERSION_: string;
+
 export class Footer extends HTMLElement {
   _footer: HTMLElement;
   _changeLanguage: any;
@@ -23,7 +25,7 @@ export class Footer extends HTMLElement {
     this._camera = this._shadowRoot.querySelector(".camera");
     this._geolocation = this._shadowRoot.querySelector(".geolocation");
     this._changeLanguage.onclick = this.changeLanguage.bind(this, false);
-    this._footer.querySelector("#version").innerHTML = process?.env?.VERSION || "?";
+    this._footer.querySelector("#version").innerHTML = typeof _VERSION_ !== "undefined" && _VERSION_ ? _VERSION_ : "?";
   }
 
   checkCameraCapabilities() {
