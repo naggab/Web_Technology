@@ -102,7 +102,7 @@ export default class MorseCodeTask extends Task {
     const shiftIndex = () => {
       if (debugTimer) {
         let diff = debugTimer - performance.now();
-        console.log("ms since last shift", Math.abs(diff), "current pixel:", pixelIndex);
+        modInstance.log("ms since last shift", Math.abs(diff), "current pixel:", pixelIndex);
       }
       debugTimer = performance.now();
       //sometimes frame update not accurate, some cursor visible, therefore delete extra when shifting, solved the case
@@ -138,11 +138,11 @@ export default class MorseCodeTask extends Task {
       setTimeout(shiftIndex, 16);
     };
     panel.addEventListener("mousedown", (e) => {
-      console.log("mousedown");
+      modInstance.log("mousedown");
       mouseDown = true;
     });
     panel.addEventListener("mouseup", (e) => {
-      console.log("mouseup");
+      modInstance.log("mouseup");
       mouseDown = false;
     });
 
@@ -237,22 +237,6 @@ export default class MorseCodeTask extends Task {
 
     return message;
   }
-  /*
-addLabel(ctx:CanvasRenderingContext2D, label: string, morsePixel: number)
-{
-    ctx.font = "30px Arial";
-    
-    
-    var labels:Array<any> = label.split('');
-    var segment = morsePixel / labels.length;
-    var offset=segment/2;
-    console.log(labels.length ,morsePixel,segment)
-    for(var elem of labels){
-        ctx.fillText(elem, this.canvasElement.width/2-morsePixel/2 + offset, this.offsetY-30); 
-        segment*=2;
-    }
-    
-}*/
 }
 
 customElements.define("morse-code-task", MorseCodeTask);
