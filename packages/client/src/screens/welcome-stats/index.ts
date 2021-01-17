@@ -5,6 +5,7 @@ import { MasterOfDisaster } from "../../masterOfDisaster";
 import { Button } from "../../components/button";
 import { StatsStorage } from "../../statsStorage";
 import { TaskManger, TaskIdentifier } from "../../taskManager";
+import Container from "../../components/container";
 
 var curr_id: any;
 var buttons = [];
@@ -18,6 +19,7 @@ class StatsScreen extends AbstractScreen {
   _taskNumber: number;
   _iter: any;
   _container: HTMLDivElement;
+  _apirush_container: Container;
   _stat: HTMLDivElement;
   button: Button;
   tasks = [];
@@ -36,6 +38,8 @@ class StatsScreen extends AbstractScreen {
     this._mod = MasterOfDisaster.getInstance();
     task_names = this._mod.getString().tasks;
     this._container = this.shadowRoot.querySelector("#container") as HTMLDivElement;
+    this._apirush_container = this.shadowRoot.querySelector("apirush-container");
+    this._apirush_container.showArrow();
     this.tasks = TaskManger.getTaskIdentifiers();
 
     this.createButton();
