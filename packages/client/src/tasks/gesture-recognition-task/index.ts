@@ -118,7 +118,7 @@ export default class GestureRecognitionTask extends Task {
 
       this.analyseRunning = false;
       if (this.currentGoal?.gesture === resp.gesture) {
-        console.log("detected goal, next!");
+        MasterOfDisaster.log("detected goal, next!");
         this.nextGoal(true);
       }
     }

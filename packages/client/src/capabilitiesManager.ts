@@ -1,3 +1,5 @@
+import { MasterOfDisaster } from "./masterOfDisaster";
+
 export class CapabilitiesManager {
   private cameraPermissionStatus: PermissionStatus;
   private geolocationPermissionStatus: PermissionStatus;
@@ -67,7 +69,7 @@ export class CapabilitiesManager {
   }
 
   log(...data: any) {
-    console.log(`[CapabilitiesManager]:`, ...data);
+    MasterOfDisaster.log(`[CapabilitiesManager]:`, ...data);
   }
 
   private receiveCameraPermissionCallback(p: PermissionStatus) {
