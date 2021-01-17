@@ -209,7 +209,7 @@ export default class ResizeScreenTask extends Task {
       "]";
   }
   onMouseDown(e: MouseEvent) {
-    console.log("bottomRightElement", "mousedown");
+    modInstance.log("bottomRightElement", "mousedown");
     this.mouseDown = true;
     this.staticPosX = this.currPosX;
     this.staticPosY = this.currPosY;
