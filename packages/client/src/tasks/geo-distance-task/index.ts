@@ -157,22 +157,22 @@ export default class GeoDistanceTask extends Task {
         reverseGeo.innerHTML =
           "(" +
           this.modInstance.getString().geo_distance_task.reverse_geo +
-          " in <a href=https://www.google.com/maps/search/?api=1&query=" +
+          " in <a href='https://www.google.com/maps/search/?api=1&query=" +
           this.position.coords.latitude +
           "," +
           this.position.coords.longitude +
-          ">" +
+          "' target='blank'>" +
           data.locality +
           "</a>)";
       } else {
         reverseGeo.innerHTML =
           "(" +
           this.modInstance.getString().geo_distance_task.reverse_geo +
-          " <a href=https://www.google.com/maps/search/?api=1&query=" +
+          " <a href='https://www.google.com/maps/search/?api=1&query=" +
           this.position.coords.latitude +
           "," +
           this.position.coords.longitude +
-          ">" +
+          "' target='blank'>" +
           this.modInstance.getString().geo_distance_task.here +
           "</a>)";
       }
