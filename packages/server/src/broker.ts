@@ -53,7 +53,9 @@ export class Broker {
 
     ws.on("close", () => {
       connection.ok = false;
-      connection.leave();
+      try {
+        connection.leave();
+      } catch (e) {}
     });
   }
 
@@ -69,8 +71,10 @@ export class Broker {
     this.gm.closeAll();
 
     this.connections.forEach((conn) => {
-      conn.leave();
-      conn.ws.close();
+      try {
+        conn.leave();
+        conn.ws.close();
+      } catch (e) {}
     });
     this.connections.clear();
   }
