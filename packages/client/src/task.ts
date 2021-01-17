@@ -9,10 +9,6 @@ export class Task extends HTMLElement {
   onMounted?(): void | Promise<void>;
   onUnmounting?(): void | Promise<void>;
 
-  static checkCapabilities(): Promise<boolean> | boolean {
-    return true;
-  }
-
   private startTime: number;
   private endTime: number;
   private opts: TaskOpts;

@@ -32,11 +32,6 @@ export default class GestureRecognitionTask extends Task {
 
   goal_: Array<{ gesture: Gesture; done: boolean; el: HTMLElement }> = [];
 
-  static checkCapabilities() {
-    // TODO check user has webcam
-    return true;
-  }
-
   get currentGoal() {
     const index = this.goal_.findIndex((g) => !g.done);
     if (index === -1) {
