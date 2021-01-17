@@ -19,6 +19,7 @@ export default class TimingTask extends Task {
   successTimeout: any;
   timerTimeout: any;
   btnEnabled: boolean;
+  modInstance: MasterOfDisaster;
 
   constructor(props) {
     super(props);
@@ -27,6 +28,8 @@ export default class TimingTask extends Task {
   async onMounted() {
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = viewHtml;
+
+    this.modInstance = MasterOfDisaster.getInstance();
     this.canvasElement = this.shadowRoot.getElementById("timingCanvas") as HTMLCanvasElement;
     this.infoElement = this.shadowRoot.querySelector(".info") as HTMLElement;
     this.checkButton = this.shadowRoot.getElementById("check-button") as Button;
@@ -44,7 +47,7 @@ export default class TimingTask extends Task {
     this.checkButton.addEventListener("mouseup", (c) => {
       c.preventDefault();
       if (!this.timeAtStart || !this.timeToEnd) {
-        this.infoElement.innerHTML = "Timer has not started yet. Try again!";
+        this.infoElement.innerHTML = this.modInstance.getString().timer_tasks.not_started;
         if (this.timerTimeout) clearTimeout(this.timerTimeout);
         //this.failTimeout = setTimeout(this.taskFailed.bind(this), 1500);
         this.taskFailed();
@@ -58,7 +61,14 @@ export default class TimingTask extends Task {
         debugPrint("result = " + Math.abs(result));
         if (Math.abs(dif - this.timeToEnd) < this.tolerance) {
           this.infoElement.innerHTML =
-            "Target time: " + (this.timeToEnd / 1000).toFixed(1) + "s - Your time: " + (dif / 1000).toFixed(1) + "s";
+            this.modInstance.getString().timer_tasks.target_time +
+            ": " +
+            (this.timeToEnd / 1000).toFixed(1) +
+            "s - " +
+            this.modInstance.getString().timer_tasks.your_time +
+            ": " +
+            (dif / 1000).toFixed(1) +
+            "s";
           //this.successTimeout = setTimeout(this.taskSuccess.bind(this), 1500);
           this.taskSuccess();
           this.infoElement.style.color = "green";
@@ -66,10 +76,14 @@ export default class TimingTask extends Task {
           this.btnEnabled = false;
         } else {
           this.infoElement.innerHTML =
-            "You were " +
+            this.modInstance.getString().timer_tasks.you_were +
+            " " +
             Math.abs(result / 1000).toFixed(1) +
-            (result > 0 ? " seconds too slow!" : " seconds too fast!") +
-            " Try again!";
+            (result > 0
+              ? " " + this.modInstance.getString().timer_tasks.seconds_too_slow
+              : " " + this.modInstance.getString().timer_tasks.seconds_too_fast) +
+            " " +
+            this.modInstance.getString().timer_tasks.try_again;
           this.infoElement.style.color = "red";
           this.drawRect();
           this.btnEnabled = false;
@@ -86,8 +100,9 @@ export default class TimingTask extends Task {
     this.timeToEnd = ((((seed + 3) % 5) * Math.PI) / 2) * 1000; // Number between ~ 1 and 7
     if (this.timeToEnd > 7000 || this.timeToEnd < 1000) this.timeToEnd = 3000;
     debugPrint(this.timeToEnd + " ms to click after start");
-    this.infoElement.innerHTML =
-      "Press the button " + (this.timeToEnd / 1000).toFixed(1) + " seconds after the box turns green!";
+    this.infoElement.innerHTML = this.modInstance
+      .getString()
+      .timer_tasks.timer_info.replace("{0}", (this.timeToEnd / 1000).toFixed(1));
     this.timerTimeout = setTimeout(this.startTimer.bind(this), timeToStart);
 
     this.drawRect();
