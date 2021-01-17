@@ -15,6 +15,8 @@ class ListAllTasksScreen extends AbstractScreen {
   }
 
   async onMounted() {
+    this._container = this.shadowRoot.querySelector("apirush-container");
+    this._container.showArrow();
     const hash = window.location.hash.replace("#", "");
     if (!hash || TaskManger.getTaskIdentifiers().indexOf(hash as any) === -1) {
       return;
@@ -22,8 +24,7 @@ class ListAllTasksScreen extends AbstractScreen {
     await MasterOfDisaster.getInstance().openTaskByIdentifier(hash as any);
     window.location.hash = "";
 
-    this._container = this.shadowRoot.querySelector("apirush-container");
-    this._container.showArrow();
+
   }
 
   async getHtml(): Promise<string> {
