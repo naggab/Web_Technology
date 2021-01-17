@@ -18,8 +18,15 @@ class PreGameScreen extends AbstractScreen {
     this.startButton_ = this.shadowRoot.querySelector("#start_now_button");
     this.startInfo_ = this.shadowRoot.querySelector(".start_info");
     this._container = this.shadowRoot.querySelector("apirush-container");
-    this._container.showArrow();
+    //this._container.showArrow();
     const mod = MasterOfDisaster.getInstance();
+
+    let title = this.shadowRoot.querySelector("#title");
+    if (title && this.startInfo_) {
+      title.innerHTML = mod.getString().pre_game.title;
+      this.startInfo_.innerHTML = mod.getString().pre_game.info;
+    }
+    this.startButton_.setAttribute("label", mod.getString().pre_game.startGame);
     if (mod.myPlayer && mod.myPlayer.isAdmin) {
       this.startButton_.classList.remove("hidden");
       this.startInfo_.classList.add("hidden");

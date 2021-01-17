@@ -38,15 +38,16 @@ export const english = {
     title: "CHOOSE A GAME TO JOIN",
   },
   welcome_create: {
-    title: "CREATE HERE A NEW GAME",
+    title: "CREATE NEW GAME",
     gameName: "CHOOSE NAME",
     gameNameHint: "ENTER THE GAME NAME",
     createGame: "CREATE GAME",
     noGameName: "You have not entered a game name!",
   },
   pre_game: {
-    title: "OTHER PLAYERS ARE JOINING",
+    title: "GAME LOBBY",
     startGame: "START NOW",
+    info: "Please wait, admin will start the game",
   },
   in_game: {
     startTask: "Press SPACE to start the task!",
@@ -157,7 +158,7 @@ export const german = {
     subTitle: "DAS BESTE SPIEL ALLER ZEITEN",
     userName: "IHREN BENUTZERNAMEN EINGEBEN",
 
-    enterGame: "BESTEHENDES SPIEL BEITRETEN",
+    enterGame: "BESTEHENDEM SPIEL BEITRETEN",
     createGame: "NEUES SPIEL ERSTELLEN",
     showStats: "STATISTIK ANZEIGEN",
     showAllTasks: "ALLE AUFGABEN ANZEIGEN",
@@ -169,15 +170,16 @@ export const german = {
     title: "WÄHLEN SIE EIN SPIEL, DEM SIE BEITRETEN MÖCHTEN",
   },
   welcome_create: {
-    title: "ERSTELLEN SIE HIER EIN NEUES SPIEL",
+    title: "NEUES SPIEL ERSTELLEN",
     gameName: "NAMEN WÄHLEN",
     gameNameHint: "EINGABE DES SPIELNAMENS",
-    createGame: "SPIEL ERZEUGEN",
+    createGame: "SPIEL ERSTELLEN",
     noGameName: "Sie haben keinen Spielnamen eingegeben!",
   },
   pre_game: {
-    title: "ANDERE SPIELER SIND DABEI",
+    title: "LOBBY",
     startGame: "JETZT STARTEN",
+    info: "Bitte warten, Admin startet das Spiel",
   },
   in_game: {
     startTask: "Drücken Sie die LEERTASTE, um den Task zu starten!",
