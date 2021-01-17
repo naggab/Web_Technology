@@ -161,7 +161,7 @@ export class MasterOfDisaster {
       this.watchForGameEnd();
     }
     if (newState !== "loading") {
-      history.pushState(newState, null, null);
+      history.pushState(newState, "");
     }
   }
 
@@ -326,6 +326,10 @@ export class MasterOfDisaster {
       console.log("hash", hash);
       this.setState("all-tasks");
     }
+  }
+
+  showAllTasks() {
+    this.setState("all-tasks");
   }
 
   taskState: Map<string, boolean> = new Map<string, boolean>();

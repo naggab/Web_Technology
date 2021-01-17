@@ -63,7 +63,7 @@ class WelcomeScreen extends AbstractScreen {
   }
 
   showAllTasks() {
-    router("all-tasks");
+    MasterOfDisaster.getInstance().showAllTasks();
   }
 
   async showStats() {

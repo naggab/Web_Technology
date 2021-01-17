@@ -30,9 +30,9 @@ export class TaskList extends List<TaskDetails> {
   }
 
   async onEntryClicked(id) {
-    window.location.hash = id;
+    history.replaceState("all-tasks", "", "/#" + id);
     await MasterOfDisaster.getInstance().openTaskByIdentifier(id);
-    window.location.hash = "";
+    history.replaceState("all-tasks", "", "/");
   }
 }
 
