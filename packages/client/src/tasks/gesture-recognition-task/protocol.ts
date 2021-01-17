@@ -9,6 +9,7 @@ export enum WorkerRequestTypes {
 export type WorkerRequest =
   | {
       type: WorkerRequestTypes.CHECK_IS_READY;
+      debugMode?: boolean;
     }
   | {
       type: WorkerRequestTypes.CONFIGURE_ESTIMATOR;

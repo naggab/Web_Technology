@@ -1,6 +1,14 @@
 import { WorkerRequest, WorkerRequestTypes, WorkerResponse } from "./protocol";
 import Gestures, { Gesture } from "./gestures";
 
+let DEBUG_MODE = location.host.indexOf("localhost") !== -1;
+
+const log = (...params: any) => {
+  if (DEBUG_MODE) {
+    console.log(...params);
+  }
+};
+
 interface HandposeLib {
   load: (data?: any) => Promise<HandposeModel>;
 }
@@ -24,17 +32,17 @@ let model: HandposeModel | null = null;
 const ctx: Worker = self as any;
 
 const loadDeps = async () => {
-  console.log("[gr-worker]: loading deps");
+  log("[gr-worker]: loading deps");
   importScripts("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs");
-  console.log("[gr-worker]: tfjs loaded");
+  log("[gr-worker]: tfjs loaded");
   importScripts("https://cdn.jsdelivr.net/npm/@tensorflow-models/handpose");
   model = await handpose.load({
     maxContinuousChecks: 7,
   });
-  console.log("[gr-worker]: handpose.js loaded");
+  log("[gr-worker]: handpose.js loaded");
 
   importScripts("/assets/fingerpose.js");
-  console.log("[gr-worker]: fingerpose.js loaded");
+  log("[gr-worker]: fingerpose.js loaded");
 };
 
 let GE: any = null;
@@ -64,7 +72,7 @@ const analyseImage = async (imageData: ImageData): Promise<Gesture | null> => {
       });
 
       if (lastDetected !== result.name) {
-        console.log("[gr-worker]: Detected", result.name);
+        log("[gr-worker]: Detected", result.name);
       }
       if (lastDetected === result.name) {
         return result.name as Gesture;
@@ -80,6 +88,7 @@ const analyseImage = async (imageData: ImageData): Promise<Gesture | null> => {
 const handleMessage = async (req: WorkerRequest): Promise<WorkerResponse> => {
   switch (req.type) {
     case WorkerRequestTypes.CHECK_IS_READY:
+      DEBUG_MODE = !!req.debugMode;
       return {
         ...req,
         ready: typeof handpose !== "undefined" && typeof fp !== "undefined" && typeof model !== "undefined",

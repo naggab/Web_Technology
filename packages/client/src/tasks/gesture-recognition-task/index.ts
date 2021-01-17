@@ -86,6 +86,7 @@ export default class GestureRecognitionTask extends Task {
     grWorker.onmessage = this.handleMsgFromWorker.bind(this);
     grWorker.postMessage({
       type: WorkerRequestTypes.CHECK_IS_READY,
+      debugMode: mod.getMode(),
     });
     this.initCamera(config.video.width, config.video.height, config.video.fps).then((video) => {
       this.video_.play();
