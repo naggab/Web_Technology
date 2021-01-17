@@ -51,6 +51,18 @@ export class MasterOfDisaster {
 
     this.language = localStorage.getItem("language") as Languages;
   }
+
+  static log(...params: any) {
+    const mod = MasterOfDisaster.getInstance();
+    mod.log(...params);
+  }
+
+  log(...params: any) {
+    if (this.debugMode) {
+      console.log(...params);
+    }
+  }
+
   //--------------------------------------------------------------------------------------------------------------------
   //HISTORY API
   //START
