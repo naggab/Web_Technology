@@ -5,8 +5,10 @@ import { TaskManger } from "../../taskManager";
 import { MasterOfDisaster } from "../../masterOfDisaster";
 
 import "../../components/taskList";
+import Container from "../../components/container";
 
 class ListAllTasksScreen extends AbstractScreen {
+  _container: Container;
   constructor() {
     super();
     this.setTitle("Task Debugger");
@@ -19,6 +21,9 @@ class ListAllTasksScreen extends AbstractScreen {
     }
     await MasterOfDisaster.getInstance().openTaskByIdentifier(hash as any);
     window.location.hash = "";
+    
+    this._container = this.shadowRoot.querySelector("apirush-container");
+    this._container.showArrow();
   }
 
   async getHtml(): Promise<string> {

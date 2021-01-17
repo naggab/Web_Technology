@@ -5,7 +5,6 @@ import { ClientState, MasterOfDisaster } from "./masterOfDisaster";
 import ErrorScreen from "./screens/error";
 import { InGameScreen } from "./screens/in-game";
 import LoadingScreen from "./screens/loading";
-import PostGameScreen from "./screens/post-game";
 import PreGameScreen from "./screens/pre-game";
 import StatsScreen from "./screens/welcome-stats";
 import ListAllTasksScreen from "./screens/listAllTasks";
@@ -28,10 +27,6 @@ export async function router(state: ClientState) {
       break;
     case "loading":
       screen = new LoadingScreen();
-
-      break;
-    case "post-game":
-      screen = new PostGameScreen();
 
       break;
     case "pre-game":
