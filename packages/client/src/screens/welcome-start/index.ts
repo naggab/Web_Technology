@@ -56,10 +56,14 @@ class WelcomeScreen extends AbstractScreen {
     this.shadowRoot.querySelector("#subtitle").innerHTML = this._mod.getString().welcome_start.subTitle;
   }
   async setRandomName() {
-    const response = await fetch("https://randomuser.me/api/");
-    let data = await response.json();
-    data = data.results[0].name;
-    this._userName_input.setValue(data.first + " " + data.last);
+    try {
+      const response = await fetch("https://randomuser.me/api/");
+      let data = await response.json();
+      data = data.results[0].name;
+      this._userName_input.setValue(data.first + " " + data.last);
+    } catch (e) {
+      this._userName_input.setValue("Player");
+    }
   }
 
   showAllTasks() {

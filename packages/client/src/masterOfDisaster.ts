@@ -196,7 +196,7 @@ export class MasterOfDisaster {
       this.taskOpener_.abortTask();
     }
     this.setState("post-game");
-    console.log("Game was aborted");
+    this.log("Game was aborted");
     this.stopWatchingForGameEnd();
   }
 
@@ -204,7 +204,7 @@ export class MasterOfDisaster {
     if (this.taskOpener_) {
       this.taskOpener_.abortTask();
     }
-    console.log("Game did finish, winner is:", ev.payload.winner);
+    this.log("Game did finish, winner is:", ev.payload.winner);
     this.gameWinner = ev.payload.winner;
     //this.setState("post-game");
 
@@ -323,7 +323,6 @@ export class MasterOfDisaster {
     this.taskOpener_ = to;
     const hash = window.location.hash.replace("#", "");
     if (hash && TaskManger.getTaskIdentifiers().indexOf(hash as any) !== -1) {
-      console.log("hash", hash);
       this.setState("all-tasks");
     }
   }
@@ -375,7 +374,7 @@ export class MasterOfDisaster {
         (neededCapabilities.camera && !this.capabilities.cameraAvailable) ||
         (neededCapabilities.geolocation && !this.capabilities.geolocationAvailable)
       ) {
-        console.log("task", selectedTask, "will not work, trying to find another task because of lacking capabilities");
+        this.log("task", selectedTask, "will not work, trying to find another task because of lacking capabilities");
         numRotations = 1;
         continue;
       }

@@ -9,9 +9,8 @@ export class StatsStorage {
   taskCompleted(taskName: TaskIdentifier, timeInMS: number) {
     //load stats
     this.tasks = this.getStats();
-    var flagFound = false;
     //check if task already in array:
-    if (Object.keys(this.tasks).includes(taskName)) {
+    if (Object.keys(this.tasks).includes(taskName) && this.tasks[taskName] != 0) {
       this.tasks[taskName] = min([timeInMS, this.tasks[taskName]]);
     } else {
       this.tasks[taskName] = timeInMS;

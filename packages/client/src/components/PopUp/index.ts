@@ -29,6 +29,7 @@ export class PopUp extends HTMLElement {
   }
 
   public openModal(type: PopUpType, content: any) {
+    this._mod = MasterOfDisaster.getInstance();
     this.shadowRoot.querySelector(".text").innerHTML = content;
     this._modal.style.display = "block";
     this._modal.id = type;

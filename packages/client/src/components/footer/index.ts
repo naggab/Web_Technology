@@ -1,5 +1,6 @@
 import templateHTML from "./template.html";
 import { Languages, MasterOfDisaster } from "../../masterOfDisaster";
+import { PopUp } from "../PopUp";
 
 type footerType = "dark" | "light";
 
@@ -12,6 +13,7 @@ export class Footer extends HTMLElement {
   _shadowRoot: ShadowRoot;
   _camera: HTMLDivElement;
   _geolocation: HTMLDivElement;
+  _modal: PopUp;
 
   constructor() {
     super();
@@ -19,6 +21,8 @@ export class Footer extends HTMLElement {
     this.checkGeolocationCapabilities = this.checkGeolocationCapabilities.bind(this);
     this._shadowRoot = this.attachShadow({ mode: "open" });
     this._shadowRoot.innerHTML = templateHTML;
+
+    this._modal = this.shadowRoot.querySelector("apirush-popup");
 
     this._footer = this._shadowRoot.querySelector("#footer");
     this._changeLanguage = this._shadowRoot.querySelector("#change-language");
@@ -72,6 +76,10 @@ export class Footer extends HTMLElement {
   }
 
   public changeLanguage(firstLaunch: boolean) {
+    if (this._mod.getState() === "in-game") {
+      this._modal.openModal("info", this._mod.getString().general.languageChangeNotPossible);
+      return;
+    }
     if (!firstLaunch) {
       if (this._mod.getLanguage() == "English") {
         this._mod.setLanguage("German");

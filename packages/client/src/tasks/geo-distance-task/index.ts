@@ -4,7 +4,6 @@ import { Button } from "../../components/button";
 import { concat, times, toNumber } from "lodash";
 import { Collection } from "konva/types/Util";
 import { MasterOfDisaster } from "../../masterOfDisaster";
-import { debugPrint } from "../../screens/in-game/game-playground";
 import { Coordinate } from "@apirush/common";
 import { TextBox } from "../../components/textBox";
 

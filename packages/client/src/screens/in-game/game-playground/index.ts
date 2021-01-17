@@ -13,17 +13,8 @@ import { Game } from "@apirush/server/src/game";
 
 const cord = (x: number, y: number) => ({ x, y });
 
-/**
- * Use this to globally enable / disable all console outputs.
- * Pulled from MOD on startup.
- */
-var DEBUG_MODE: boolean = true;
 var ANIMATIONS_ENABLED: boolean = true;
-export function debugPrint(x: any) {
-  if (MasterOfDisaster.getInstance().getMode) {
-    console.log(x);
-  }
-}
+var DEBUG_MODE: boolean = true;
 
 /**
  * The element type of a specific field on the grid.
@@ -608,7 +599,7 @@ export default class GamePlayground extends HTMLElement {
       audioElement.src = "/assets/music.ogg";
       audioElement.addEventListener("loadeddata", () => {
         let duration = audioElement.duration;
-        audioElement.volume = 0.2;
+        audioElement.volume = 0.05;
         audioElement.loop = true;
         audioElement.play();
         this.fixCSS();

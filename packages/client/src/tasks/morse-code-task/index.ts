@@ -44,11 +44,11 @@ export default class MorseCodeTask extends Task {
     o.frequency.value = 0;
     const gainNode = audioContext.createGain();
     //volume peep
-    gainNode.gain.value = 0.1; // setting it to 10%
+    gainNode.gain.value = 0.05; // setting it to 10%
     gainNode.connect(audioContext.destination);
     o.connect(gainNode);
     //voume whitesound
-    this.audioElement.volume = 0.1;
+    this.audioElement.volume = 0.05;
     const infoHeading = this.info;
     this.ctx = this.canvasElement.getContext("2d");
     this.ctxAnimtated = this.canvasElement.getContext("2d");
@@ -97,14 +97,7 @@ export default class MorseCodeTask extends Task {
       animation = requestAnimationFrame(updateRectPos); // call requestAnimationFrame again to animate next frame
     }
 
-    let debugTimer: number = 0;
-
     const shiftIndex = () => {
-      if (debugTimer) {
-        let diff = debugTimer - performance.now();
-        modInstance.log("ms since last shift", Math.abs(diff), "current pixel:", pixelIndex);
-      }
-      debugTimer = performance.now();
       //sometimes frame update not accurate, some cursor visible, therefore delete extra when shifting, solved the case
       ctxAnimtated.clearRect(pixelIndex - 1, 160, 2, 30);
       if (mouseDown && pixelIndex > offsetX && pixelIndex <= offsetX + binaryArray.length) {

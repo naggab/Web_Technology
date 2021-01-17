@@ -4,7 +4,6 @@ import { Button } from "../../components/button";
 import { concat, times } from "lodash";
 import { Collection } from "konva/types/Util";
 import { MasterOfDisaster } from "../../masterOfDisaster";
-import { debugPrint } from "../../screens/in-game/game-playground";
 
 export default class ReactionTask extends Task {
   canvasElement: HTMLCanvasElement;

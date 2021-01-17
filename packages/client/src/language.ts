@@ -7,6 +7,7 @@ export const english = {
     info: "INFO",
     debug: "DEBUG",
     reloadPage: "You have to reload the page to change the language!",
+    languageChangeNotPossible: "You cannot change the language during a game!",
   },
 
   tasks: {
@@ -138,6 +139,7 @@ export const german = {
     info: "INFO",
     debug: "DEBUG",
     reloadPage: "Sie müssen die Seite neu laden um die Sprache zu ändern!",
+    languageChangeNotPossible: "Sie können die Sprache nicht während eines Spiels verändern!",
   },
   tasks: {
     "drag-and-drop-task": "DragAndDropTask",
@@ -204,7 +206,7 @@ export const german = {
     error_msg_many_times_outside: "Uups, zu oft rausgemahlt.",
     error_msg_many_px_outside: "Uups, zu viele falsche Pixel ausgemahlt.",
     fill_msg: "Fülle",
-    percentage_check_win_msg: "Du hast es geschafft!!! ",
+    percentage_check_win_msg: "Sie haben es geschafft!!! ",
     percentage_check_fail_msg: "Nein. Netter Versuch. ",
   },
   morse_code_task: {
@@ -214,11 +216,11 @@ export const german = {
   resize_screen_task: {
     current_size_msg: "Aktuelle Göße",
     resize_to_msg: "Zielgröße:",
-    check_win_msg: "Du hast es geschafft!!! ",
+    check_win_msg: "Sie haben es geschafft!!! ",
     check_fail_msg: "Nein. Netter Versuch. ",
   },
   drag_and_drop_task: {
-    check_win_msg: "Du hast es geschafft!!! ",
+    check_win_msg: "Sie haben es geschafft!!! ",
     check_fail_msg: "Nein. Falsche Datei. ",
     task_msg_1: "Drag and Drop Datei ",
     task_msg_2: " vom Ordner 'Downloads'",
