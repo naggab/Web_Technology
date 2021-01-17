@@ -39,7 +39,7 @@ module.exports = {
       patterns: [{ from: "assets", to: "assets" }],
     }),
     new webpack.DefinePlugin({
-      "process.env.VERSION": JSON.stringify(process.env.VERSION ? `v${process.env.VERSION}` : "dev"),
+      _VERSION_: JSON.stringify(process.env.VERSION ? `v${process.env.VERSION}` : "dev"),
     }),
   ],
 };
