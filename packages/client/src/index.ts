@@ -35,5 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 window.addEventListener("popstate", (event) => {
-  MasterOfDisaster.getInstance().goBack(event.state);
+  if (event.state) {
+    MasterOfDisaster.getInstance().goBack(event.state);
+  }
 });
