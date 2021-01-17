@@ -1,4 +1,4 @@
-export const CLEANUP_SCHEDULE = 5000; // 5 seconds
+export const CLEANUP_SCHEDULE = 10000; // 10 seconds
 
 export const ERR_GAME_NOT_EXISTENT = () => new Error(`Game does not exist`);
 export const ERR_PLAYER_NOT_EXISTENT = () => new Error(`Player does not exist`);

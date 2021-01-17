@@ -77,6 +77,7 @@ export class ServerSession {
 
   private OnClosed(ev: CloseEvent) {
     console.log("WebSocket closed", ev);
+    location.reload();
   }
 
   connect(): Promise<void> {

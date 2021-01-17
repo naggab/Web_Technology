@@ -27,6 +27,7 @@ export class Broker {
     try {
       this.connections.forEach((conn) => {
         if (!conn.ok || conn.ws.readyState !== WebSocket.OPEN) {
+          console.log(conn.player, "cleaning connection because it is not open anymore", conn.ok, conn.ws.readyState);
           conn.leave();
           return;
         }
