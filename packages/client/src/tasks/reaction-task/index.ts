@@ -19,6 +19,7 @@ export default class ReactionTask extends Task {
   successTimeout: any;
   timerTimeout: any;
   btnEnabled: boolean;
+  modInstance: MasterOfDisaster;
 
   constructor(props) {
     super(props);
@@ -27,6 +28,7 @@ export default class ReactionTask extends Task {
   async onMounted() {
     this.attachShadow({ mode: "open" });
     this.shadowRoot.innerHTML = viewHtml;
+    this.modInstance = MasterOfDisaster.getInstance();
     this.canvasElement = this.shadowRoot.getElementById("reactionCanvas") as HTMLCanvasElement;
     this.infoElement = this.shadowRoot.querySelector(".info") as HTMLElement;
     this.checkButton = this.shadowRoot.getElementById("check-button") as Button;
@@ -40,7 +42,7 @@ export default class ReactionTask extends Task {
     this.checkButton.addEventListener("mousedown", (c) => {
       c.preventDefault();
       if (!this.timeAtStart) {
-        this.infoElement.innerHTML = "Timer has not started yet. Try again!";
+        this.infoElement.innerHTML = this.modInstance.getString().timer_tasks.not_started;
         if (this.timerTimeout) clearTimeout(this.timerTimeout);
         //this.failTimeout = setTimeout(this.taskFailed.bind(this), 1500);
         this.infoElement.style.color = "red";
@@ -54,7 +56,12 @@ export default class ReactionTask extends Task {
         var result = dif - this.tolerance;
         debugPrint("result = " + Math.abs(result));
         if (result < 0) {
-          this.infoElement.innerHTML = "Your reaction: " + (dif / 1000).toFixed(3) + "s - Success!";
+          this.infoElement.innerHTML =
+            this.modInstance.getString().timer_tasks.your_reaction +
+            ": " +
+            (dif / 1000).toFixed(3) +
+            "s - " +
+            this.modInstance.getString().timer_tasks.success;
           this.infoElement.style.color = "green";
           //this.successTimeout = setTimeout(this.taskSuccess.bind(this), 1500);
           this.btnEnabled = false;
@@ -62,7 +69,11 @@ export default class ReactionTask extends Task {
           this.taskSuccess();
         } else {
           this.infoElement.innerHTML =
-            "You were " + Math.abs(result / 1000).toFixed(3) + " seconds too slow! Try again!";
+            this.modInstance.getString().timer_tasks.you_were +
+            " " +
+            Math.abs(result / 1000).toFixed(3) +
+            " " +
+            this.modInstance.getString().timer_tasks.too_slow;
           this.drawRect();
           this.infoElement.style.color = "red";
           this.btnEnabled = false;
@@ -74,9 +85,9 @@ export default class ReactionTask extends Task {
     });
 
     var timeToStart = ((seed % 3) + 2) * 1000;
-    if (timeToStart > 7000 || timeToStart < 1000) timeToStart = 3000;
+    if (timeToStart > 7000 || timeToStart < 3000) timeToStart = 3000;
     debugPrint(timeToStart + " ms until the box turns green");
-    this.infoElement.innerHTML = "Press the button immediately after the box turns green!";
+    this.infoElement.innerHTML = this.modInstance.getString().timer_tasks.reaction_info;
     this.timerTimeout = setTimeout(this.startTimer.bind(this), timeToStart);
 
     this.drawRect();
