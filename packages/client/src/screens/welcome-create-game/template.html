@@ -2,6 +2,7 @@
   * {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
   }
 
   h1,
@@ -33,8 +34,11 @@
   }
 
   #game_name {
-    width: 100%;
-    margin-bottom: 20px;
+    margin-top: 16px;
+    margin-bottom: 50px;
+    display: flex;
+    align-content: center;
+    justify-content: center;
   }
   #create_game {
     width: 100%;
@@ -55,7 +59,7 @@
     </div>
 
     <div id="create_game">
-      <apirush-button id="create-game-button" styletype="transparent"></apirush-button>
+      <apirush-button id="create-game-button" styletype="black"></apirush-button>
     </div>
   </apirush-container>
   <apirush-popup></apirush-popup>

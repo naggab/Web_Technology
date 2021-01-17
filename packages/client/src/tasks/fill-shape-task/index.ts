@@ -3,7 +3,7 @@ import { Task } from "../../task";
 import { Button } from "../../components/button";
 import { concat, times } from "lodash";
 import { Collection } from "konva/types/Util";
-import { MasterOfDisaster } from "../../masterOfDisaster"
+import { MasterOfDisaster } from "../../masterOfDisaster";
 
 interface ShapeI {
   checkOutside(relativeMousePos: any);
@@ -19,7 +19,6 @@ type ShapeConstructor = new (
   canvasPx: number,
   tolerancePx: number,
 ) => ShapeI;
-
 
 const shapes: Array<ShapeConstructor> = [];
 const fillArry: Array<number> = [30, 40, 50, 60, 70];
@@ -56,7 +55,7 @@ export default class FillShapeTask extends Task {
     var seed = modInstance.getGameSeed();
     this.infoElement.innerHTML =
       modInstance.getString().fill_shape_task.fill_msg + " " + fillArry[seed % fillArry.length] + "%";
-    
+
     shapes.push(Smiley, Pyramid, Tree, Cactus);
     //this.shape = new shapes[seed % shapes.length](this.ctx, 100, 5, fillArry[seed % fillArry.length], 400, 10);
     this.shape = new shapes[seed % shapes.length](this.ctx, 100, 5, fillArry[seed % fillArry.length], 400, 5);
@@ -325,7 +324,7 @@ class Smiley implements ShapeI {
       ((outCircle.coloredPixel + outRect1.coloredPixel + outRect2.coloredPixel + outRect3.coloredPixel) /
         (outCircle.totalPixel + outRect1.totalPixel + outRect2.totalPixel + outRect3.totalPixel)) *
       100;
-      
+
     modInstance.log(
       percentage_check,
       "Drawn: ",

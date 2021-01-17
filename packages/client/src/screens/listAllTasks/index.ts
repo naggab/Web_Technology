@@ -21,7 +21,7 @@ class ListAllTasksScreen extends AbstractScreen {
     }
     await MasterOfDisaster.getInstance().openTaskByIdentifier(hash as any);
     window.location.hash = "";
-    
+
     this._container = this.shadowRoot.querySelector("apirush-container");
     this._container.showArrow();
   }
