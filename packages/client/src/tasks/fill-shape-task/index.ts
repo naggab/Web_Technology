@@ -57,7 +57,7 @@ export default class FillShapeTask extends Task {
       modInstance.getString().fill_shape_task.fill_msg + " " + fillArry[seed % fillArry.length] + "%";
 
     shapes.push(Smiley, Pyramid, Tree, Cactus);
-    //this.shape = new shapes[seed % shapes.length](this.ctx, 100, 5, fillArry[seed % fillArry.length], 400, 10);
+
     this.shape = new shapes[seed % shapes.length](this.ctx, 100, 5, fillArry[seed % fillArry.length], 400, 5);
     this.shape.draw();
 
@@ -389,13 +389,13 @@ class Pyramid implements ShapeI {
     this.tolerance = tolerance;
   }
   draw() {
-    this.rect_1 = new Rectangle(this.ctx, 175, 100, 60, 50);
+    this.rect_1 = new Rectangle(this.ctx, 175, 99, 60, 50);
     this.rect_1.drawRectangle();
-    this.rect_2 = new Rectangle(this.ctx, 150, 160, 60, 100);
+    this.rect_2 = new Rectangle(this.ctx, 150, 159, 60, 100);
     this.rect_2.drawRectangle();
-    this.rect_3 = new Rectangle(this.ctx, 100, 220, 60, 200);
+    this.rect_3 = new Rectangle(this.ctx, 100, 219, 60, 200);
     this.rect_3.drawRectangle();
-    this.rect_4 = new Rectangle(this.ctx, 50, 280, 60, 300);
+    this.rect_4 = new Rectangle(this.ctx, 50, 279, 60, 300);
     this.rect_4.drawRectangle();
   }
   checkOutside(relativeMousePos: any) {
@@ -503,19 +503,19 @@ class Tree implements ShapeI {
     this.rect_1 = new Rectangle(this.ctx, (this.canvasPx - 40) / 2, 20, 60, 40);
     this.rect_1.fillStyle = color;
     this.rect_1.drawRectangle();
-    this.rect_2 = new Rectangle(this.ctx, (this.canvasPx - 120) / 2, this.rect_1.height + this.rect_1.posY, 60, 120);
+    this.rect_2 = new Rectangle(this.ctx, (this.canvasPx - 120) / 2, this.rect_1.height + this.rect_1.posY-1, 60, 120);
     this.rect_2.fillStyle = color;
     this.rect_2.drawRectangle();
-    this.rect_3 = new Rectangle(this.ctx, (this.canvasPx - 200) / 2, this.rect_2.height + this.rect_2.posY, 60, 200);
+    this.rect_3 = new Rectangle(this.ctx, (this.canvasPx - 200) / 2, this.rect_2.height + this.rect_2.posY-1, 60, 200);
     this.rect_3.fillStyle = color;
     this.rect_3.drawRectangle();
-    this.rect_4 = new Rectangle(this.ctx, (this.canvasPx - 250) / 2, this.rect_3.height + this.rect_3.posY, 60, 250);
+    this.rect_4 = new Rectangle(this.ctx, (this.canvasPx - 250) / 2, this.rect_3.height + this.rect_3.posY-1, 60, 250);
     this.rect_4.fillStyle = color;
     this.rect_4.drawRectangle();
-    this.rect_5 = new Rectangle(this.ctx, (this.canvasPx - 60) / 2, this.rect_4.height + this.rect_4.posY, 80, 60);
+    this.rect_5 = new Rectangle(this.ctx, (this.canvasPx - 60) / 2, this.rect_4.height + this.rect_4.posY-1, 80, 60);
     this.rect_5.fillStyle = "#ab6134";
     this.rect_5.drawRectangle();
-    this.rect_6 = new Rectangle(this.ctx, (this.canvasPx - 150) / 2, this.rect_5.height + this.rect_5.posY, 30, 150);
+    this.rect_6 = new Rectangle(this.ctx, (this.canvasPx - 150) / 2, this.rect_5.height + this.rect_5.posY-1, 30, 150);
     this.rect_6.fillStyle = "#ab6134";
     this.rect_6.drawRectangle();
   }
