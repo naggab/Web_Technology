@@ -543,7 +543,7 @@ export default class GamePlayground extends HTMLElement {
       if (!this.timerFunction) {
         this.timerFunction = setInterval(this.keyDownCheck.bind(this), 150);
       }
-    }
+    };
   }
 
   async connectedCallback() {
@@ -756,11 +756,7 @@ export default class GamePlayground extends HTMLElement {
       if (keyCode == 72) {
         this.showPopup(modInstance.getString().in_game.help, 6000, 18);
       }
-      if (keyCode == 67 && DEBUG_MODE && !this.keyMap.get(17)) {
-        // c and not ctrl
-        this.endGame(this.player.playerID);
-      }
-      if (keyCode == 77) {
+      if (keyCode == 77 && DEBUG_MODE) {
         this.editMode = !this.editMode;
         if (this.grid) {
           this.grid.forEach((gridRow) => {
