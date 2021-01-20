@@ -531,7 +531,7 @@ export default class GamePlayground extends HTMLElement {
     super();
     this.endGameScreen = false;
     this.keyMap = new Map();
-    document.onkeydown = document.onkeyup = function (e) {
+    document.onkeydown = document.onkeyup = (e) => {
       if (this.keyMap.get(e.keyCode) != true && e.type == "keydown") {
         this.keyMap.set(e.keyCode, e.type == "keydown");
         this.handleMove(e.keyCode);
@@ -543,7 +543,7 @@ export default class GamePlayground extends HTMLElement {
       if (!this.timerFunction) {
         this.timerFunction = setInterval(this.keyDownCheck.bind(this), 150);
       }
-    }.bind(this);
+    }
   }
 
   async connectedCallback() {

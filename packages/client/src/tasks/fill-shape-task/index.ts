@@ -245,10 +245,10 @@ class Rectangle {
     return { totalPixel: countTotalPixel, coloredPixel: countPixel };
   }
   isDrawnInside(relativeMousePos) {
-    return relativeMousePos.x > this.posX &&
-      relativeMousePos.x < this.posX + this.width &&
-      relativeMousePos.y > this.posY &&
-      relativeMousePos.y < this.posY + this.height
+    return relativeMousePos.x >= this.posX &&
+      relativeMousePos.x <= this.posX + this.width &&
+      relativeMousePos.y >= this.posY &&
+      relativeMousePos.y <= this.posY + this.height
       ? true
       : false;
   }
@@ -503,19 +503,43 @@ class Tree implements ShapeI {
     this.rect_1 = new Rectangle(this.ctx, (this.canvasPx - 40) / 2, 20, 60, 40);
     this.rect_1.fillStyle = color;
     this.rect_1.drawRectangle();
-    this.rect_2 = new Rectangle(this.ctx, (this.canvasPx - 120) / 2, this.rect_1.height + this.rect_1.posY-1, 60, 120);
+    this.rect_2 = new Rectangle(
+      this.ctx,
+      (this.canvasPx - 120) / 2,
+      this.rect_1.height + this.rect_1.posY - 1,
+      60,
+      120,
+    );
     this.rect_2.fillStyle = color;
     this.rect_2.drawRectangle();
-    this.rect_3 = new Rectangle(this.ctx, (this.canvasPx - 200) / 2, this.rect_2.height + this.rect_2.posY-1, 60, 200);
+    this.rect_3 = new Rectangle(
+      this.ctx,
+      (this.canvasPx - 200) / 2,
+      this.rect_2.height + this.rect_2.posY - 1,
+      60,
+      200,
+    );
     this.rect_3.fillStyle = color;
     this.rect_3.drawRectangle();
-    this.rect_4 = new Rectangle(this.ctx, (this.canvasPx - 250) / 2, this.rect_3.height + this.rect_3.posY-1, 60, 250);
+    this.rect_4 = new Rectangle(
+      this.ctx,
+      (this.canvasPx - 250) / 2,
+      this.rect_3.height + this.rect_3.posY - 1,
+      60,
+      250,
+    );
     this.rect_4.fillStyle = color;
     this.rect_4.drawRectangle();
-    this.rect_5 = new Rectangle(this.ctx, (this.canvasPx - 60) / 2, this.rect_4.height + this.rect_4.posY-1, 80, 60);
+    this.rect_5 = new Rectangle(this.ctx, (this.canvasPx - 60) / 2, this.rect_4.height + this.rect_4.posY - 1, 80, 60);
     this.rect_5.fillStyle = "#ab6134";
     this.rect_5.drawRectangle();
-    this.rect_6 = new Rectangle(this.ctx, (this.canvasPx - 150) / 2, this.rect_5.height + this.rect_5.posY-1, 30, 150);
+    this.rect_6 = new Rectangle(
+      this.ctx,
+      (this.canvasPx - 150) / 2,
+      this.rect_5.height + this.rect_5.posY - 1,
+      30,
+      150,
+    );
     this.rect_6.fillStyle = "#ab6134";
     this.rect_6.drawRectangle();
   }
