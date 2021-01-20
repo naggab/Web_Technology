@@ -35,9 +35,15 @@ export class TaskOpener extends HTMLElement {
   }
 
   private animateFadeOut() {
+    if (!this.container_.classList.contains("open")) {
+      return;
+    }
     this.container_.addEventListener(
       "transitionend",
-      () => {
+      (e) => {
+        if (this.container_.classList.contains("open")) {
+          return;
+        }
         this.wrapper_.classList.remove("open");
         document.body.style.overflow = "";
         this.backdrop_.onclick = undefined;
